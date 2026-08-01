@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import ToolBottomBar from '../../_components/ToolBottomBar';
 import ToolActionButton from '../../_components/ToolActionButton';
@@ -14,17 +14,40 @@ export default function DesktopView() {
     errorMessage, setErrorMessage,
     addPdfs, removePage, rotatePage, toggleSelect,
     clearAll,
-    rotateAndPrepare,        // ⭐ CHANGED (was downloadPdf)
-    downloadRotatedFile,     // ⭐ ADDED
+    rotateAndPrepare,
+    rotatedPdfUrl,           // ⭐ ADDED (was downloadRotatedFile)
+    pdfFilename,             // ⭐ ADDED (for filename)
   } = useRotatePdfContext();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ⭐ NEW: Desktop handler — generate then auto-download
+  // ⭐ Auto-download flag
+  const shouldDownloadRef = useRef(false);
+
+  // ⭐ Watch for rotatedPdfUrl → auto-download when ready
+  useEffect(() => {
+    if (rotatedPdfUrl && shouldDownloadRef.current) {
+      shouldDownloadRef.current = false;
+      console.log('⬇️ Auto-downloading rotated PDF');
+
+      const filename = `${pdfFilename || 'rotated'}.pdf`;
+
+      const link = document.createElement('a');
+      link.href = rotatedPdfUrl;
+      link.download = filename;
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }, [rotatedPdfUrl, pdfFilename]);
+
+  // ⭐ Desktop handler — trigger rotation, useEffect handles download
   const handleDesktopSave = async () => {
+    shouldDownloadRef.current = true;
     const url = await rotateAndPrepare();
-    if (url) {
-      downloadRotatedFile();
+    if (!url) {
+      shouldDownloadRef.current = false;
     }
   };
 
@@ -41,10 +64,8 @@ export default function DesktopView() {
   // ============ HELPER: Rotate Selected Pages ============
   const rotateSelectedPages = (direction: 'left' | 'right') => {
     if (selectedIds.size === 0) {
-      // If nothing selected, rotate all pages
       pages.forEach(page => rotatePage(page.id, direction));
     } else {
-      // Rotate only selected pages
       selectedIds.forEach(id => rotatePage(id, direction));
     }
   };
@@ -109,7 +130,7 @@ export default function DesktopView() {
   // ============ MAIN ACTION BUTTON ============
   const actionButton = (
     <ToolActionButton
-      onClick={handleDesktopSave}          // ⭐ CHANGED (was downloadPdf)
+      onClick={handleDesktopSave}
       disabled={pages.length === 0}
       isLoading={isProcessing}
       loadingLabel="Processing…"

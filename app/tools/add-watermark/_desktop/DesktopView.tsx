@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import ToolBottomBar from '../../_components/ToolBottomBar';
 import ToolActionButton from '../../_components/ToolActionButton';
@@ -14,15 +15,37 @@ export default function DesktopView() {
     file, isLoadingPdf, isProcessing, processProgress,
     errorMessage, setErrorMessage,
     addPdf, clearFile,
-    applyAndPrepare,          // ⭐ CHANGED (was downloadWatermarked)
-    downloadWatermarkedFile,  // ⭐ ADDED
+    applyAndPrepare,
+    watermarkedPdfUrl,        // ⭐ ADDED (was downloadWatermarkedFile)
   } = useAddWatermarkContext();
 
-  // ⭐ NEW: Desktop handler — apply then auto-download
+  // ⭐ Auto-download flag
+  const shouldDownloadRef = useRef(false);
+
+  // ⭐ Watch for watermarkedPdfUrl → auto-download when ready
+  useEffect(() => {
+    if (watermarkedPdfUrl && shouldDownloadRef.current && file) {
+      shouldDownloadRef.current = false;
+      console.log('⬇️ Auto-downloading watermarked PDF');
+
+      const filename = file.name.replace(/\.pdf$/i, '-watermarked.pdf');
+
+      const link = document.createElement('a');
+      link.href = watermarkedPdfUrl;
+      link.download = filename;
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }, [watermarkedPdfUrl, file]);
+
+  // ⭐ Desktop handler — trigger watermark, useEffect handles download
   const handleDesktopSave = async () => {
+    shouldDownloadRef.current = true;
     const url = await applyAndPrepare();
-    if (url) {
-      downloadWatermarkedFile();
+    if (!url) {
+      shouldDownloadRef.current = false;
     }
   };
 
@@ -69,7 +92,7 @@ export default function DesktopView() {
 
   const actionButton = (
     <ToolActionButton
-      onClick={handleDesktopSave}        // ⭐ CHANGED (was downloadWatermarked)
+      onClick={handleDesktopSave}
       disabled={!file}
       isLoading={isProcessing}
       loadingLabel="Adding watermark…"

@@ -16,6 +16,26 @@ export default function DesktopView() {
     removePdf, clearAll,
   } = useUnlockPdfContext();
 
+  // ⭐ Smart download logic
+  const isSingleFile = items.length === 1;
+
+  const handleSmartDownload = () => {
+    if (isSingleFile && items[0]) {
+      downloadOne(items[0].id);
+    } else {
+      downloadAll();
+    }
+  };
+
+  // ⭐ Dynamic label based on file count
+  const downloadLabel = isSingleFile
+    ? 'Download PDF'
+    : unlockedCount > 0
+    ? `Download All (${unlockedCount})`
+    : 'Download All';
+
+  const downloadSubtitle = isSingleFile ? 'Get unlocked PDF' : 'Get unlocked PDFs';
+
   const rightPanel = (
     <>
       <div className="mb-4">
@@ -109,7 +129,7 @@ export default function DesktopView() {
 
   const actionButton = (
     <ToolActionButton
-      onClick={downloadAll}
+      onClick={handleSmartDownload}          // ⭐ CHANGED (was downloadAll)
       disabled={unlockedCount === 0}
       icon={
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -118,8 +138,8 @@ export default function DesktopView() {
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
       }
-      label={unlockedCount > 0 ? `Download All (${unlockedCount})` : 'Download All'}
-      subtitle="Get unlocked PDFs"
+      label={downloadLabel}                  // ⭐ CHANGED (dynamic label)
+      subtitle={downloadSubtitle}            // ⭐ CHANGED (dynamic subtitle)
     />
   );
 
@@ -171,7 +191,7 @@ export default function DesktopView() {
             />
           ))}
 
-          {/* ⭐ Compact inline "Add more" row (replaces the big UploadZone) */}
+          {/* Compact inline "Add more" row */}
           <AddMorePdfRow onFiles={addPdfs} />
         </div>
       )}

@@ -18,6 +18,20 @@ export default function DesktopView() {
 
   const allCompressed = items.length > 0 && items.every((it) => it.status === 'done');
   const someCompressed = items.some((it) => it.status === 'done');
+  const isSingleFile = items.length === 1;                              // ⭐ NEW
+
+  // ⭐ Smart download handler — single file → downloadOne, multiple → downloadAll
+  const handleSmartDownload = () => {
+    if (isSingleFile && items[0]) {
+      downloadOne(items[0].id);
+    } else {
+      downloadAll();
+    }
+  };
+
+  // ⭐ Dynamic labels based on file count
+  const downloadLabel = isSingleFile ? 'Download PDF' : `Download All (${items.length})`;
+  const downloadSubtitle = isSingleFile ? 'Get compressed file' : 'Get all compressed files';
 
   // ============ BOTTOM TOOLBAR ============
   const bottomBar = (
@@ -53,9 +67,9 @@ export default function DesktopView() {
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
           ),
-          label: 'Download All',
+          label: isSingleFile ? 'Download' : 'Download All',       // ⭐ UPDATED
           shortcut: 'Ctrl + S',
-          onClick: downloadAll,
+          onClick: handleSmartDownload,                             // ⭐ UPDATED
           disabled: !someCompressed || isProcessing,
         },
         {
@@ -78,7 +92,7 @@ export default function DesktopView() {
   // ============ MAIN ACTION BUTTON ============
   const actionButton = allCompressed ? (
     <ToolActionButton
-      onClick={downloadAll}
+      onClick={handleSmartDownload}                                 // ⭐ UPDATED
       icon={
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -86,8 +100,8 @@ export default function DesktopView() {
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
       }
-      label="Download All"
-      subtitle="Get all compressed files"
+      label={downloadLabel}                                         // ⭐ UPDATED
+      subtitle={downloadSubtitle}                                   // ⭐ UPDATED
     />
   ) : (
     <ToolActionButton
@@ -103,7 +117,7 @@ export default function DesktopView() {
           <line x1="3" y1="21" x2="10" y2="14" />
         </svg>
       }
-      label={`Compress ${items.length > 0 ? `(${items.length})` : ''}`}
+      label={isSingleFile ? 'Compress PDF' : `Compress ${items.length > 0 ? `(${items.length})` : ''}`}
       subtitle="Reduce file size"
     />
   );

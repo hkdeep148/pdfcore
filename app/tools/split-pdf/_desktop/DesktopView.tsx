@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import ToolBottomBar from '../../_components/ToolBottomBar';
 import ToolActionButton from '../../_components/ToolActionButton';
@@ -17,8 +17,38 @@ export default function DesktopView() {
     isCalculatingSize,
     isLoadingPdf, loadProgress, isProcessing,
     errorMessage, setErrorMessage,
-    addPdf, clearFile, splitAndDownload,
+    addPdf, clearFile,
+    splitAndPrepare,           // ⭐ CHANGED (was splitAndDownload)
+    splitResult,               // ⭐ ADDED
   } = useSplitPdfContext();
+
+  // ⭐ Auto-download flag
+  const shouldDownloadRef = useRef(false);
+
+  // ⭐ Watch for splitResult → auto-download when ready
+  useEffect(() => {
+    if (splitResult && shouldDownloadRef.current) {
+      shouldDownloadRef.current = false;
+      console.log('⬇️ Auto-downloading split file:', splitResult.filename);
+
+      const link = document.createElement('a');
+      link.href = splitResult.blobUrl;
+      link.download = splitResult.filename;
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }, [splitResult]);
+
+  // ⭐ Desktop handler — split then useEffect handles download
+  const handleDesktopSplit = async () => {
+    shouldDownloadRef.current = true;
+    const url = await splitAndPrepare();
+    if (!url) {
+      shouldDownloadRef.current = false;
+    }
+  };
 
   const pageToGroup = useMemo(() => {
     const map = new Map<number, number>();
@@ -28,7 +58,7 @@ export default function DesktopView() {
     return map;
   }, [pageGroups]);
 
-  // ⭐ Is selection mode active?
+  // Is selection mode active?
   const isSelectMode = mode === 'pages' && extractMode === 'select';
 
   const bottomBar = (
@@ -84,7 +114,7 @@ export default function DesktopView() {
 
   const actionButton = (
     <ToolActionButton
-      onClick={splitAndDownload}
+      onClick={handleDesktopSplit}          // ⭐ CHANGED
       disabled={!canSplit}
       isLoading={isProcessing}
       loadingLabel="Splitting…"
@@ -168,17 +198,17 @@ export default function DesktopView() {
             </div>
           </div>
 
-          {/* ⭐ Size mode calculating indicator */}
-{mode === 'size' && isCalculatingSize && (
-  <div className="mb-4 px-4 py-3 bg-[#EFF3FF] border border-[#DBEAFE] rounded-xl flex items-center gap-3 flex-shrink-0">
-    <div className="w-4 h-4 rounded-full border-2 border-[#2563EB]/30 border-t-[#2563EB] animate-spin" />
-    <span className="text-[13px] text-[#1E40AF] font-semibold">
-      Calculating optimal size splits...
-    </span>
-  </div>
-)}
+          {/* Size mode calculating indicator */}
+          {mode === 'size' && isCalculatingSize && (
+            <div className="mb-4 px-4 py-3 bg-[#EFF3FF] border border-[#DBEAFE] rounded-xl flex items-center gap-3 flex-shrink-0">
+              <div className="w-4 h-4 rounded-full border-2 border-[#2563EB]/30 border-t-[#2563EB] animate-spin" />
+              <span className="text-[13px] text-[#1E40AF] font-semibold">
+                Calculating optimal size splits...
+              </span>
+            </div>
+          )}
 
-          {/* ⭐ Show hint when in select mode */}
+          {/* Show hint when in select mode */}
           {isSelectMode && selectedPages.size === 0 && (
             <div className="mb-4 px-4 py-3 bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl flex items-center gap-3 flex-shrink-0">
               <svg viewBox="0 0 24 24" className="w-5 h-5 text-[#10B981] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
