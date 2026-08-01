@@ -11,94 +11,14 @@ import {
   WifiOff,
   Layers,
   Mail,
-  Sparkles,
 } from 'lucide-react';
 import { openCookieSettings } from './CookieBanner';
-import Logo from './Logo';
 
 export default function LandingFooter() {
   return (
     <>
       {/* ================ WHY CHOOSE US SECTION ================ */}
       <section className="relative bg-white">
-        {/* ============ ⭐ SUBTLE TINT DIVIDER (mobile only, above WHY PDF CORE) ============ */}
-<div className="md:hidden h-16 bg-gradient-to-b from-white via-[#FAF9FF] to-[#F4F2FF]" />
-{/* ============ MOBILE WHY PDF CORE (Tinted background) ============ */}
-<div className="md:hidden pt-6 pb-10 px-4 bg-[#F4F2FF]">
-          {/* Header */}
-          <div className="text-center mb-7">
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white border border-indigo-100 shadow-2xs text-[#5B4EF5] text-[11px] font-extrabold uppercase tracking-wider mb-2.5">
-              <Sparkles size={13} strokeWidth={2.5} />
-              <span>WHY PDF CORE</span>
-            </div>
-            <h2 className="text-[26px] sm:text-[28px] font-extrabold tracking-tight text-[#07122E] leading-tight mb-1.5">
-              Your files,{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-                your device.
-              </span>
-            </h2>
-            <p className="text-[13.5px] text-slate-500 font-medium max-w-[280px] mx-auto">
-              Fast, private PDF tools that run offline in your browser.
-            </p>
-          </div>
-
-          {/* 3 Modern Bento-Style Cards Stack */}
-          <div className="max-w-sm mx-auto space-y-3.5">
-            {/* Card 1: 100% Private */}
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-emerald-300 transition-all text-left">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-[0_4px_12px_-2px_rgba(16,185,129,0.4)]">
-                <Shield size={22} strokeWidth={2.2} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between mb-0.5">
-                  <h3 className="text-[15.5px] font-bold text-[#07122E]">100% Private</h3>
-                  <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-wide">
-                    Local
-                  </span>
-                </div>
-                <p className="text-[13px] text-slate-500 leading-snug">
-                  Processed offline in your browser memory. Files never touch a server.
-                </p>
-              </div>
-            </div>
-
-            {/* Card 2: Lightning Fast */}
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-purple-300 transition-all text-left">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-[0_4px_12px_-2px_rgba(139,92,246,0.4)]">
-                <Zap size={22} strokeWidth={2.2} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between mb-0.5">
-                  <h3 className="text-[15.5px] font-bold text-[#07122E]">Lightning Fast</h3>
-                  <span className="text-[10px] font-extrabold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full uppercase tracking-wide">
-                    Instant
-                  </span>
-                </div>
-                <p className="text-[13px] text-slate-500 leading-snug">
-                  Zero upload wait times or server lag. Instant results on any PDF.
-                </p>
-              </div>
-            </div>
-
-            {/* Card 3: Always Free */}
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-xs hover:border-orange-300 transition-all text-left">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-white flex items-center justify-center shrink-0 shadow-[0_4px_12px_-2px_rgba(249,115,22,0.4)]">
-                <Layers size={22} strokeWidth={2.2} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between mb-0.5">
-                  <h3 className="text-[15.5px] font-bold text-[#07122E]">Always Free</h3>
-                  <span className="text-[10px] font-extrabold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full uppercase tracking-wide">
-                    Unlimited
-                  </span>
-                </div>
-                <p className="text-[13px] text-slate-500 leading-snug">
-                  No account required, zero daily limits, and no hidden paywalls.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* ============ DESKTOP WHY CHOOSE US (hidden md:block) ============ */}
         <div className="hidden md:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 md:pb-24">
@@ -166,15 +86,106 @@ export default function LandingFooter() {
         </div>
       </section>
 
-      {/* ============ ⭐ SUBTLE FADE-OUT DIVIDER (mobile only, below WHY PDF CORE) ============ */}
-<div className="md:hidden h-10 bg-gradient-to-b from-[#F4F2FF] to-white" />
-
-{/* ================ FOOTER WITH INTEGRATED CTA ================ */}
-<footer className="relative bg-white">
+      {/* ================ FOOTER WITH INTEGRATED CTA ================ */}
+      <footer className="relative bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          {/* CTA Section */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-10 md:py-14">
+
+          {/* ============ ⭐ MOBILE: What Makes Us Different (100% Honest) ============ */}
+          <div className="md:hidden -mx-4 pt-16 pb-12 px-4 bg-gradient-to-b from-white via-[#FAF9FF] to-[#F4F2FF]">
+            <div className="max-w-md mx-auto text-center">
+              
+              {/* Small label */}
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-[#5B4EF5] mb-3">
+                What Makes Us Different
+              </p>
+
+              {/* Headline */}
+              <h3 className="text-[22px] font-extrabold text-[#07122E] tracking-tight leading-[1.2] mb-8">
+                Built for people who{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+                  care about privacy.
+                </span>
+              </h3>
+
+              {/* HONEST STATS GRID */}
+              <div className="grid grid-cols-3 gap-3 mb-8">
+                <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs">
+                  <div className="text-[20px] font-extrabold text-[#5B4EF5] leading-tight">10+</div>
+                  <div className="text-[10.5px] font-semibold text-slate-500 mt-1 leading-tight">Free Tools</div>
+                </div>
+                <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs">
+                  <div className="text-[20px] font-extrabold text-emerald-600 leading-tight">100%</div>
+                  <div className="text-[10.5px] font-semibold text-slate-500 mt-1 leading-tight">Private &amp; Local</div>
+                </div>
+                <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs">
+                  <div className="text-[20px] font-extrabold text-orange-600 leading-tight">0</div>
+                  <div className="text-[10.5px] font-semibold text-slate-500 mt-1 leading-tight">Sign-ups Needed</div>
+                </div>
+              </div>
+
+              {/* HOW IT WORKS */}
+              <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm">
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-slate-500 mb-5 text-center">
+                  How It Works
+                </p>
+                
+                <div className="flex items-center justify-between gap-2">
+                  {/* Step 1 */}
+                  <div className="text-center flex-1">
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-2 flex items-center justify-center text-white text-[14px] font-extrabold shadow-[0_4px_10px_-2px_rgba(99,102,241,0.4)]">
+                      1
+                    </div>
+                    <div className="text-[11px] font-bold text-[#07122E] leading-tight">
+                      Choose Tool
+                    </div>
+                  </div>
+
+                  {/* Arrow */}
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+
+                  {/* Step 2 */}
+                  <div className="text-center flex-1">
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-2 flex items-center justify-center text-white text-[14px] font-extrabold shadow-[0_4px_10px_-2px_rgba(99,102,241,0.4)]">
+                      2
+                    </div>
+                    <div className="text-[11px] font-bold text-[#07122E] leading-tight">
+                      Add Your File
+                    </div>
+                  </div>
+
+                  {/* Arrow */}
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+
+                  {/* Step 3 */}
+                  <div className="text-center flex-1">
+                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 mx-auto mb-2 flex items-center justify-center text-white text-[14px] font-extrabold shadow-[0_4px_10px_-2px_rgba(16,185,129,0.4)]">
+                      ✓
+                    </div>
+                    <div className="text-[11px] font-bold text-[#07122E] leading-tight">
+                      Done!
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom note */}
+                <p className="text-[11px] text-slate-500 text-center mt-4 leading-[1.5]">
+                  Everything happens in your browser.<br/>
+                  <span className="font-bold text-emerald-600">Nothing is uploaded.</span>
+                </p>
+              </div>
+              
+            </div>
+          </div>
+
+          {/* ⭐ Bottom fade back to white */}
+          <div className="md:hidden -mx-4 h-12 bg-gradient-to-b from-[#F4F2FF] to-white" />
+
+          {/* Desktop: Original "Ready to get started" CTA */}
+          <div className="hidden md:flex flex-col md:flex-row items-center justify-between gap-6 py-10 md:py-14">
             <div className="text-center md:text-left">
               <h3 className="text-[22px] md:text-[28px] font-extrabold text-slate-900 tracking-tight leading-tight mb-1.5">
                 Ready to get started?
@@ -198,9 +209,12 @@ export default function LandingFooter() {
             
             {/* Column 1: Brand */}
             <div className="col-span-2 md:col-span-1 pr-4">
-              <Link href="/" className="inline-block mb-4">
-  <Logo size="md" />
-</Link>
+              <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#6D35FF] flex items-center justify-center shadow-[0_4px_12px_-2px_rgba(109,53,255,0.3)]">
+                  <FileText size={16} className="text-white" />
+                </div>
+                <span className="text-[16px] font-extrabold text-slate-900">PDF Core</span>
+              </Link>
               <p className="text-[13px] text-slate-500 leading-relaxed mb-5 max-w-xs">
                 Free, secure PDF tools that work right in your browser. Your files never leave your device.
               </p>
@@ -282,7 +296,7 @@ export default function LandingFooter() {
             </div>
           </div>
 
-          {/* Bottom Bar - Clean, no borders */}
+          {/* Bottom Bar */}
           <div className="relative -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-white">
             <div className="py-5 flex flex-col md:flex-row items-center justify-between gap-3">
               <p className="text-[12.5px] text-slate-600 font-medium">
