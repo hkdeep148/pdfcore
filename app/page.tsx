@@ -1,306 +1,563 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Shield,
+  Zap,
+  Check,
   Lock,
-  Files,
-  Layers,
-  Flame,
+  Upload,
+  ChevronRight,
+  Sparkles,
   FileText,
   ArrowRight,
-  ChevronRight,
+  X,
+  Star,
+  Files,
 } from 'lucide-react';
-import { tools } from './tools/_config/tools';
+import { popularTools, tools } from './tools/_config/tools';
+import { usePendingFile } from './_context/PendingFileContext';
 import LandingNavbar from './tools/_components/LandingNavbar';
 import LandingFooter from './tools/_components/LandingFooter';
 
+// ============ FILE ANALYSIS TYPES ============
+type ToolItem = typeof tools[0];
+
+interface FileAnalysis {
+  files: File[];
+  count: number;
+  totalSize: string;
+  type: 'pdf' | 'image' | 'mixed';
+  isMultiple: boolean;
+  isLarge: boolean;
+  topRecommendation: ToolItem;
+  topReason: string;
+  otherRecommendations: ToolItem[];
+}
+
+// ============ SMART RECOMMENDATION LOGIC ============
+function analyzeFiles(files: File[]): FileAnalysis {
+  const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+  const totalMB = totalBytes / 1024 / 1024;
+  const isLarge = totalMB > 5;
+  const isMultiple = files.length > 1;
+
+  const pdfs = files.filter((f) => f.type === 'application/pdf');
+  const images = files.filter((f) => f.type.startsWith('image/'));
+
+  let type: 'pdf' | 'image' | 'mixed';
+  if (pdfs.length > 0 && images.length === 0) type = 'pdf';
+  else if (images.length > 0 && pdfs.length === 0) type = 'image';
+  else type = 'mixed';
+
+  const totalSize =
+    totalMB < 1
+      ? `${(totalMB * 1024).toFixed(0)} KB`
+      : `${totalMB.toFixed(2)} MB`;
+
+  const getTool = (href: string): ToolItem => {
+    const found = tools.find((t) => t.href === href);
+    if (!found) throw new Error(`Tool not found: ${href}`);
+    return found;
+  };
+
+  let topRecommendation: ToolItem;
+  let topReason: string;
+  let otherRecommendations: ToolItem[] = [];
+
+  if (type === 'image') {
+    // IMAGES → Image to PDF
+    topRecommendation = getTool('/tools/image-to-pdf');
+    topReason = isMultiple
+      ? `Combine ${images.length} images into one PDF`
+      : 'Convert image to PDF';
+    otherRecommendations = [];
+  } else if (type === 'pdf') {
+    if (isMultiple) {
+      // Multiple PDFs → Merge
+      topRecommendation = getTool('/tools/merge-pdf');
+      topReason = `Merge ${pdfs.length} PDFs into one document`;
+      otherRecommendations = [
+        getTool('/tools/compress-pdf'),
+      ];
+    } else if (isLarge) {
+      // Single large PDF → Compress
+      topRecommendation = getTool('/tools/compress-pdf');
+      topReason = 'Reduce file size while maintaining quality';
+      otherRecommendations = [
+        getTool('/tools/merge-pdf'),
+      ];
+    } else {
+      // Single normal PDF → Compress (most common need)
+      topRecommendation = getTool('/tools/compress-pdf');
+      topReason = 'Reduce file size for easy sharing';
+      otherRecommendations = [
+        getTool('/tools/merge-pdf'),
+      ];
+    }
+  } else {
+    // MIXED
+    topRecommendation = getTool('/tools/merge-pdf');
+    topReason = 'Combine your files into one PDF';
+    otherRecommendations = [
+      getTool('/tools/compress-pdf'),
+    ];
+  }
+
+  return {
+    files,
+    count: files.length,
+    totalSize,
+    type,
+    isMultiple,
+    isLarge,
+    topRecommendation,
+    topReason,
+    otherRecommendations,
+  };
+}
+
 export default function HomePage() {
-  // First 5 tools for mobile floating icons
-  const heroIcons = tools.slice(0, 5);
+  const router = useRouter();
+  const { setPendingFiles } = usePendingFile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [analysis, setAnalysis] = useState<FileAnalysis | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  // Handle file drop/upload
+  const handleFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    // Filter valid files
+    const validFiles = Array.from(files).filter(
+      (f) => f.type === 'application/pdf' || f.type.startsWith('image/')
+    );
+
+    if (validFiles.length === 0) {
+      alert('Please upload PDF or image files');
+      return;
+    }
+
+    // Analyze
+    const result = analyzeFiles(validFiles);
+    setSelectedFiles(validFiles);
+    setAnalysis(result);
+  };
+
+  // Navigate to tool WITH files
+  const goToTool = (href: string) => {
+  if (selectedFiles.length > 0) {
+    setPendingFiles(selectedFiles, '/');  // ⭐ Must use setPendingFiles (plural)
+  }
+  router.push(href);
+};
+
+  // Reset to upload again
+  const resetAnalysis = () => {
+    setAnalysis(null);
+    setSelectedFiles([]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleFiles(e.dataTransfer.files);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFiles(e.target.files);
+  };
 
   return (
-    <div className="min-h-screen bg-white font-['Inter',sans-serif]">
-      {/* ============ NAVBAR ============ */}
+    <div className="min-h-screen relative font-['Inter',sans-serif] text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-700 overflow-x-hidden bg-gradient-to-br from-[#F8F9FB] via-[#F8F9FB] to-[#EEF0F8]">
       <LandingNavbar />
 
       {/* ============ HERO SECTION ============ */}
-      <section className="relative overflow-hidden">
-        {/* Mobile gradient background */}
-        <div className="md:hidden absolute inset-0 bg-gradient-to-b from-[#EDE9FE] via-[#E8E0FF] to-[#F3F0FF] pointer-events-none" />
-
-        {/* Mobile decorative circles */}
-        <div className="md:hidden absolute top-10 -left-20 w-60 h-60 bg-[#DDD6FE]/30 rounded-full blur-3xl pointer-events-none" />
-        <div className="md:hidden absolute bottom-20 -right-20 w-60 h-60 bg-[#C4B5FD]/20 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Desktop background */}
-        <div className="hidden md:block absolute inset-0 bg-gradient-to-br from-[#F5F3FF] via-white to-[#FCE7F3] opacity-60" />
-        <div className="hidden md:block absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#6366F1] opacity-[0.08] blur-3xl rounded-full" />
-
-        <div className="relative max-w-[1440px] mx-auto px-5 md:px-8 pt-8 md:pt-14 pb-6 md:pb-16 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            {/* Badge */}
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/80 md:bg-[#EAF1FF] border border-[#E0D4FC] md:border-transparent text-[#6D35FF] md:text-[#1E63FF] text-[11px] md:text-[12px] font-bold uppercase tracking-wider mb-4 md:mb-5 backdrop-blur-sm md:backdrop-blur-none shadow-sm md:shadow-none">
-              <Layers size={13} />
-              <span>All-in-One Solution</span>
-            </div>
-
-            {/* Heading */}
-            <h1 className="font-['Space_Grotesk',sans-serif] text-[28px] leading-[1.1] sm:text-[38px] md:text-[54px] md:leading-tight font-extrabold tracking-tight text-[#07122E]">
-              Complete{' '}
-              <span className="bg-gradient-to-r from-[#1E63FF] to-[#6D35FF] bg-clip-text text-transparent">
-                PDF
-              </span>{' '}
-              Toolkit
-            </h1>
-
-            {/* Subtitle */}
-            <p className="mt-3 md:mt-4 text-[14px] md:text-[18px] text-[#4B5874] font-medium px-4 md:px-0 max-w-2xl mx-auto leading-relaxed">
-              Powerful and easy-to-use online PDF Core
-              <br className="md:hidden" /> to handle all your PDF needs.
-            </p>
-
-            {/* Trust badges */}
-            <div className="mt-5 md:mt-7 flex items-center justify-center gap-0 md:gap-10 text-[11px] md:text-[14px] font-semibold text-[#26324B]">
-              <div className="flex items-center gap-1.5 px-3 md:px-0">
-                <Shield size={14} className="text-[#16A34A]" />
-                <span>100% Free</span>
-              </div>
-              <div className="h-4 md:h-6 w-px bg-[#C7CADB]/60 md:bg-[#D8E0EE]" />
-              <div className="flex items-center gap-1.5 px-3 md:px-0">
-                <Lock size={14} className="text-[#4B5874]" />
-                <span className="text-center">
-                  Secure &amp;<br className="md:hidden" /> Private
-                </span>
-              </div>
-              <div className="h-4 md:h-6 w-px bg-[#C7CADB]/60 md:bg-[#D8E0EE]" />
-              <div className="flex items-center gap-1.5 px-3 md:px-0">
-                <Files size={14} className="text-[#4B5874]" />
-                <span className="text-center">
-                  Works on All<br className="md:hidden" /> Devices
-                </span>
-              </div>
-            </div>
-
-            {/* Explore All Tools button - MOBILE ONLY */}
-            <div className="mt-6 md:hidden">
-              <Link
-                href="/tools"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-[#1E63FF] to-[#6D35FF] text-white text-[15px] font-bold shadow-[0_12px_28px_-8px_rgba(109,53,255,0.5)] hover:opacity-95 transition-opacity"
-              >
-                Explore All Tools
-                <ArrowRight size={18} />
-              </Link>
-            </div>
-
-            {/* Desktop CTAs */}
-            <div className="hidden md:flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
-              <Link
-                href="/#tools"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-[15px] font-semibold px-6 py-3.5 rounded-xl transition-all shadow-[0_10px_30px_-8px_rgba(99,102,241,0.5)] hover:shadow-[0_14px_36px_-8px_rgba(99,102,241,0.6)] hover:scale-[1.02]"
-              >
-                Start Using Tools
-                <ArrowRight size={16} />
-              </Link>
-              <a
-                href="/tools"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-[#26324B] text-[15px] font-semibold px-6 py-3.5 rounded-xl border-2 border-[#ECEDF3] hover:border-[#D1D5FF] transition-colors"
-              >
-                Browse all tools
-              </a>
-            </div>
-          </motion.div>
-
-          {/* MOBILE ONLY: Floating icons with curved background */}
-          <div className="md:hidden relative mt-8">
-            {/* Large curved background circle */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-6 w-[140%] h-[220px] rounded-[50%] bg-gradient-to-b from-[#DDD6FE]/50 to-[#C4B5FD]/30 blur-sm pointer-events-none" />
-
-            {/* Dotted curved lines */}
-            <svg
-              className="absolute left-1/2 -translate-x-1/2 top-2 w-[130%] h-[180px] pointer-events-none"
-              viewBox="0 0 400 180"
-              fill="none"
-              preserveAspectRatio="none"
+      <section className="relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-16 md:pb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            {/* LEFT: TEXT CONTENT */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center lg:text-left"
             >
-              <path
-                d="M 20 60 Q 200 -20 380 60"
-                stroke="#A78BFA"
-                strokeWidth="1"
-                strokeDasharray="3 4"
-                opacity="0.4"
-              />
-              <path
-                d="M 10 90 Q 200 10 390 90"
-                stroke="#A78BFA"
-                strokeWidth="1"
-                strokeDasharray="3 4"
-                opacity="0.3"
-              />
-              <path
-                d="M 0 120 Q 200 40 400 120"
-                stroke="#A78BFA"
-                strokeWidth="1"
-                strokeDasharray="3 4"
-                opacity="0.25"
-              />
-            </svg>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[11px] md:text-xs font-semibold uppercase tracking-wider mb-6 border border-indigo-100">
+                <Zap size={14} strokeWidth={2.5} />
+                Instant Smart Analysis
+              </div>
 
-            {/* Icons row */}
-            <div className="relative flex items-center justify-center gap-3 pt-4">
-              {heroIcons.map((tool, index) => (
-                <Link href={tool.href} key={`hero-icon-${index}`}>
-                  <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center shadow-[0_8px_20px_-8px_rgba(109,53,255,0.3)] border border-white/80 backdrop-blur-sm"
-                    style={{ backgroundColor: tool.bgColor, color: tool.color }}
+              <h1 className="text-[38px] leading-[1.05] sm:text-5xl md:text-6xl lg:text-7xl md:leading-[1.05] font-extrabold tracking-tight text-slate-900 mb-5 md:mb-6">
+                The smart way to handle{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500">
+                  PDFs
+                </span>
+                <span className="text-slate-900">.</span>
+              </h1>
+
+              <p className="text-[15px] md:text-lg text-slate-500 mb-6 md:mb-8 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
+                Drop one or multiple files. We instantly analyze them and recommend the perfect tools for the job.
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-[13px] font-semibold">
+                  <Check size={16} className="text-emerald-500" strokeWidth={2.5} />
+                  100% Free
+                </div>
+                <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-[13px] font-semibold">
+                  <Lock size={14} className="text-emerald-500" strokeWidth={2.5} />
+                  Secure &amp; Private
+                </div>
+              </div>
+            </motion.div>
+
+            {/* RIGHT: UPLOAD or ANALYSIS PANEL */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="lg:pl-8"
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                multiple
+                onChange={handleFileChange}
+                accept="application/pdf,image/jpeg,image/jpg,image/png,image/webp"
+              />
+
+              <AnimatePresence mode="wait">
+                {!analysis ? (
+                  /* ⭐ UPLOAD DROPZONE */
+                  <motion.div
+                    key="upload"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`relative rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer group ${
+                      isDragging
+                        ? 'border-indigo-500 bg-indigo-50/50 scale-[1.02]'
+                        : 'border-slate-300 bg-white/50 hover:border-indigo-400 hover:bg-white/80'
+                    }`}
                   >
-                    <div className="scale-[0.65]">{tool.icon}</div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
+                    <div className="flex flex-col items-center justify-center px-8 py-16 md:py-20 text-center">
+                      <div
+                        className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300 ${
+                          isDragging
+                            ? 'bg-indigo-600 scale-110'
+                            : 'bg-indigo-50 group-hover:bg-indigo-100'
+                        }`}
+                      >
+                        <Upload
+                          size={28}
+                          className={`transition-colors ${isDragging ? 'text-white' : 'text-indigo-600'}`}
+                          strokeWidth={2}
+                        />
+                      </div>
 
-        {/* MOBILE ONLY: Bottom wave transition */}
-        <div className="md:hidden relative h-8 -mt-2 pointer-events-none">
-          <svg
-            className="absolute bottom-0 w-full h-full"
-            viewBox="0 0 400 32"
-            fill="none"
-            preserveAspectRatio="none"
-          >
-            <path
-              d="M0 32V12C80 -4 160 -4 240 12C320 28 360 28 400 12V32H0Z"
-              fill="#F8FAFC"
-            />
-          </svg>
+                      <h3 className="text-[20px] md:text-[22px] font-bold text-slate-900 mb-2">
+                        {isDragging ? 'Drop them here!' : 'Drop your files here'}
+                      </h3>
+
+                      <p className="text-[13px] text-slate-500 mb-6">
+                        Merge PDF · Compress PDF · Image to PDF
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          fileInputRef.current?.click();
+                        }}
+                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-white border border-slate-200 hover:border-indigo-400 hover:bg-slate-50 text-slate-700 text-[13px] font-semibold shadow-sm transition-all"
+                      >
+                        Browse Files
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  /* ⭐ SMART RECOMMENDATION PANEL */
+                  <motion.div
+                    key="analysis"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative rounded-2xl bg-white border border-slate-200 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] overflow-hidden"
+                  >
+                    {/* File Info Header */}
+                    <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-br from-indigo-50/50 to-purple-50/30 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                          {analysis.isMultiple ? (
+                            <Files size={18} className="text-indigo-600" strokeWidth={2} />
+                          ) : (
+                            <FileText size={18} className="text-indigo-600" strokeWidth={2} />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          {analysis.isMultiple ? (
+                            <>
+                              <p className="text-[13px] font-bold text-slate-900 truncate">
+                                {analysis.count} files selected
+                              </p>
+                              <p className="text-[11px] text-slate-500 font-medium">
+                                {analysis.type === 'pdf'
+                                  ? `${analysis.count} PDFs`
+                                  : analysis.type === 'image'
+                                  ? `${analysis.count} images`
+                                  : `${analysis.count} mixed files`}{' '}
+                                • {analysis.totalSize}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-[13px] font-bold text-slate-900 truncate">
+                                {analysis.files[0].name}
+                              </p>
+                              <p className="text-[11px] text-slate-500 font-medium">
+                                {analysis.type === 'pdf' ? 'PDF' : 'Image'} •{' '}
+                                {analysis.totalSize}
+                              </p>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={resetAnalysis}
+                        className="w-8 h-8 rounded-lg hover:bg-white flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors shrink-0"
+                        aria-label="Remove files"
+                      >
+                        <X size={16} strokeWidth={2} />
+                      </button>
+                    </div>
+
+                    {/* File list preview (for multiple files) */}
+                    {analysis.isMultiple && analysis.files.length <= 5 && (
+                      <div className="px-6 py-3 border-b border-slate-100 bg-slate-50/50">
+                        <div className="flex flex-wrap gap-1.5">
+                          {analysis.files.map((file, idx) => (
+                            <div
+                              key={idx}
+                              className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white border border-slate-200 text-[11px] text-slate-600 font-medium max-w-[140px]"
+                            >
+                              <FileText size={10} strokeWidth={2} className="text-slate-400 shrink-0" />
+                              <span className="truncate">{file.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {analysis.isMultiple && analysis.files.length > 5 && (
+                      <div className="px-6 py-3 border-b border-slate-100 bg-slate-50/50">
+                        <p className="text-[11px] text-slate-500 font-medium">
+                          {analysis.files.slice(0, 3).map((f) => f.name).join(', ')}{' '}
+                          and {analysis.files.length - 3} more...
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Recommendations */}
+                    <div className="p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Sparkles size={14} className="text-indigo-600" strokeWidth={2.5} />
+                        <p className="text-[12px] font-bold text-indigo-600 uppercase tracking-wider">
+                          Recommended for you
+                        </p>
+                      </div>
+
+                      {/* Top Recommendation Card */}
+                      <button
+                        onClick={() => goToTool(analysis.topRecommendation.href)}
+                        className="group w-full p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 hover:border-indigo-400 hover:shadow-[0_8px_20px_-6px_rgba(99,102,241,0.3)] transition-all duration-300 mb-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+                            style={{
+                              backgroundColor: analysis.topRecommendation.bgColor,
+                              color: analysis.topRecommendation.color,
+                            }}
+                          >
+                            <div className="scale-90">{analysis.topRecommendation.icon}</div>
+                          </div>
+                          <div className="flex-1 text-left min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider bg-amber-50 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                <Star size={9} fill="currentColor" strokeWidth={0} />
+                                Best Match
+                              </span>
+                            </div>
+                            <h4 className="text-[15px] font-bold text-slate-900">
+                              {analysis.topRecommendation.label}
+                            </h4>
+                            <p className="text-[12px] text-slate-600 truncate font-medium">
+                              {analysis.topReason}
+                            </p>
+                          </div>
+                          <ArrowRight
+                            size={18}
+                            className="text-indigo-600 group-hover:translate-x-1 transition-transform shrink-0"
+                            strokeWidth={2.5}
+                          />
+                        </div>
+                      </button>
+
+                      {/* Other Recommendations */}
+                      {analysis.otherRecommendations.length > 0 && (
+                        <>
+                          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-4">
+                            Or try these
+                          </p>
+                          <div className="grid grid-cols-1 gap-2">
+                            {analysis.otherRecommendations.map((tool) => (
+                              <button
+                                key={tool.href}
+                                onClick={() => goToTool(tool.href)}
+                                className="group flex items-center gap-3 p-3 rounded-lg bg-white border border-slate-100 hover:border-slate-300 hover:bg-slate-50 transition-all"
+                              >
+                                <div
+                                  className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                                  style={{
+                                    backgroundColor: tool.bgColor,
+                                    color: tool.color,
+                                  }}
+                                >
+                                  <div className="scale-75">{tool.icon}</div>
+                                </div>
+                                <div className="flex-1 text-left">
+                                  <h4 className="text-[13px] font-semibold text-slate-900">
+                                    {tool.label}
+                                  </h4>
+                                </div>
+                                <ChevronRight
+                                  size={16}
+                                  className="text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all"
+                                />
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+
+                      {/* Upload Different Files */}
+                      <button
+                        onClick={resetAnalysis}
+                        className="w-full mt-4 py-2.5 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 text-[13px] font-semibold transition-all"
+                      >
+                        Upload different files
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* ============ MOST POPULAR TOOLS SECTION ============ */}
-      <section id="tools" className="bg-[#F8FAFC] md:bg-white">
-        <div className="max-w-[1440px] mx-auto px-5 md:px-8 pb-10 md:pb-14 pt-4 md:pt-10">
-          {/* Section Header */}
-          <div className="text-center mb-5 md:mb-8">
-            {/* Mobile badge */}
-            <div className="md:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF7ED] text-[#EA580C] text-[11px] font-bold uppercase tracking-wider mb-2">
-              <Flame size={12} />
-              <span>Popular Tools</span>
-            </div>
-
-            {/* Desktop badge */}
-            <div className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF1FF] text-[#1E63FF] text-[12px] font-bold uppercase tracking-wider mb-3">
-              <FileText size={12} />
-              <span>Core Features</span>
-            </div>
-
-            <h2 className="font-['Space_Grotesk',sans-serif] text-[24px] md:text-[32px] font-extrabold text-[#07122E] tracking-tight">
-              Most Popular Tools
+      {/* ============ TOOL GRID SECTION ============ */}
+      <section id="tools" className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 md:pb-32">
+        <div className="flex items-center justify-between mb-8 md:mb-10">
+          <div>
+            <h2 className="text-[26px] md:text-[32px] font-extrabold tracking-tight text-slate-900">
+              Explore All Tools
             </h2>
-
-            {/* Mobile subtitle */}
-            <p className="md:hidden mt-1.5 text-[13px] text-[#4B5874]">
-              Quick access to our most used PDF Core
-            </p>
-
-            {/* Mobile "View All Tools" link */}
-            <Link
-              href="/tools"
-              className="inline-flex items-center gap-1 mt-2 md:hidden text-[13px] font-bold text-[#6D35FF]"
-            >
-              View All Tools
-              <ArrowRight size={14} />
-            </Link>
           </div>
-
-          {/* Desktop: View All button aligned right */}
-          <div className="hidden md:flex justify-end -mt-14 mb-6">
-            <Link
-              href="/tools"
-              className="group inline-flex items-center justify-center gap-1.5 text-[14px] font-bold text-[#1E63FF] bg-[#F8FAFF] border border-[#E7ECF5] hover:border-[#C9D8F3] hover:bg-[#EAF1FF] px-4 py-2.5 rounded-lg transition-all"
-            >
-              View All Tools
-              <ChevronRight
-                size={16}
-                className="group-hover:translate-x-1 transition-transform"
-              />
-            </Link>
-          </div>
-
-          {/* Tool Cards Grid */}
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-5">
-  {tools.map((tool, index) => {
-    const CardContent = (
-      <div
-        className={`group h-full bg-white border rounded-xl p-4 md:p-5 flex items-center gap-3 md:gap-4 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.08)] md:shadow-[0_12px_28px_-24px_rgba(15,23,42,0.45)] transition-all relative ${
-          tool.comingSoon
-            ? 'border-[#E7ECF5] opacity-70 cursor-not-allowed'
-            : 'border-[#E7ECF5] md:border-[#DDE5F0] hover:shadow-[0_18px_36px_-24px_rgba(37,99,235,0.55)] hover:border-[#C9D8F3] active:scale-[0.98]'
-        }`}
-        style={{ animationDelay: `${index * 40}ms` }}
-      >
-        {/* Coming Soon Badge */}
-        {tool.comingSoon && (
-          <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-gradient-to-r from-[#F59E0B] to-[#F97316] text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider shadow-sm">
-            Soon
-          </div>
-        )}
-
-        {/* Icon */}
-        <div
-          className={`w-12 h-12 md:w-[60px] md:h-[60px] rounded-xl flex items-center justify-center flex-shrink-0 ${
-            tool.comingSoon ? 'grayscale' : ''
-          }`}
-          style={{ backgroundColor: tool.bgColor, color: tool.color }}
-        >
-          {tool.icon}
+          <Link
+            href="/tools"
+            className="hidden sm:flex items-center gap-1 text-indigo-600 text-[14px] font-medium hover:text-indigo-700 group"
+          >
+            View All ({tools.length})
+            <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
 
-        {/* Content */}
-        <div className="min-w-0 flex-1 text-left">
-          <div className="flex items-center gap-2">
-            <h3 className={`text-[14px] md:text-[15px] font-extrabold truncate ${
-              tool.comingSoon ? 'text-[#8A97AE]' : 'text-[#07122E]'
-            }`}>
-              {tool.label}
-            </h3>
-            {!tool.comingSoon && (
-              <ChevronRight
-                size={16}
-                className="text-[#C0C8D8] md:text-[#8A97AE] group-hover:text-[#1E63FF] transition-colors ml-auto flex-shrink-0"
-              />
-            )}
-          </div>
-          <p className={`mt-1 md:mt-2 text-[12px] leading-relaxed ${
-            tool.comingSoon ? 'text-[#B0B7C3]' : 'text-[#4B5874]'
-          }`}>
-            {tool.description}
-          </p>
-        </div>
-      </div>
-    );
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+          {popularTools.map((tool) => {
+            const CardContent = (
+              <div
+                className={`group h-full block bg-white p-5 md:p-6 rounded-2xl border border-slate-100 transition-all duration-300 relative ${
+                  tool.comingSoon
+                    ? 'opacity-70 cursor-not-allowed'
+                    : 'hover:border-slate-200 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(99,102,241,0.08)] cursor-pointer'
+                }`}
+              >
+                {tool.comingSoon && (
+                  <div className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-bold uppercase tracking-wider shadow-sm">
+                    Soon
+                  </div>
+                )}
 
-    // If coming soon → non-clickable div
-    // Otherwise → clickable Link
-    return tool.comingSoon ? (
-      <div key={tool.href}>{CardContent}</div>
-    ) : (
-      <Link href={tool.href} key={tool.href}>
-        {CardContent}
-      </Link>
-    );
-  })}
-</div>
+                <div
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-105 ${
+                    tool.comingSoon ? 'grayscale' : ''
+                  }`}
+                  style={{ backgroundColor: tool.bgColor, color: tool.color }}
+                >
+                  <div className="scale-90">{tool.icon}</div>
+                </div>
+
+                <h3
+                  className={`text-[15px] md:text-base font-bold mb-1.5 ${
+                    tool.comingSoon ? 'text-slate-400' : 'text-slate-900'
+                  }`}
+                >
+                  {tool.label}
+                </h3>
+
+                <p
+                  className={`text-[13px] leading-relaxed ${
+                    tool.comingSoon ? 'text-slate-400' : 'text-slate-500'
+                  }`}
+                >
+                  {tool.description}
+                </p>
+              </div>
+            );
+
+            return tool.comingSoon ? (
+              <div key={tool.href}>{CardContent}</div>
+            ) : (
+              <Link href={tool.href} key={tool.href}>
+                {CardContent}
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="mt-8 flex justify-center sm:hidden">
+          <Link
+            href="/tools"
+            className="inline-flex items-center gap-1 text-indigo-600 text-[14px] font-semibold"
+          >
+            View All Tools
+            <ChevronRight size={16} />
+          </Link>
         </div>
       </section>
 
-      {/* ============ FOOTER (Why Choose Us + Newsletter + Bottom Bar) ============ */}
       <LandingFooter />
     </div>
   );

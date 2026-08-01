@@ -7,6 +7,7 @@ import UploadZone from '../../_components/UploadZone';
 import PageGrid from '../../_components/PageGrid';
 import AddMoreCard from '../../_components/AddMoreCard';
 import { useImageToPdfContext } from '../_context/ImageToPdfContext';
+import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 import type { ImageItem } from '../../_types';
 import PageCard from './PageCard';
 import OptionsPanel from './OptionsPanel';
@@ -18,6 +19,9 @@ export default function DesktopView() {
     currentPageRatio, marginPercent, pageFit, pageBackground,
     selectedId, setSelectedId,
   } = useImageToPdfContext();
+
+  // ⭐ Central handler — replaces manual useEffect + useRef + usePendingFile
+  useToolFileReceiver((files) => addImages(files));
 
   // ============ BOTTOM TOOLBAR ============
   const bottomBar = (

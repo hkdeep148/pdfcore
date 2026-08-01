@@ -24,12 +24,13 @@ export interface MobileUploadInfo {
   fileType: 'pdf' | 'image';
 }
 
-// ============ ALL AVAILABLE PDF Core ============
+// ============ ALL AVAILABLE PDF TOOLS ============
 
 export const tools: (Tool & {
   color: string;
   bgColor: string;
   mobileUpload: MobileUploadInfo;
+  popular?: boolean;              // ⭐ Marks popular tools shown on homepage
 })[] = [
   {
     href: '/tools/image-to-pdf',
@@ -39,6 +40,7 @@ export const tools: (Tool & {
     color: '#8B3DFF',
     bgColor: '#F3E8FF',
     icon: <ImageIcon size={28} strokeWidth={2} />,
+    popular: true,                // ⭐ POPULAR
     mobileUpload: {
       titleLine1: 'Convert Images',
       titleLine2: 'to PDF',
@@ -59,6 +61,7 @@ export const tools: (Tool & {
     color: '#16A34A',
     bgColor: '#DCFCE7',
     icon: <ImageIcon size={28} strokeWidth={2} />,
+    popular: true,                // ⭐ POPULAR
     mobileUpload: {
       titleLine1: 'Convert PDF',
       titleLine2: 'to Images',
@@ -79,6 +82,7 @@ export const tools: (Tool & {
     color: '#2563EB',
     bgColor: '#EAF1FF',
     icon: <Combine size={28} strokeWidth={2} />,
+    popular: true,                // ⭐ POPULAR
     mobileUpload: {
       titleLine1: 'Merge PDF',
       titleLine2: 'Files',
@@ -99,6 +103,7 @@ export const tools: (Tool & {
     color: '#F97316',
     bgColor: '#FFEDD5',
     icon: <SplitSquareHorizontal size={28} strokeWidth={2} />,
+    popular: true,                // ⭐ POPULAR
     mobileUpload: {
       titleLine1: 'Split PDF',
       titleLine2: 'Pages',
@@ -119,6 +124,7 @@ export const tools: (Tool & {
     color: '#7C3AED',
     bgColor: '#EDE9FE',
     icon: <Files size={28} strokeWidth={2} />,
+    // ❌ Not popular - shown only on /tools page
     mobileUpload: {
       titleLine1: 'Organize',
       titleLine2: 'PDF Pages',
@@ -139,6 +145,7 @@ export const tools: (Tool & {
     color: '#F43F5E',
     bgColor: '#FFE4E6',
     icon: <Maximize2 size={28} strokeWidth={2} />,
+    popular: true,                // ⭐ POPULAR
     mobileUpload: {
       titleLine1: 'Compress',
       titleLine2: 'PDF',
@@ -159,6 +166,7 @@ export const tools: (Tool & {
     color: '#DB2777',
     bgColor: '#FCE7F3',
     icon: <Unlock size={28} strokeWidth={2} />,
+    popular: true,                // ⭐ POPULAR
     mobileUpload: {
       titleLine1: 'Unlock PDF',
       titleLine2: 'Files',
@@ -171,26 +179,27 @@ export const tools: (Tool & {
       fileType: 'pdf',
     },
   },
-{
-  href: '/tools/sign-pdf',
-  label: 'Sign PDF',
-  description: 'Add your signature to any PDF document',
-  category: 'edit',
-  color: '#1E40AF',
-  bgColor: '#DBEAFE',
-  icon: <PenTool size={28} strokeWidth={2} />,
-  mobileUpload: {
-    titleLine1: 'Sign PDF',
-    titleLine2: 'Documents',
-    titleAccent: 'Sign',
-    description: 'Add your signature\nto PDF files easily.',
-    uploadTitle: 'Upload PDF',
-    uploadSubtitle: 'Drag & drop your PDF here\nor choose a file',
-    buttonText: 'Choose PDF',
-    fileSizeNote: 'Supports PDF up to 100 MB',
-    fileType: 'pdf',
+  {
+    href: '/tools/sign-pdf',
+    label: 'Sign PDF',
+    description: 'Add your signature to any PDF document',
+    category: 'edit',
+    color: '#1E40AF',
+    bgColor: '#DBEAFE',
+    icon: <PenTool size={28} strokeWidth={2} />,
+    popular: true,                // ⭐ POPULAR
+    mobileUpload: {
+      titleLine1: 'Sign PDF',
+      titleLine2: 'Documents',
+      titleAccent: 'Sign',
+      description: 'Add your signature\nto PDF files easily.',
+      uploadTitle: 'Upload PDF',
+      uploadSubtitle: 'Drag & drop your PDF here\nor choose a file',
+      buttonText: 'Choose PDF',
+      fileSizeNote: 'Supports PDF up to 100 MB',
+      fileType: 'pdf',
+    },
   },
-},
   {
     href: '/tools/rotate-pdf',
     label: 'Rotate PDF',
@@ -199,6 +208,7 @@ export const tools: (Tool & {
     color: '#F59E0B',
     bgColor: '#FEF3C7',
     icon: <RotateCw size={28} strokeWidth={2} />,
+    popular: true,                // ⭐ POPULAR
     mobileUpload: {
       titleLine1: 'Rotate PDF',
       titleLine2: 'Pages',
@@ -219,6 +229,7 @@ export const tools: (Tool & {
     color: '#0EA5A4',
     bgColor: '#CCFBF1',
     icon: <PenTool size={28} strokeWidth={2} />,
+    // ❌ Not popular - shown only on /tools page
     mobileUpload: {
       titleLine1: 'Add Watermark',
       titleLine2: 'to PDF',
@@ -233,7 +244,24 @@ export const tools: (Tool & {
   },
 ];
 
-// Category labels for grouping
+// ============ ⭐ DERIVED HELPERS (computed once at module load) ============
+
+/**
+ * Popular tools shown on homepage.
+ * Computed once when module loads — zero runtime cost per render.
+ */
+export const popularTools = tools.filter((tool) => tool.popular);
+
+/**
+ * Tools grouped by category (useful for categorized menus/pages).
+ */
+export const toolsByCategory = tools.reduce((acc, tool) => {
+  if (!acc[tool.category]) acc[tool.category] = [];
+  acc[tool.category].push(tool);
+  return acc;
+}, {} as Record<string, typeof tools>);
+
+// ============ CATEGORY LABELS ============
 export const categoryLabels: Record<string, string> = {
   convert: 'Convert',
   organize: 'Organize',
@@ -242,7 +270,11 @@ export const categoryLabels: Record<string, string> = {
   security: 'Security',
 };
 
-// Helper: get tool info by current URL
+// ============ HELPERS ============
+
+/**
+ * Get tool info by current URL path.
+ */
 export function getToolByPath(pathname: string): (typeof tools)[0] | undefined {
   return tools.find((t) => t.href === pathname);
 }

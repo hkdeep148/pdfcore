@@ -65,7 +65,6 @@ export default function MobileView() {
     if (currentImage) removeImage(currentImage.id);
   };
 
-  // 🎊 Trigger create + show success screen
   const handleCreatePdf = async () => {
     const url = await createPdf();
     if (url) {
@@ -106,19 +105,18 @@ export default function MobileView() {
         </div>
       )}
 
-      {/* 🎊 SUCCESS SCREEN */}
       {showSuccess && isReady ? (
-  <MobileSuccessScreen
-    title="PDF Created!"
-    subtitle="Your images have been converted to PDF"
-    filename={`${pdfFilename}.pdf`}
-    fileSize={lastPdfSize || undefined}
-    pageCount={images.length}
-    onDownload={downloadPdf}
-    onPreview={previewPdf}
-    onStartOver={handleStartOver}
-    onBack={handleBackToEdit}
-  />
+        <MobileSuccessScreen
+          title="PDF Created!"
+          subtitle="Your images have been converted to PDF"
+          filename={`${pdfFilename}.pdf`}
+          fileSize={lastPdfSize || undefined}
+          pageCount={images.length}
+          onDownload={downloadPdf}
+          onPreview={previewPdf}
+          onStartOver={handleStartOver}
+          onBack={handleBackToEdit}
+        />
       ) : !hasImages ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
       ) : isReorderMode ? (

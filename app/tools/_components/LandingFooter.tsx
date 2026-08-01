@@ -1,224 +1,219 @@
 'use client';
 
 import Link from 'next/link';
-import { FileText, Shield, Lock, ImageIcon, ArrowRight } from 'lucide-react';
+import {
+  FileText,
+  Shield,
+  Lock,
+  ArrowRight,
+  Zap,
+  WifiOff,
+  Layers,
+  Mail,
+} from 'lucide-react';
 import { openCookieSettings } from './CookieBanner';
 
 export default function LandingFooter() {
   return (
     <>
       {/* ================ WHY CHOOSE US SECTION ================ */}
-      <section className="bg-gradient-to-b from-[#F5F3FF] via-[#EEF2FF] to-[#F5F3FF]">
-        <div className="max-w-[1440px] mx-auto px-5 md:px-8 py-10 md:py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_2.6fr] gap-8 md:gap-10 items-center">
-            {/* Left column: Heading */}
-            <div className="text-center lg:text-left">
-              <p className="text-[13px] md:text-[14px] font-bold text-[#7C3AED] mb-2 md:mb-3">
-                Why Choose Us?
-              </p>
-              <h2 className="font-['Space_Grotesk',sans-serif] text-[26px] md:text-[32px] font-extrabold text-[#07122E] leading-tight mb-3 md:mb-4">
-                Simple. Fast. Secure.
+      <section className="relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 md:pb-24">
+          {/* Section Header */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8 md:mb-12">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-semibold uppercase tracking-wider mb-4 border border-indigo-100">
+                Why Choose Us
+              </div>
+              <h2 className="text-[26px] md:text-[32px] font-extrabold tracking-tight text-slate-900 leading-tight">
+                Your files,{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500">
+                  your device
+                </span>
+                <span className="text-slate-900">.</span>
               </h2>
-              <p className="text-[14px] text-[#4B5874] leading-relaxed mb-5 md:mb-6 max-w-md mx-auto lg:mx-0">
-                We built our tools to make your PDF work smarter, not harder. All tools are free and work right in your browser.
-              </p>
-              <Link
-                href="/about"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[#C4B5FD] text-[14px] font-bold text-[#7C3AED] hover:bg-white hover:border-[#7C3AED] transition-all"
-              >
-                Learn More
-                <ArrowRight size={14} />
-              </Link>
             </div>
-
-            {/* Right column: 4 feature cards with dividers */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 relative">
-              {/* Dashed divider lines (desktop only) */}
-              <div className="hidden lg:block absolute inset-y-4 left-1/4 w-px border-l border-dashed border-[#C7CADB]" />
-              <div className="hidden lg:block absolute inset-y-4 left-1/2 w-px border-l border-dashed border-[#C7CADB]" />
-              <div className="hidden lg:block absolute inset-y-4 left-3/4 w-px border-l border-dashed border-[#C7CADB]" />
-
-              {/* Feature 1: Privacy (Green Shield) */}
-              <div className="text-center px-2 md:px-3">
-                <div className="relative w-20 h-20 mx-auto mb-3 md:mb-4 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-emerald-200/40 rounded-full blur-xl pointer-events-none" />
-                  <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg flex items-center justify-center">
-                    <Shield size={30} className="text-white" fill="white" fillOpacity={0.2} strokeWidth={2.5} />
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-300 rounded-full opacity-70 pointer-events-none" />
-                  <div className="absolute -bottom-1 -left-2 w-2 h-2 bg-emerald-400 rounded-full opacity-60 pointer-events-none" />
-                </div>
-                <h3 className="text-[14px] md:text-[15px] font-extrabold text-[#07122E] mb-2">Your Privacy Matters</h3>
-                <p className="text-[12px] text-[#4B5874] leading-relaxed">
-                  Files are processed locally in your browser. Nothing is uploaded.
-                </p>
-              </div>
-
-              {/* Feature 2: Lightning (Purple Bolt) */}
-              <div className="text-center px-2 md:px-3">
-                <div className="relative w-20 h-20 mx-auto mb-3 md:mb-4 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-purple-200/40 rounded-full blur-xl pointer-events-none" />
-                  <div className="relative w-16 h-16 flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" className="w-14 h-14 drop-shadow-lg" fill="url(#lightning-gradient)">
-                      <defs>
-                        <linearGradient id="lightning-gradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#A78BFA" />
-                          <stop offset="100%" stopColor="#7C3AED" />
-                        </linearGradient>
-                      </defs>
-                      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                    </svg>
-                  </div>
-                  <div className="absolute -top-1 right-0 w-2 h-2 bg-purple-300 rounded-full opacity-70 pointer-events-none" />
-                  <div className="absolute bottom-0 -left-1 w-3 h-3 bg-purple-400 rounded-full opacity-60 pointer-events-none" />
-                </div>
-                <h3 className="text-[14px] md:text-[15px] font-extrabold text-[#07122E] mb-2">Lightning Fast</h3>
-                <p className="text-[12px] text-[#4B5874] leading-relaxed">
-                  Our tools are optimized for speed so you can get things done quickly.
-                </p>
-              </div>
-
-              {/* Feature 3: No Installation (Blue Browser) */}
-              <div className="text-center px-2 md:px-3">
-                <div className="relative w-20 h-20 mx-auto mb-3 md:mb-4 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-blue-200/40 rounded-full blur-xl pointer-events-none" />
-                  <div className="relative w-16 h-14 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg overflow-hidden">
-                    {/* Browser top bar */}
-                    <div className="h-3 bg-blue-700/40 flex items-center gap-1 px-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
-                    </div>
-                    {/* Checkmark */}
-                    <div className="flex items-center justify-center h-[calc(100%-12px)]">
-                      <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center">
-                        <svg viewBox="0 0 24 24" className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-300 rounded-full opacity-70 pointer-events-none" />
-                </div>
-                <h3 className="text-[14px] md:text-[15px] font-extrabold text-[#07122E] mb-2">No Installation</h3>
-                <p className="text-[12px] text-[#4B5874] leading-relaxed">
-                  Everything works online. No downloads or installations required.
-                </p>
-              </div>
-
-              {/* Feature 4: Always Accessible (Orange Layers) */}
-              <div className="text-center px-2 md:px-3">
-                <div className="relative w-20 h-20 mx-auto mb-3 md:mb-4 flex items-center justify-center">
-                  <div className="absolute inset-0 bg-orange-200/40 rounded-full blur-xl pointer-events-none" />
-                  <div className="relative w-16 h-14 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 shadow-lg flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" className="w-9 h-9 text-white/95" fill="currentColor">
-                      <path
-                        d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  <div className="absolute -top-1 right-1 w-2 h-2 bg-orange-300 rounded-full opacity-70 pointer-events-none" />
-                  <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-orange-400 rounded-full opacity-60 pointer-events-none" />
-                </div>
-                <h3 className="text-[14px] md:text-[15px] font-extrabold text-[#07122E] mb-2">Always Accessible</h3>
-                <p className="text-[12px] text-[#4B5874] leading-relaxed">
-                  Use our tools on any device, anytime, anywhere.
-                </p>
-              </div>
-            </div>
+            <p className="text-[14px] md:text-[15px] text-slate-500 font-medium max-w-md md:text-right leading-relaxed">
+              Zero uploads. Zero tracking. All PDF processing happens locally in your browser.
+            </p>
           </div>
 
-          {/* ================ CTA BANNER (Dark) ================ */}
-          <div className="mt-10 md:mt-12 relative bg-[#0B1729] rounded-2xl overflow-hidden shadow-[0_20px_50px_-20px_rgba(11,23,41,0.5)]">
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-center px-6 md:px-10 py-8 text-center lg:text-left">
-              {/* Left: Folder illustration */}
-              <div className="relative w-28 h-20 lg:w-32 lg:h-24 flex-shrink-0">
-                {/* Back folder */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#8B5CF6] to-[#6D35FF] rounded-lg transform -rotate-6 translate-x-2 translate-y-1 shadow-lg" />
-                {/* Front folder */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#A78BFA] to-[#7C3AED] rounded-lg shadow-xl">
-                  <div className="absolute top-0 left-0 w-12 h-3 bg-[#6D35FF] rounded-t-lg" />
-                </div>
-                {/* Image icon overlay */}
-                <div className="absolute top-1 right-1 w-7 h-7 rounded-md bg-gradient-to-br from-[#C4B5FD] to-[#8B5CF6] flex items-center justify-center shadow-md">
-                  <ImageIcon size={14} className="text-white" />
-                </div>
-                {/* Lock icon overlay */}
-                <div className="absolute bottom-1 right-2 w-6 h-6 rounded-md bg-gradient-to-br from-[#FB923C] to-[#F97316] flex items-center justify-center shadow-md">
-                  <Lock size={12} className="text-white" fill="white" fillOpacity={0.3} />
-                </div>
+          {/* Feature Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+            {/* Feature 1: 100% Private */}
+            <div className="group h-full block bg-white p-5 md:p-6 rounded-2xl border border-slate-100 hover:border-slate-200 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(99,102,241,0.08)] transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
+                <Shield size={22} className="text-emerald-600" strokeWidth={2} />
               </div>
+              <h3 className="text-[15px] md:text-base font-bold text-slate-900 mb-1.5">
+                100% Private
+              </h3>
+              <p className="text-[13px] text-slate-500 leading-relaxed">
+                Your files are processed locally in your browser. They never leave your device.
+              </p>
+            </div>
 
-              {/* Middle: Text */}
-              <div className="flex-1">
-                <h3 className="font-['Space_Grotesk',sans-serif] text-[20px] md:text-[24px] font-extrabold text-white mb-2">
-                  Ready to work with PDFs?
-                </h3>
-                <p className="text-[13px] md:text-[15px] text-[#B8C4D9]">
-                  Explore our free PDF tools — no signup required, no hidden costs.
-                </p>
+            {/* Feature 2: Lightning Fast */}
+            <div className="group h-full block bg-white p-5 md:p-6 rounded-2xl border border-slate-100 hover:border-slate-200 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(99,102,241,0.08)] transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
+                <Zap size={22} className="text-purple-600" strokeWidth={2} />
               </div>
+              <h3 className="text-[15px] md:text-base font-bold text-slate-900 mb-1.5">
+                Lightning Fast
+              </h3>
+              <p className="text-[13px] text-slate-500 leading-relaxed">
+                No upload wait times. Processing happens instantly right on your device.
+              </p>
+            </div>
 
-              {/* Right: CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 items-stretch w-full lg:w-auto flex-shrink-0">
-                <Link
-                  href="/tools"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-[#7C3AED] to-[#6D35FF] text-white text-[14px] font-bold hover:opacity-95 transition-opacity whitespace-nowrap shadow-lg"
-                >
-                  Explore All Tools
-                  <ArrowRight size={16} />
-                </Link>
-                <Link
-                  href="/about"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-white/10 backdrop-blur-sm text-white text-[14px] font-bold border border-white/20 hover:bg-white/20 transition-all whitespace-nowrap"
-                >
-                  Learn More
-                </Link>
+            {/* Feature 3: Works Offline */}
+            <div className="group h-full block bg-white p-5 md:p-6 rounded-2xl border border-slate-100 hover:border-slate-200 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(99,102,241,0.08)] transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
+                <WifiOff size={22} className="text-blue-600" strokeWidth={2} />
               </div>
+              <h3 className="text-[15px] md:text-base font-bold text-slate-900 mb-1.5">
+                Works Offline
+              </h3>
+              <p className="text-[13px] text-slate-500 leading-relaxed">
+                All processing runs in your browser. No servers, no internet needed after loading.
+              </p>
+            </div>
+
+            {/* Feature 4: Always Free */}
+            <div className="group h-full block bg-white p-5 md:p-6 rounded-2xl border border-slate-100 hover:border-slate-200 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(99,102,241,0.08)] transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
+                <Layers size={22} className="text-orange-600" strokeWidth={2} />
+              </div>
+              <h3 className="text-[15px] md:text-base font-bold text-slate-900 mb-1.5">
+                Always Free
+              </h3>
+              <p className="text-[13px] text-slate-500 leading-relaxed">
+                All tools are completely free. No hidden costs, no sign-up, no limits.
+              </p>
             </div>
           </div>
         </div>
       </section>
+      {/* ================ FOOTER WITH INTEGRATED CTA ================ */}
+      <footer className="relative border-t border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* ============ ⭐ IMPROVED CTA WITH ICON ============ */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-10 md:py-14 border-b border-slate-200/60">
+            <div className="text-center md:text-left">
+              <h3 className="text-[22px] md:text-[28px] font-extrabold text-slate-900 tracking-tight leading-tight mb-1.5">
+                Ready to get started?
+              </h3>
+              <p className="text-[14px] md:text-[15px] text-slate-500 font-medium">
+                Try our free PDF tools right now. No sign-up needed.
+              </p>
+            </div>
+            <Link
+              href="/tools"
+              className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-[15px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_14px_rgba(99,102,241,0.4)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_6px_24px_rgba(99,102,241,0.5)] hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap"
+            >
+              <Zap size={16} className="text-yellow-300" strokeWidth={2.5} fill="currentColor" />
+              Start Now
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
+            </Link>
+          </div>
 
-      {/* ================ MAIN FOOTER WITH LINKS ================ */}
-      <footer className="bg-[#0B1729] text-white">
-        <div className="max-w-[1440px] mx-auto px-5 md:px-8 py-12 md:py-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 md:gap-6">
+          {/* ============ FOOTER MAIN CONTENT ============ */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 py-12 md:py-16">
+            
             {/* Column 1: Brand */}
-            <div className="col-span-2 lg:col-span-2 pr-4">
+            <div className="col-span-2 md:col-span-1 pr-4">
               <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#6D35FF] flex items-center justify-center shadow-[0_4px_12px_-2px_rgba(109,53,255,0.5)]">
-                  <FileText size={18} className="text-white" />
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#6D35FF] flex items-center justify-center shadow-[0_4px_12px_-2px_rgba(109,53,255,0.3)]">
+                  <FileText size={16} className="text-white" />
                 </div>
-                <span className="text-[18px] font-extrabold text-white">
-                  PDF <span className="text-[#A78BFA]">Core</span>
+                <span className="text-[16px] font-extrabold text-slate-900">
+                  PDF Core
                 </span>
               </Link>
-              <p className="text-[13px] text-[#B8C4D9] leading-relaxed mb-5 max-w-sm">
-                Free, secure, and fast PDF tools that work right in your browser. Your files never leave your device.
+              <p className="text-[13px] text-slate-500 leading-relaxed mb-5 max-w-xs">
+                Free, secure PDF tools that work right in your browser. Your files never leave your device.
               </p>
 
               {/* Trust badges */}
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/10 text-[11px] font-bold text-[#B8C4D9]">
-                  <Shield size={11} className="text-emerald-400" />
+              <div className="flex flex-wrap items-center gap-2 mb-5">
+                <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50 border border-emerald-100 text-[11px] font-semibold text-emerald-700">
+                  <Shield size={11} strokeWidth={2.5} />
                   <span>Privacy First</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/10 text-[11px] font-bold text-[#B8C4D9]">
-                  <Lock size={11} className="text-blue-400" />
+                <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-indigo-50 border border-indigo-100 text-[11px] font-semibold text-indigo-700">
+                  <Lock size={11} strokeWidth={2.5} />
                   <span>100% Free</span>
                 </div>
               </div>
+
+              {/* Social Media Icons */}
+<div className="flex items-center gap-2">
+  {/* X (Twitter) */}
+  <a
+    href="https://twitter.com/pdfcore"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-9 h-9 rounded-lg bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-all group"
+    aria-label="X (Twitter)"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      className="w-4 h-4 group-hover:scale-110 transition-transform"
+      fill="currentColor"
+    >
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  </a>
+
+  {/* GitHub */}
+  <a
+    href="https://github.com/pdfcore"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-9 h-9 rounded-lg bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-all group"
+    aria-label="GitHub"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      className="w-4 h-4 group-hover:scale-110 transition-transform"
+      fill="currentColor"
+    >
+      <path d="M12 0C5.374 0 0 5.373 0 12 0 17.302 3.438 21.8 8.207 23.387c.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
+    </svg>
+  </a>
+
+  {/* LinkedIn */}
+  <a
+    href="https://linkedin.com/company/pdfcore"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-9 h-9 rounded-lg bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-all group"
+    aria-label="LinkedIn"
+  >
+    <svg
+      viewBox="0 0 24 24"
+      className="w-4 h-4 group-hover:scale-110 transition-transform"
+      fill="currentColor"
+    >
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
+  </a>
+
+  {/* Email */}
+  <a
+    href="mailto:hello@pdfcore.online"
+    className="w-9 h-9 rounded-lg bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 flex items-center justify-center text-slate-600 hover:text-slate-900 transition-all group"
+    aria-label="Email"
+  >
+    <Mail size={15} strokeWidth={2} className="group-hover:scale-110 transition-transform" />
+  </a>
+</div>
             </div>
 
             {/* Column 2: Tools */}
             <div>
-              <h4 className="text-[13px] font-extrabold text-white uppercase tracking-wider mb-4">
+              <h4 className="text-[12px] font-bold text-slate-900 uppercase tracking-wider mb-4">
                 Tools
               </h4>
               <ul className="space-y-2.5">
@@ -226,14 +221,13 @@ export default function LandingFooter() {
                 <FooterLink href="/tools/split-pdf">Split PDF</FooterLink>
                 <FooterLink href="/tools/compress-pdf">Compress PDF</FooterLink>
                 <FooterLink href="/tools/pdf-to-image">PDF to Image</FooterLink>
-                <FooterLink href="/tools/image-to-pdf">Image to PDF</FooterLink>
-                <li className="pt-1">
+                <li>
                   <Link
                     href="/tools"
-                    className="inline-flex items-center gap-1 text-[13px] font-bold text-[#A78BFA] hover:text-[#C4B5FD] transition-colors"
+                    className="inline-flex items-center gap-1 text-[13px] font-semibold text-indigo-600 hover:text-indigo-700 transition-colors group"
                   >
                     All Tools
-                    <ArrowRight size={12} />
+                    <ArrowRight size={12} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 </li>
               </ul>
@@ -241,11 +235,11 @@ export default function LandingFooter() {
 
             {/* Column 3: Company */}
             <div>
-              <h4 className="text-[13px] font-extrabold text-white uppercase tracking-wider mb-4">
+              <h4 className="text-[12px] font-bold text-slate-900 uppercase tracking-wider mb-4">
                 Company
               </h4>
               <ul className="space-y-2.5">
-                <FooterLink href="/about">About Us</FooterLink>
+                <FooterLink href="/about">About</FooterLink>
                 <FooterLink href="/contact">Contact</FooterLink>
                 <FooterLink href="/faq">FAQ</FooterLink>
                 <FooterLink href="/security">Security</FooterLink>
@@ -254,18 +248,17 @@ export default function LandingFooter() {
 
             {/* Column 4: Legal */}
             <div>
-              <h4 className="text-[13px] font-extrabold text-white uppercase tracking-wider mb-4">
+              <h4 className="text-[12px] font-bold text-slate-900 uppercase tracking-wider mb-4">
                 Legal
               </h4>
               <ul className="space-y-2.5">
                 <FooterLink href="/privacy">Privacy Policy</FooterLink>
                 <FooterLink href="/terms">Terms of Service</FooterLink>
-                <FooterLink href="/security">Security</FooterLink>
                 <li>
                   <button
                     type="button"
                     onClick={openCookieSettings}
-                    className="text-[13px] text-[#B8C4D9] hover:text-white transition-colors text-left"
+                    className="text-[13px] text-slate-500 hover:text-slate-900 transition-colors text-left"
                   >
                     Cookie Settings
                   </button>
@@ -274,37 +267,20 @@ export default function LandingFooter() {
             </div>
           </div>
 
-          {/* Bottom Bar */}
-          <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-center md:text-left">
-              <span className="text-[12.5px] text-[#7F8CA3]">
-                © {new Date().getFullYear()} PDF Core. All rights reserved.
-              </span>
-              <span className="hidden md:inline text-[#3F4A5F]">•</span>
-              <span className="text-[12.5px] text-[#7F8CA3]">
-                Made with <span className="text-[#EF4444]">♥</span> for everyone
-              </span>
-            </div>
-
-            <div className="flex items-center gap-4 text-[12.5px] text-[#7F8CA3]">
-              <Link href="/privacy" className="hover:text-white transition-colors">
-                Privacy
-              </Link>
-              <span className="text-[#3F4A5F]">•</span>
-              <Link href="/terms" className="hover:text-white transition-colors">
-                Terms
-              </Link>
-              <span className="text-[#3F4A5F]">•</span>
-              <button
-                type="button"
-                onClick={openCookieSettings}
-                className="hover:text-white transition-colors"
-              >
-                Cookies
-              </button>
-            </div>
-          </div>
-        </div>
+          {/* ============ BOTTOM BAR ============ */}
+<div className="relative -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-50/50 via-purple-50/30 to-indigo-50/50 border-t border-slate-200/60">
+  <div className="py-5 flex flex-col md:flex-row items-center justify-between gap-3">
+    <p className="text-[12.5px] text-slate-600 font-medium">
+      © {new Date().getFullYear()} <span className="text-slate-900 font-semibold">PDF Core</span>. All rights reserved.
+    </p>
+    <div className="flex items-center gap-1.5 text-[12.5px] text-slate-600 font-medium">
+      <span>Made with</span>
+      <span className="text-red-500 text-[14px]">♥</span>
+      <span>for everyone</span>
+    </div>
+  </div>
+  </div>
+</div>
       </footer>
     </>
   );
@@ -322,7 +298,7 @@ function FooterLink({ href, children }: FooterLinkProps) {
     <li>
       <Link
         href={href}
-        className="text-[13px] text-[#B8C4D9] hover:text-white transition-colors"
+        className="text-[13px] text-slate-500 hover:text-slate-900 transition-colors"
       >
         {children}
       </Link>

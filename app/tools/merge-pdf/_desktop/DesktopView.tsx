@@ -9,6 +9,7 @@ import AddMoreCard from '../../_components/AddMoreCard';
 import { useMergePdfContext } from '../_context/MergePdfContext';
 import PdfMergeCard from './PdfMergeCard';
 import OptionsPanel from './OptionsPanel';
+import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 
 export default function DesktopView() {
   const {
@@ -18,6 +19,8 @@ export default function DesktopView() {
     addPdfs, removePdf, reorderPdfs, clearAll,
     performMerge, downloadMerged, mergeResult,
   } = useMergePdfContext();
+
+  useToolFileReceiver((files: File[]) => addPdfs(files));
 
   const bottomBar = (
     <div className="flex items-center justify-between gap-4">

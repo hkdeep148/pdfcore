@@ -6,6 +6,7 @@ import ToolActionButton from '../../_components/ToolActionButton';
 import UploadZone from '../../_components/UploadZone';
 import PageGrid from '../../_components/PageGrid';
 import AddMoreCard from '../../_components/AddMoreCard';
+import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 import { useCompressPdfContext } from '../_context/CompressPdfContext';
 import PdfCard from './PdfCard';
 import OptionsPanel from './OptionsPanel';
@@ -15,6 +16,8 @@ export default function DesktopView() {
     items, isProcessing, errorMessage, setErrorMessage,
     addPdfs, removePdf, clearAll, compressAll, downloadOne, downloadAll,
   } = useCompressPdfContext();
+
+  useToolFileReceiver((files: File[]) => addPdfs(files));
 
   const allCompressed = items.length > 0 && items.every((it) => it.status === 'done');
   const someCompressed = items.some((it) => it.status === 'done');

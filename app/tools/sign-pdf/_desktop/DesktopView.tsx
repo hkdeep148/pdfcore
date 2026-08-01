@@ -28,16 +28,19 @@ export default function DesktopView() {
     addPdf, clearFile, placeSignature, updatePlacedSignature, removePlacedSignature,
     signAndPreparePdf,
     downloadSignedFile,
-    signedPdfUrl,              // ⭐ ADDED
+    signedPdfUrl,
   } = useSignPdfContext();
 
   const [dragState, setDragState] = useState<DragState | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
-  // ⭐ Auto-download flag
+  // ⭐ NEW: Track if drag/resize just finished (prevents accidental placement)
+  const justFinishedDragRef = useRef(false);
+
+  // Auto-download flag
   const shouldDownloadRef = useRef(false);
 
-  // ⭐ Watch for signedPdfUrl → auto-download when ready
+  // Watch for signedPdfUrl → auto-download when ready
   useEffect(() => {
     if (signedPdfUrl && shouldDownloadRef.current && file) {
       shouldDownloadRef.current = false;
@@ -55,7 +58,7 @@ export default function DesktopView() {
     }
   }, [signedPdfUrl, file]);
 
-  // ⭐ Desktop handler — sign then useEffect handles download
+  // Desktop handler — sign then useEffect handles download
   const handleDesktopDownload = async () => {
     shouldDownloadRef.current = true;
     const url = await signAndPreparePdf();
@@ -64,7 +67,7 @@ export default function DesktopView() {
     }
   };
 
-  // ⭐ Helper to get CURRENT preview container dimensions
+  // Helper to get CURRENT preview container dimensions
   const getCurrentDimensions = useCallback(() => {
     if (!previewRef.current) return null;
     const rect = previewRef.current.getBoundingClientRect();
@@ -123,13 +126,28 @@ export default function DesktopView() {
     }
   }, [dragState, updatePlacedSignature, getCurrentDimensions]);
 
+  // ⭐ UPDATED: Set flag when drag/resize ends (prevents accidental placement)
   const handleMouseUp = useCallback(() => {
+    if (dragState) {
+      justFinishedDragRef.current = true;
+      // Reset flag after 100ms so normal clicks work
+      setTimeout(() => {
+        justFinishedDragRef.current = false;
+      }, 100);
+    }
     setDragState(null);
-  }, []);
+  }, [dragState]);
 
+  // ⭐ UPDATED: Check flag before placing new signature
   const handlePageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (dragState) return;
     if (!activeSignatureId || !file) return;
+
+    // Ignore click if we just finished dragging/resizing
+    if (justFinishedDragRef.current) {
+      justFinishedDragRef.current = false;
+      return;
+    }
 
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
