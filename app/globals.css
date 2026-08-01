@@ -31,13 +31,30 @@ html {
   html {
     scroll-behavior: auto;
   }
+
+  .skeleton-shimmer {
+    animation: none;
+    background: #e7ecf5;
+  }
 }
 
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+/* ============ MODERN SKELETON SHIMMER EFFECT ============ */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f1f3f9 0%,
+    #e7ecf5 50%,
+    #f1f3f9 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 
-.animate-shimmer {
-  animation: shimmer 2s infinite;
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
