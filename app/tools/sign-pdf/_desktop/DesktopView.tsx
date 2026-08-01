@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import ToolBottomBar from '../../_components/ToolBottomBar';
 import ToolActionButton from '../../_components/ToolActionButton';
@@ -26,20 +26,43 @@ export default function DesktopView() {
     isLoadingPdf, isProcessing,
     errorMessage, setErrorMessage,
     addPdf, clearFile, placeSignature, updatePlacedSignature, removePlacedSignature,
-signAndPreparePdf,
-downloadSignedFile,
-} = useSignPdfContext();
+    signAndPreparePdf,
+    downloadSignedFile,
+    signedPdfUrl,              // ⭐ ADDED
+  } = useSignPdfContext();
 
   const [dragState, setDragState] = useState<DragState | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
-  // Desktop handler — sign then auto-download
-const handleDesktopDownload = async () => {
-  const url = await signAndPreparePdf();
-  if (url) {
-    downloadSignedFile();
-  }
-};
+  // ⭐ Auto-download flag
+  const shouldDownloadRef = useRef(false);
+
+  // ⭐ Watch for signedPdfUrl → auto-download when ready
+  useEffect(() => {
+    if (signedPdfUrl && shouldDownloadRef.current && file) {
+      shouldDownloadRef.current = false;
+      console.log('⬇️ Auto-downloading signed PDF');
+
+      const filename = file.name.replace(/\.pdf$/i, '-signed.pdf');
+
+      const link = document.createElement('a');
+      link.href = signedPdfUrl;
+      link.download = filename;
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }, [signedPdfUrl, file]);
+
+  // ⭐ Desktop handler — sign then useEffect handles download
+  const handleDesktopDownload = async () => {
+    shouldDownloadRef.current = true;
+    const url = await signAndPreparePdf();
+    if (!url) {
+      shouldDownloadRef.current = false;
+    }
+  };
 
   // ⭐ Helper to get CURRENT preview container dimensions
   const getCurrentDimensions = useCallback(() => {
@@ -73,21 +96,18 @@ const handleDesktopDownload = async () => {
     });
   }, [placedSignatures]);
 
-  // ⭐ FIXED: Always update displayWidth/displayHeight
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!dragState) return;
 
     const deltaX = e.clientX - dragState.startX;
     const deltaY = e.clientY - dragState.startY;
 
-    // ⭐ Get current dimensions to keep them fresh
     const dims = getCurrentDimensions();
 
     if (dragState.type === 'move') {
       updatePlacedSignature(dragState.placedId, {
         x: dragState.origX + deltaX,
         y: dragState.origY + deltaY,
-        // ⭐ Always update display dimensions
         ...(dims && { displayWidth: dims.width, displayHeight: dims.height }),
       });
     } else if (dragState.type === 'resize') {
@@ -98,7 +118,6 @@ const handleDesktopDownload = async () => {
       updatePlacedSignature(dragState.placedId, {
         width: newWidth,
         height: newHeight,
-        // ⭐ Always update display dimensions
         ...(dims && { displayWidth: dims.width, displayHeight: dims.height }),
       });
     }
@@ -108,7 +127,6 @@ const handleDesktopDownload = async () => {
     setDragState(null);
   }, []);
 
-  // ⭐ FIXED: Pass display dimensions when placing signature
   const handlePageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (dragState) return;
     if (!activeSignatureId || !file) return;
@@ -117,19 +135,13 @@ const handleDesktopDownload = async () => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    console.log('🖥️ Desktop click to place:', {
-      x, y,
-      containerSize: { width: rect.width, height: rect.height },
-      pdfPageSize: { width: file.pages[currentPageIndex].width, height: file.pages[currentPageIndex].height },
-    });
-
     placeSignature(
       activeSignatureId,
       currentPageIndex,
       x,
       y,
-      rect.width,   // ⭐ Real desktop display width
-      rect.height   // ⭐ Real desktop display height
+      rect.width,
+      rect.height
     );
   };
 
@@ -277,7 +289,6 @@ const handleDesktopDownload = async () => {
               </div>
             </div>
 
-            {/* Page nav */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCurrentPageIndex(Math.max(0, currentPageIndex - 1))}
@@ -306,7 +317,6 @@ const handleDesktopDownload = async () => {
             )}
           </div>
 
-          {/* PDF Preview with drag & resize */}
           <div
             className="flex-1 flex items-start justify-center p-8 overflow-y-auto overflow-x-hidden"
             onMouseMove={handleMouseMove}
@@ -325,7 +335,6 @@ const handleDesktopDownload = async () => {
               }}
               onClick={handlePageClick}
             >
-              {/* PDF Page */}
               <img
                 src={currentPage.preview}
                 alt={`Page ${currentPageIndex + 1}`}
@@ -333,7 +342,6 @@ const handleDesktopDownload = async () => {
                 draggable={false}
               />
 
-              {/* Placed Signatures with drag & resize */}
               {currentPageSignatures.map((placed) => {
                 const sig = signatures.find((s) => s.id === placed.signatureId);
                 if (!sig) return null;
@@ -409,7 +417,6 @@ const handleDesktopDownload = async () => {
                 );
               })}
 
-              {/* Click hint */}
               {activeSignatureId && currentPageSignatures.length === 0 && !dragState && (
                 <div className="absolute inset-0 flex items-center justify-center bg-[#4F46E5]/5 pointer-events-none">
                   <div className="bg-white/95 rounded-xl px-6 py-4 shadow-xl text-center">
