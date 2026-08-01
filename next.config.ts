@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Vercel handles everything automatically - no special config needed
+  // Cloudflare Pages configuration
+  images: {
+    unoptimized: true,  // Cloudflare doesn't need Next.js image optimization
+  },
 };
 
 export default nextConfig;
