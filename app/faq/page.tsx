@@ -19,7 +19,7 @@ import {
   Mail,
 } from 'lucide-react';
 import LandingNavbar from '../tools/_components/LandingNavbar';
-import LandingFooter from '../tools/_components/LandingFooter';
+import SimpleFooter from '../tools/_components/SimpleFooter';
 
 // ============ FAQ DATA ============
 
@@ -591,7 +591,7 @@ export default function FAQPage() {
         </div>
       </section>
 
-      <LandingFooter />
+     <SimpleFooter />
 
       {/* Hide scrollbar for category filters */}
       <style jsx global>{`

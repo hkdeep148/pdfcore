@@ -20,11 +20,10 @@ import {
   Lightbulb,
   Handshake,
   ArrowRight,
-  MapPin,
   Globe,
 } from 'lucide-react';
 import LandingNavbar from '../tools/_components/LandingNavbar';
-import LandingFooter from '../tools/_components/LandingFooter';
+import SimpleFooter from '../tools/_components/SimpleFooter';
 
 // ============ FORM TYPES ============
 
@@ -225,7 +224,7 @@ export default function ContactPage() {
               icon={<Mail size={22} />}
               title="Email Us"
               description="support@pdfcore.com"
-              subtitle="We respond within 24-48 hours"
+              subtitle="We respond within 24 hours"
               color="#1E63FF"
               bgColor="#DBEAFE"
               href="mailto:support@pdfcore.com"
@@ -233,7 +232,7 @@ export default function ContactPage() {
             <InfoCard
               icon={<Clock size={22} />}
               title="Response Time"
-              description="24-48 Hours"
+              description="24 Hours"
               subtitle="Monday to Friday"
               color="#16A34A"
               bgColor="#DCFCE7"
@@ -255,44 +254,7 @@ export default function ContactPage() {
         <div className="max-w-[1100px] mx-auto px-5 md:px-8">
           <div className="grid lg:grid-cols-[1fr,1.5fr] gap-8 md:gap-12">
             {/* LEFT: What to Expect */}
-            <div className="space-y-6">
-              <div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF1FF] text-[#1E63FF] text-[11px] font-bold uppercase tracking-wider mb-3">
-                  <MessageCircle size={12} />
-                  <span>What to Expect</span>
-                </div>
-                <h2 className="font-['Space_Grotesk',sans-serif] text-[24px] md:text-[32px] font-extrabold text-[#07122E] tracking-tight mb-3">
-                  Get in Touch
-                </h2>
-                <p className="text-[14px] md:text-[15px] text-[#4B5874] leading-relaxed">
-                  Whether you have a question about our tools, need technical support, or want to share feedback, we&apos;re here to help.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <ExpectationItem
-                  icon={<Zap size={18} />}
-                  title="Fast Response"
-                  description="Most inquiries are answered within 24 hours"
-                />
-                <ExpectationItem
-                  icon={<Shield size={18} />}
-                  title="Privacy Respected"
-                  description="Your information is kept confidential"
-                />
-                <ExpectationItem
-                  icon={<CheckCircle2 size={18} />}
-                  title="Real Humans"
-                  description="No bots or auto-responses"
-                />
-                <ExpectationItem
-                  icon={<HelpCircle size={18} />}
-                  title="Helpful Answers"
-                  description="Detailed responses to your questions"
-                />
-              </div>
-
-              {/* Quick Links */}
+              <div className="mb-6">
               <div className="bg-gradient-to-br from-[#F0FDF4] to-[#DCFCE7] border border-[#86EFAC] rounded-2xl p-5 md:p-6">
                 <h3 className="text-[15px] font-extrabold text-[#166534] mb-3 flex items-center gap-2">
                   <Lightbulb size={16} />
@@ -544,91 +506,9 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* ============ ALTERNATIVE CONTACT METHODS ============ */}
-      <section className="py-16 md:py-20 bg-[#F8FAFC]">
-        <div className="max-w-[1000px] mx-auto px-5 md:px-8">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF1FF] text-[#1E63FF] text-[11px] font-bold uppercase tracking-wider mb-3">
-              <Mail size={12} />
-              <span>Other Ways to Reach Us</span>
-            </div>
-            <h2 className="font-['Space_Grotesk',sans-serif] text-[24px] md:text-[32px] font-extrabold text-[#07122E] tracking-tight">
-              Alternative Contact Methods
-            </h2>
-          </div>
+      
 
-          <div className="grid md:grid-cols-2 gap-4 md:gap-5">
-            <AlternativeContact
-              icon={<Mail size={22} />}
-              title="Direct Email"
-              description="Prefer email? Send us a message directly."
-              action="support@pdfcore.com"
-              href="mailto:support@pdfcore.com"
-              color="#1E63FF"
-              bgColor="#DBEAFE"
-            />
-            <AlternativeContact
-              icon={<Bug size={22} />}
-              title="Report Bugs"
-              description="Found a bug? Let us know so we can fix it."
-              action="bugs@pdfcore.com"
-              href="mailto:bugs@pdfcore.com"
-              color="#DC2626"
-              bgColor="#FEE2E2"
-            />
-            <AlternativeContact
-              icon={<Handshake size={22} />}
-              title="Business Inquiries"
-              description="Partnerships, collaborations, or press."
-              action="business@pdfcore.com"
-              href="mailto:business@pdfcore.com"
-              color="#EC4899"
-              bgColor="#FCE7F3"
-            />
-            <AlternativeContact
-              icon={<Shield size={22} />}
-              title="Legal & Privacy"
-              description="Questions about legal matters or privacy."
-              action="legal@pdfcore.com"
-              href="mailto:legal@pdfcore.com"
-              color="#7C3AED"
-              bgColor="#EDE9FE"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ============ FAQ QUICK LINKS ============ */}
-      <section className="py-16 md:py-20">
-        <div className="max-w-[900px] mx-auto px-5 md:px-8 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#EFF3FF] to-[#DBEAFE] flex items-center justify-center mx-auto mb-5">
-            <HelpCircle className="w-8 h-8 text-[#1E63FF]" />
-          </div>
-          <h2 className="font-['Space_Grotesk',sans-serif] text-[24px] md:text-[32px] font-extrabold text-[#07122E] tracking-tight mb-3">
-            Looking for Quick Answers?
-          </h2>
-          <p className="text-[14px] md:text-[15px] text-[#4B5874] mb-8 max-w-lg mx-auto">
-            Check our FAQ page for instant answers to common questions
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
-              href="/faq"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-gradient-to-r from-[#1E63FF] to-[#6D35FF] text-white text-[15px] font-bold shadow-[0_10px_24px_-6px_rgba(109,53,255,0.5)] hover:shadow-[0_14px_28px_-6px_rgba(109,53,255,0.6)] hover:scale-[1.02] transition-all"
-            >
-              Browse FAQ
-              <ArrowRight size={18} />
-            </Link>
-            <Link
-              href="/tools"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-[#07122E] text-[15px] font-bold border-2 border-[#E7ECF5] hover:border-[#C9D8F3] transition-all"
-            >
-              Explore Tools
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <LandingFooter />
+      <SimpleFooter />
     </div>
   );
 }

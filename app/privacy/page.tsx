@@ -17,7 +17,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import LandingNavbar from '../tools/_components/LandingNavbar';
-import LandingFooter from '../tools/_components/LandingFooter';
+import SimpleFooter from '../tools/_components/SimpleFooter';
 
 const LAST_UPDATED = 'January 2025';
 
@@ -432,7 +432,7 @@ export default function PrivacyPolicyPage() {
         </div>
       </section>
 
-      <LandingFooter />
+      <SimpleFooter />
     </div>
   );
 }

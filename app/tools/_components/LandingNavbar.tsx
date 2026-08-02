@@ -29,6 +29,7 @@ export default function LandingNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Keyboard shortcut: Cmd/Ctrl + K to open search
   useEffect(() => {
@@ -76,10 +77,15 @@ export default function LandingNavbar() {
               
               {/* Single "Tools" Dropdown (Mega Menu Style) */}
               <div
-                className="relative"
-                onMouseEnter={() => setOpenDropdown('Tools')}
-                onMouseLeave={() => setOpenDropdown(null)}
-              >
+  className="relative"
+  onMouseEnter={() => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    setOpenDropdown('Tools');
+  }}
+  onMouseLeave={() => {
+    closeTimeoutRef.current = setTimeout(() => setOpenDropdown(null), 150);
+  }}
+>
                 <button
   type="button"
   className={`flex items-center gap-1 px-5 py-2 text-[15px] font-medium font-[family-name:var(--font-inter)] transition-colors ${

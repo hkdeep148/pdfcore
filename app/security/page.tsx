@@ -26,7 +26,7 @@ import {
   Rocket,
 } from 'lucide-react';
 import LandingNavbar from '../tools/_components/LandingNavbar';
-import LandingFooter from '../tools/_components/LandingFooter';
+import SimpleFooter from '../tools/_components/SimpleFooter';
 
 export default function SecurityPage() {
   return (
@@ -538,7 +538,7 @@ export default function SecurityPage() {
         </div>
       </section>
 
-      <LandingFooter />
+      <SimpleFooter />
     </div>
   );
 }
