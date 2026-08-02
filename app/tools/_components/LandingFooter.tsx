@@ -18,7 +18,7 @@ export default function LandingFooter() {
   return (
     <>
       {/* ================ WHY CHOOSE US SECTION ================ */}
-      <section className="relative bg-white">
+      <section className="relative">
 
         {/* ============ DESKTOP WHY CHOOSE US (hidden md:block) ============ */}
         <div className="hidden md:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 md:pb-24">
@@ -87,7 +87,7 @@ export default function LandingFooter() {
       </section>
 
       {/* ================ FOOTER WITH INTEGRATED CTA ================ */}
-      <footer className="relative bg-white">
+      <footer className="relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* ============ ⭐ MOBILE: What Makes Us Different (100% Honest) ============ */}
@@ -297,7 +297,7 @@ export default function LandingFooter() {
           </div>
 
           {/* Bottom Bar */}
-          <div className="relative -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-white">
+          <div className="relative -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
             <div className="py-5 flex flex-col md:flex-row items-center justify-between gap-3">
               <p className="text-[12.5px] text-slate-600 font-medium">
                 © {new Date().getFullYear()} <span className="text-slate-900 font-semibold">PDF Core</span>. All rights reserved.

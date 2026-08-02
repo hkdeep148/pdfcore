@@ -9,6 +9,7 @@ import PageGridCard from '../../_components/PageGridCard';
 import AddMoreCard from '../../_components/AddMoreCard';
 import { useOrganizePdfContext } from '../_context/OrganizePdfContext';
 import OrganizeOptionsPanel from './OrganizeOptionsPanel';
+import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 
 export default function DesktopView() {
   const {
@@ -20,6 +21,8 @@ export default function DesktopView() {
     downloadOrganizedFile,    // ⭐ ADDED
     pdfFilename,  
   } = useOrganizePdfContext();
+
+  useToolFileReceiver((files: File[]) => addPdfs(files));
 
   // ⭐ NEW: Desktop handler — generate then auto-download
   const handleDesktopSave = async () => {

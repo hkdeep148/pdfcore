@@ -7,6 +7,7 @@ import UploadZone from '../../_components/UploadZone';
 import { useUnlockPdfContext } from '../_context/UnlockPdfContext';
 import PasswordCard from './PasswordCard';
 import AddMorePdfRow from './AddMorePdfRow';
+import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 
 export default function DesktopView() {
   const {
@@ -15,6 +16,8 @@ export default function DesktopView() {
     addPdfs, updatePassword, unlockOne, downloadOne, downloadAll,
     removePdf, clearAll,
   } = useUnlockPdfContext();
+
+  useToolFileReceiver((files: File[]) => addPdfs(files));
 
   // ⭐ Smart download logic
   const isSingleFile = items.length === 1;

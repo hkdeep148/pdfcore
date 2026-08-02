@@ -9,6 +9,7 @@ import PageGrid from '../../_components/PageGrid';
 import { useSplitPdfContext } from '../_context/SplitPdfContext';
 import PageThumbnail, { GROUP_COLORS } from './PageThumbnail';
 import SplitOptionsPanel from './SplitOptionsPanel';
+import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 
 export default function DesktopView() {
   const {
@@ -21,6 +22,8 @@ export default function DesktopView() {
     splitAndPrepare,           // ⭐ CHANGED (was splitAndDownload)
     splitResult,               // ⭐ ADDED
   } = useSplitPdfContext();
+
+   useToolFileReceiver((files: File[]) => addPdf(files));
 
   // ⭐ Auto-download flag
   const shouldDownloadRef = useRef(false);

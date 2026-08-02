@@ -6,39 +6,29 @@ import { Search } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 import { tools } from '../_config/tools';
 
-// Group tools for dropdown menus
-const dropdownGroups = {
-  Tools: tools.map(t => ({ href: t.href, label: t.label })),
-  Convert: tools.filter(t => t.category === 'convert').map(t => ({ href: t.href, label: t.label })),
-  Edit: [...tools.filter(t => t.category === 'edit' || t.category === 'organize')].map(t => ({ href: t.href, label: t.label })),
-  Compress: tools.filter(t => t.category === 'optimize' || t.category === 'security').map(t => ({ href: t.href, label: t.label })),
+// Group tools by category (for organized dropdown)
+const toolsByCategory = {
+  Convert: tools.filter(t => t.category === 'convert'),
+  Organize: tools.filter(t => t.category === 'organize'),
+  Edit: tools.filter(t => t.category === 'edit'),
+  Optimize: tools.filter(t => t.category === 'optimize'),
+  Security: tools.filter(t => t.category === 'security'),
 };
 
-// Simple links
+// Simple top-level links (clean & focused)
 const simpleLinks = [
   { label: 'Blog', href: '/blog' },
+  { label: 'FAQ', href: '/faq' },
   { label: 'Security', href: '/security' },
   { label: 'About', href: '/about' },
 ];
+
 
 export default function LandingNavbar() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
-        setOpenDropdown(null);
-        setLangDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
 
   // Keyboard shortcut: Cmd/Ctrl + K to open search
   useEffect(() => {
@@ -69,7 +59,8 @@ export default function LandingNavbar() {
       <nav ref={navRef} className="sticky top-0 z-50 bg-white/90 backdrop-blur-lg border-b border-[#ECEDF3]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[72px]">
-            {/* ============ ORIGINAL LOGO ============ */}
+            
+            {/* ============ LOGO (Left) ============ */}
             <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shadow-[0_4px_12px_-2px_rgba(99,102,241,0.4)]">
                 <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -80,131 +71,120 @@ export default function LandingNavbar() {
               <span className="text-[18px] font-bold text-[#07122E]">PDF Core</span>
             </Link>
 
-            {/* ============ DESKTOP MENU ============ */}
-            <div className="hidden lg:flex items-center gap-1">
-              {/* Dropdowns */}
-              {Object.entries(dropdownGroups).map(([label, items]) => (
-                <div
-                  key={label}
-                  className="relative"
-                  onMouseEnter={() => setOpenDropdown(label)}
-                  onMouseLeave={() => setOpenDropdown(null)}
-                >
-                  <button
-                    type="button"
-                    className={`flex items-center gap-1 px-4 py-2 text-[14px] font-semibold rounded-lg transition-colors ${
-                      openDropdown === label ? 'text-[#6366F1] bg-[#F5F3FF]' : 'text-[#26324B] hover:text-[#6366F1]'
-                    }`}
+            {/* ============ DESKTOP MENU (Centered) ============ */}
+            <div className="hidden lg:flex items-center gap-1 flex-1 justify-center">
+              
+              {/* Single "Tools" Dropdown (Mega Menu Style) */}
+              <div
+                className="relative"
+                onMouseEnter={() => setOpenDropdown('Tools')}
+                onMouseLeave={() => setOpenDropdown(null)}
+              >
+                <button
+  type="button"
+  className={`flex items-center gap-1 px-5 py-2 text-[15px] font-medium font-[family-name:var(--font-inter)] transition-colors ${
+    openDropdown === 'Tools' ? 'text-[#5B4EF5]' : 'text-[#26324B] hover:text-[#5B4EF5]'
+  }`}
+>
+                  Tools
+                  <svg
+                    viewBox="0 0 24 24"
+                    className={`w-3.5 h-3.5 transition-transform ${openDropdown === 'Tools' ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    {label}
-                    <svg
-                      viewBox="0 0 24 24"
-                      className={`w-3.5 h-3.5 transition-transform ${openDropdown === label ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </button>
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
 
-                  {openDropdown === label && (
-                    <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-[#ECEDF3] rounded-xl shadow-[0_20px_40px_-12px_rgba(20,30,60,0.15)] overflow-hidden">
-                      <div className="py-2">
-                        {items.map((item) => (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            className="block px-4 py-2.5 text-[13.5px] font-medium text-[#26324B] hover:bg-[#F5F3FF] hover:text-[#6366F1] transition-colors"
-                          >
-                            {item.label}
-                          </Link>
-                        ))}
-                      </div>
+                {openDropdown === 'Tools' && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[560px] bg-white border border-[#ECEDF3] rounded-2xl shadow-[0_20px_50px_-12px_rgba(20,30,60,0.18)] overflow-hidden">
+                    <div className="p-5 grid grid-cols-2 gap-x-6 gap-y-1">
+                      {Object.entries(toolsByCategory).map(([category, items]) => (
+                        items.length > 0 && (
+                          <div key={category} className="min-w-0">
+                            {/* Category Label */}
+                            <p className="text-[10.5px] font-extrabold uppercase tracking-[0.15em] text-[#5B4EF5] mb-2 mt-3 first:mt-0">
+                              {category}
+                            </p>
+                            
+                            {/* Tools in this category */}
+                            <div className="space-y-0.5">
+                              {items.map((tool: any) => (
+                                <Link
+                                  key={tool.href}
+                                  href={tool.href}
+                                  className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-semibold text-[#26324B] hover:bg-[#F5F3FF] hover:text-[#6366F1] transition-colors group"
+                                >
+                                  {/* Tool Icon (small) */}
+                                  <div 
+                                    className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
+                                    style={{
+                                      backgroundColor: tool.bgColor,
+                                      color: tool.color,
+                                    }}
+                                  >
+                                    <div className="scale-[0.55]">{tool.icon}</div>
+                                  </div>
+                                  <span>{tool.label}</span>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        )
+                      ))}
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {/* Bottom bar with "View All Tools" */}
+                    <div className="border-t border-slate-100 px-5 py-3 bg-slate-50">
+                      <Link
+                        href="/tools"
+                        className="flex items-center justify-center gap-1.5 text-[13px] font-bold text-[#5B4EF5] hover:gap-2 transition-all"
+                      >
+                        <span>View All Tools</span>
+                        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {simpleLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="px-4 py-2 text-[14px] font-semibold text-[#26324B] hover:text-[#6366F1] rounded-lg transition-colors"
-                >
+  <Link
+    key={link.label}
+    href={link.href}
+    className="relative px-5 py-2 text-[15px] font-medium font-[family-name:var(--font-inter)] text-[#26324B] hover:text-[#5B4EF5] transition-colors"
+  >
                   {link.label}
                 </Link>
               ))}
             </div>
 
-            {/* ============ RIGHT SIDE (Desktop) ============ */}
-            <div className="hidden lg:flex items-center gap-3">
+            {/* ============ RIGHT: Compact Search ============ */}
+            <div className="hidden lg:flex items-center flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="flex items-center gap-3 w-[280px] px-4 py-2.5 rounded-lg bg-[#F5F7FB] border border-[#E7ECF5] hover:border-[#C9D8F3] hover:bg-white transition-all group"
+                className="flex items-center gap-2.5 w-[220px] px-3.5 py-2 rounded-lg bg-[#F5F7FB] border border-[#E7ECF5] hover:border-[#C9D8F3] hover:bg-white transition-all group"
                 aria-label="Search"
               >
-                <Search size={16} className="text-[#8A93A3] group-hover:text-[#6366F1] transition-colors flex-shrink-0" />
-                <span className="text-[13px] text-[#8A93A3] group-hover:text-[#6366F1] transition-colors flex-1 text-left">
-                  Search tools, articles...
+                <Search size={15} className="text-[#8A93A3] group-hover:text-[#6366F1] transition-colors flex-shrink-0" strokeWidth={2.2} />
+                <span className="text-[12.5px] text-[#8A93A3] group-hover:text-[#6366F1] transition-colors flex-1 text-left">
+                  Search tools...
                 </span>
+                <kbd className="hidden xl:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold text-slate-500 bg-white border border-slate-200 shadow-xs">
+                  ⌘K
+                </kbd>
               </button>
-
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setLangDropdownOpen(!langDropdownOpen)}
-                  className="flex items-center gap-1.5 px-3 py-2 text-[13.5px] font-semibold text-[#5B6472] hover:text-[#6366F1] rounded-lg transition-colors"
-                >
-                  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="2" y1="12" x2="22" y2="12" />
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                  </svg>
-                  English
-                  <svg viewBox="0 0 24 24" className={`w-3 h-3 transition-transform ${langDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
-                </button>
-
-                {langDropdownOpen && (
-                  <div className="absolute top-full right-0 mt-1 w-52 bg-white border border-[#ECEDF3] rounded-xl shadow-[0_20px_40px_-12px_rgba(20,30,60,0.15)] overflow-hidden">
-                    <div className="py-2">
-                      <button className="w-full flex items-center gap-3 px-4 py-2.5 text-[13.5px] font-medium text-[#6366F1] bg-[#F5F3FF] text-left">
-                        <span className="text-lg">🇬🇧</span>
-                        <span className="flex-1">English</span>
-                        <span className="text-[10px] font-bold">✓</span>
-                      </button>
-                      {[
-                        { code: 'es', flag: '🇪🇸', name: 'Español' },
-                        { code: 'fr', flag: '🇫🇷', name: 'Français' },
-                        { code: 'de', flag: '🇩🇪', name: 'Deutsch' },
-                        { code: 'pt', flag: '🇵🇹', name: 'Português' },
-                        { code: 'ja', flag: '🇯🇵', name: '日本語' },
-                      ].map((lang) => (
-                        <button
-                          key={lang.code}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-[13.5px] font-medium text-[#26324B] hover:bg-[#F5F3FF] hover:text-[#6366F1] transition-colors text-left"
-                          onClick={() => {
-                            alert(`${lang.name} coming soon! We're working on it.`);
-                            setLangDropdownOpen(false);
-                          }}
-                        >
-                          <span className="text-lg">{lang.flag}</span>
-                          <span className="flex-1">{lang.name}</span>
-                          <span className="text-[9px] font-bold text-[#8A93A3] bg-[#F1F5F9] px-1.5 py-0.5 rounded">SOON</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
 
-            {/* ============ MOBILE ACTIONS (Original - Simple) ============ */}
+            {/* ============ MOBILE ACTIONS ============ */}
             <div className="lg:hidden flex items-center gap-1">
               <button
                 type="button"

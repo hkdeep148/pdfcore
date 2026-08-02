@@ -7,27 +7,70 @@ export interface ToolFileConfig {
   mode: LoadMode;
 }
 
-// ⭐ Only these 3 tools support file auto-loading from homepage
+// ⭐ Registry of all tools that support file auto-loading from homepage
 export const TOOL_FILE_REGISTRY: Record<string, ToolFileConfig> = {
+  // ============ CONVERT ============
   '/tools/image-to-pdf': {
     path: '/tools/image-to-pdf',
     accept: 'image',
     mode: 'multiple',
   },
+  '/tools/pdf-to-image': {
+    path: '/tools/pdf-to-image',
+    accept: 'pdf',
+    mode: 'single',
+  },
+
+  // ============ ORGANIZE ============
   '/tools/merge-pdf': {
     path: '/tools/merge-pdf',
     accept: 'pdf',
     mode: 'multiple',
   },
+  '/tools/split-pdf': {
+    path: '/tools/split-pdf',
+    accept: 'pdf',
+    mode: 'single',
+  },
+  '/tools/organize-pdf': {
+    path: '/tools/organize-pdf',
+    accept: 'pdf',
+    mode: 'single',
+  },
+
+  // ============ OPTIMIZE ============
   '/tools/compress-pdf': {
     path: '/tools/compress-pdf',
     accept: 'pdf',
     mode: 'multiple',
   },
+
+  // ============ EDIT ============
+  '/tools/rotate-pdf': {
+    path: '/tools/rotate-pdf',
+    accept: 'pdf',
+    mode: 'single',
+  },
+  '/tools/sign-pdf': {
+    path: '/tools/sign-pdf',
+    accept: 'pdf',
+    mode: 'single',
+  },
+
+  // ============ SECURITY ============
+  '/tools/unlock-pdf': {
+    path: '/tools/unlock-pdf',
+    accept: 'pdf',
+    mode: 'single',
+  },
+  '/tools/add-watermark': {
+    path: '/tools/add-watermark',
+    accept: 'pdf',
+    mode: 'single',
+  },
 };
 
 export function getToolFileConfig(path: string): ToolFileConfig | undefined {
-  // Handle trailing slash (Next.js trailingSlash: true adds / to paths)
   const cleanPath = path.endsWith('/') ? path.slice(0, -1) : path;
   return TOOL_FILE_REGISTRY[cleanPath];
 }

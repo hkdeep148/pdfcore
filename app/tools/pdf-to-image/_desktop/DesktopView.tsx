@@ -8,6 +8,7 @@ import UploadZone from '../../_components/UploadZone';
 import { usePdfToImageContext } from '../_context/PdfToImageContext';
 import PageThumbnail from './PageThumbnail';
 import OptionsPanel from './OptionsPanel';
+import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 
 export default function DesktopView() {
   const {
@@ -19,6 +20,8 @@ export default function DesktopView() {
     conversionResult,
     downloadingPageId, 
   } = usePdfToImageContext();
+
+  useToolFileReceiver((files: File[]) => addPdfs(files));
 
   // ⭐ Auto-download flag
   const shouldDownloadRef = useRef(false);

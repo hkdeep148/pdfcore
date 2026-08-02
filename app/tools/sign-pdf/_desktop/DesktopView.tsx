@@ -7,6 +7,7 @@ import ToolActionButton from '../../_components/ToolActionButton';
 import UploadZone from '../../_components/UploadZone';
 import { useSignPdfContext } from '../_context/SignPdfContext';
 import SignaturePanel from './SignaturePanel';
+import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 
 type DragState = {
   type: 'move' | 'resize';
@@ -30,6 +31,8 @@ export default function DesktopView() {
     downloadSignedFile,
     signedPdfUrl,
   } = useSignPdfContext();
+
+  useToolFileReceiver((files: File[]) => addPdf(files));
 
   const [dragState, setDragState] = useState<DragState | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);

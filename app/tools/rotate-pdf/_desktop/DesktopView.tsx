@@ -7,6 +7,7 @@ import ToolActionButton from '../../_components/ToolActionButton';
 import { useRotatePdfContext } from '../_context/RotatePdfContext';
 import PdfPageCard from './PdfPageCard';
 import OptionsPanel from './OptionsPanel';
+import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 
 export default function DesktopView() {
   const {
@@ -18,6 +19,8 @@ export default function DesktopView() {
     rotatedPdfUrl,           // ⭐ ADDED (was downloadRotatedFile)
     pdfFilename,             // ⭐ ADDED (for filename)
   } = useRotatePdfContext();
+
+  useToolFileReceiver((files: File[]) => addPdfs(files));
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 

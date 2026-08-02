@@ -34,26 +34,24 @@ export default function HomePage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // Handle file drop/upload
-  const handleFiles = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
+  const handleFiles = async (files: FileList | null) => {
+  if (!files || files.length === 0) return;
 
-    // Filter valid files
-    const validFiles = Array.from(files).filter(
-      (f: File) => f.type === 'application/pdf' || f.type.startsWith('image/')
-    );
+  const validFiles = Array.from(files).filter(
+    (f: File) => f.type === 'application/pdf' || f.type.startsWith('image/')
+  );
 
-    if (validFiles.length === 0) {
-      alert('Please upload PDF or image files');
-      return;
-    }
+  if (validFiles.length === 0) {
+    alert('Please upload PDF or image files');
+    return;
+  }
 
-    // Analyze
-    const result = analyzeFiles(validFiles);
-    setSelectedFiles(validFiles);
-    setAnalysis(result);
-  };
+  // Analyze (now async - reads PDF pages)
+  const result = await analyzeFiles(validFiles);
+  setSelectedFiles(validFiles);
+  setAnalysis(result);
+};
 
-  // Navigate to tool WITH files
   const goToTool = (href: string) => {
     if (selectedFiles.length > 0) {
       setPendingFiles(selectedFiles, '/');
@@ -61,7 +59,6 @@ export default function HomePage() {
     router.push(href);
   };
 
-  // Reset to upload again
   const resetAnalysis = () => {
     setAnalysis(null);
     setSelectedFiles([]);
@@ -91,50 +88,360 @@ export default function HomePage() {
     <div className="min-h-screen relative font-['Inter',sans-serif] text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-700 overflow-x-hidden bg-gradient-to-br from-[#F8F9FB] via-[#F8F9FB] to-[#EEF0F8]">
       <LandingNavbar />
 
-      {/* ============ ⭐ REDESIGNED MOBILE HOMEPAGE VIEW (md:hidden) ============ */}
+      {/* ============ MOBILE HOMEPAGE ============ */}
       <MobileHomeView />
 
-      {/* ============ DESKTOP HOMEPAGE VIEW (hidden md:block) ============ */}
+      {/* ============ DESKTOP HOMEPAGE ============ */}
       <div className="hidden md:block">
-        {/* ============ HERO SECTION ============ */}
+        {/* ============ HERO SECTION (Balanced) ============ */}
         <section className="relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-16 md:pb-24">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-              {/* LEFT: TEXT CONTENT */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="text-center lg:text-left"
-              >
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[11px] md:text-xs font-semibold uppercase tracking-wider mb-6 border border-indigo-100">
-                  <Zap size={14} strokeWidth={2.5} />
-                  Instant Smart Analysis
-                </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+              
+              {/* LEFT: TEXT CONTENT (Bigger & Balanced) */}
+<AnimatePresence mode="wait">
+  {!analysis ? (
+    /* ⭐ HERO CONTENT (before upload) */
+    <motion.div
+      key="hero"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4 }}
+      className="text-center lg:text-left"
+    >
+      {/* Top Badge */}
+      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-indigo-100 shadow-[0_2px_8px_-2px_rgba(99,102,241,0.15)] mb-6">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+        </span>
+        <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-[0.12em]">
+          Instant Smart Analysis
+        </span>
+      </div>
 
-                <h1 className="text-[38px] leading-[1.05] sm:text-5xl md:text-6xl lg:text-7xl md:leading-[1.05] font-extrabold tracking-tight text-slate-900 mb-5 md:mb-6">
-                  The smart way to handle{' '}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500">
-                    PDFs
-                  </span>
-                  <span className="text-slate-900">.</span>
-                </h1>
+      {/* Headline */}
+      <h1 className="text-[38px] leading-[1.15] sm:text-[46px] md:text-[52px] lg:text-[58px] lg:leading-[1.1] font-extrabold tracking-tight text-slate-900 mb-6 md:mb-7">
+        Every PDF task,{' '}
+        <span className="relative inline-block whitespace-nowrap">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-500 to-purple-600">
+            solved instantly.
+          </span>
+          <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 8" preserveAspectRatio="none">
+            <path d="M0,6 Q100,-2 200,4" stroke="url(#gradient)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#6366F1" />
+                <stop offset="100%" stopColor="#A855F7" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </span>
+      </h1>
 
-                <p className="text-[15px] md:text-lg text-slate-500 mb-6 md:mb-8 max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed">
-                  Drop one or multiple files. We instantly analyze them and recommend the perfect tools for the job.
-                </p>
+      {/* Subheadline */}
+      <p className="text-[16px] md:text-[18px] text-slate-600 mb-8 max-w-xl mx-auto lg:mx-0 font-medium leading-[1.65]">
+        Merge, split, convert, compress and more. All in one place, running{' '}
+        <span className="text-slate-900 font-semibold">entirely in your browser</span>.
+      </p>
 
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-[13px] font-semibold">
-                    <Check size={16} className="text-emerald-500" strokeWidth={2.5} />
-                    100% Free
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-[13px] font-semibold">
-                    <Lock size={14} className="text-emerald-500" strokeWidth={2.5} />
-                    Secure &amp; Private
-                  </div>
-                </div>
-              </motion.div>
+      {/* Trust Badges */}
+      <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 md:gap-5 text-[13.5px] font-semibold text-slate-700">
+        <div className="inline-flex items-center gap-2">
+          <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center">
+            <Check size={12} className="text-emerald-600" strokeWidth={3} />
+          </div>
+          <span>100% Free</span>
+        </div>
+
+        <div className="w-1 h-1 rounded-full bg-slate-300" />
+
+        <div className="inline-flex items-center gap-2">
+          <div className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center">
+            <Lock size={11} className="text-indigo-600" strokeWidth={2.5} />
+          </div>
+          <span>Zero Uploads</span>
+        </div>
+
+        <div className="w-1 h-1 rounded-full bg-slate-300" />
+
+        <div className="inline-flex items-center gap-2">
+          <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center">
+            <Zap size={11} className="text-amber-600 fill-amber-600" strokeWidth={0} />
+          </div>
+          <span>Lightning Fast</span>
+        </div>
+      </div>
+    </motion.div>
+  ) : (
+    /* ⭐ SMART TIPS PANEL (after upload) */
+    <motion.div
+      key="tips"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4 }}
+      className="lg:pr-8"
+    >
+      {/* Top Badge */}
+      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 shadow-[0_2px_8px_-2px_rgba(245,158,11,0.15)] mb-5">
+        <Sparkles size={12} className="text-amber-600" strokeWidth={2.5} />
+        <span className="text-[11px] font-bold text-amber-700 uppercase tracking-[0.12em]">
+          Did You Know?
+        </span>
+      </div>
+
+      {/* Compact Headline */}
+<h2 className="text-[20px] md:text-[22px] font-bold tracking-tight text-slate-900 mb-2">
+  Smart suggestions for your{' '}
+  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-500 to-purple-600">
+    {analysis.type === 'pdf' ? 'PDF' : analysis.type === 'image' ? 'image' : 'files'}
+  </span>
+</h2>
+
+{/* Small Description */}
+<p className="text-[13px] text-slate-500 mb-5 font-medium leading-[1.5]">
+  Choose from these actions to get started
+</p>
+
+      {/* Smart Suggestions List */}
+<div className="space-y-3">
+  
+  {/* ⭐ Tip: Smart PDF Content Analysis */}
+{analysis.type === 'pdf' && analysis.pageCount > 0 && (
+  <div className="group flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-[0_4px_12px_-2px_rgba(99,102,241,0.1)] transition-all">
+    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center shrink-0">
+      <span className="text-[18px]">
+        {analysis.isScanned ? '📷' :
+         analysis.isImageHeavy ? '🖼️' :
+         analysis.isTextBased ? '📝' :
+         analysis.hasForms ? '📋' :
+         analysis.isSigned ? '✍️' :
+         analysis.isInvoice ? '🧾' :
+         '📖'}
+      </span>
+    </div>
+    <div className="min-w-0 flex-1">
+      <h4 className="text-[14px] font-bold text-slate-900 mb-0.5">
+        {analysis.pageCount} {analysis.pageCount === 1 ? 'page' : 'pages'} · {analysis.totalSize}
+      </h4>
+      <p className="text-[12.5px] text-slate-500 leading-[1.5]">
+        {analysis.isScanned ? 'Scanned document detected' :
+         analysis.isImageHeavy ? 'Image-heavy PDF detected' :
+         analysis.isTextBased ? 'Text-based PDF detected' :
+         analysis.hasForms ? 'Form PDF with fillable fields' :
+         analysis.isSigned ? 'Signed document detected' :
+         analysis.isInvoice ? 'Invoice or receipt detected' :
+         analysis.isSinglePage ? 'Single-page document' :
+         `Multi-page document with ${analysis.pageCount} pages`}
+      </p>
+    </div>
+  </div>
+)}
+
+  {/* ⭐ Tip: Smart Compression Info (Filename + Size-per-page detection) */}
+{analysis.type === 'pdf' && (() => {
+  const sizeStr = analysis.totalSize;
+  const sizeNum = parseFloat(sizeStr);
+  const sizeInKB = sizeStr.includes('MB') ? sizeNum * 1024 : sizeNum;
+  const pageCount = analysis.pageCount || 1;
+  const kbPerPage = sizeInKB / pageCount;
+
+  // Check filename for compression hints
+  const filename = analysis.files[0]?.name?.toLowerCase() || '';
+  const alreadyCompressed = 
+    filename.includes('compressed') || 
+    filename.includes('optimized') || 
+    filename.includes('reduced') ||
+    filename.includes('small') ||
+    filename.includes('-min');
+
+  let title = '';
+  let description = '';
+  let iconColor = 'from-rose-100 to-rose-200';
+  let emoji = '✨';
+
+  if (alreadyCompressed) {
+    // Filename indicates already compressed
+    title = 'Appears already compressed';
+    description = 'Try other tools like split, sign, or convert';
+    iconColor = 'from-emerald-100 to-emerald-200';
+    emoji = '✅';
+  } else if (kbPerPage < 30) {
+    // Very small per page = text-only or optimized
+    title = 'Already well-optimized';
+    description = 'Text-based PDF with minimal compression potential';
+    iconColor = 'from-emerald-100 to-emerald-200';
+    emoji = '✅';
+  } else if (kbPerPage < 80) {
+    // Small per page = likely optimized
+    title = 'Well-optimized (5-15% possible)';
+    description = 'Small size per page suggests good optimization';
+    iconColor = 'from-blue-100 to-blue-200';
+    emoji = '📊';
+  } else if (kbPerPage < 200) {
+    // Normal per page
+    title = 'Compressible by 20-35%';
+    description = 'Standard PDF with moderate compression potential';
+  } else if (kbPerPage < 500) {
+    // High per page = has images
+    title = 'Compressible by 35-55%';
+    description = 'Contains images that can be optimized';
+  } else {
+    // Very high per page = image-heavy
+    title = 'Compressible by up to 65%';
+    description = 'Image-heavy PDF, great compression potential';
+  }
+  
+  return (
+    <div className="group flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-[0_4px_12px_-2px_rgba(99,102,241,0.1)] transition-all">
+      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${iconColor} flex items-center justify-center shrink-0`}>
+        <span className="text-[18px]">{emoji}</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <h4 className="text-[14px] font-bold text-slate-900 mb-0.5">
+          {title}
+        </h4>
+        <p className="text-[12.5px] text-slate-500 leading-[1.5]">
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+})()}
+
+  {/* ⭐ Tip: Split (only if PDF has 2+ pages) */}
+  {analysis.type === 'pdf' && !analysis.isMultiple && analysis.pageCount > 1 && (
+    <div className="group flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-[0_4px_12px_-2px_rgba(99,102,241,0.1)] transition-all">
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-amber-200 flex items-center justify-center shrink-0">
+        <span className="text-[18px]">📄</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <h4 className="text-[14px] font-bold text-slate-900 mb-0.5">
+          Split into {analysis.pageCount} pages
+        </h4>
+        <p className="text-[12.5px] text-slate-500 leading-[1.5]">
+          Extract specific pages or split into multiple files
+        </p>
+      </div>
+    </div>
+  )}
+
+  {/* ⭐ Tip: Merge (only for multiple PDFs) */}
+  {analysis.type === 'pdf' && analysis.isMultiple && (
+    <div className="group flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-[0_4px_12px_-2px_rgba(99,102,241,0.1)] transition-all">
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center shrink-0">
+        <span className="text-[18px]">🔗</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <h4 className="text-[14px] font-bold text-slate-900 mb-0.5">
+          Merged into 1 file
+        </h4>
+        <p className="text-[12.5px] text-slate-500 leading-[1.5]">
+          Combine all {analysis.count} PDFs into a single document
+        </p>
+      </div>
+    </div>
+  )}
+
+  {/* ⭐ Tip: Organize (only for 2-10 page PDFs) */}
+  {analysis.type === 'pdf' && !analysis.isMultiple && analysis.pageCount > 1 && analysis.pageCount <= 10 && (
+    <div className="group flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-[0_4px_12px_-2px_rgba(99,102,241,0.1)] transition-all">
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-purple-200 flex items-center justify-center shrink-0">
+        <span className="text-[18px]">🗂️</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <h4 className="text-[14px] font-bold text-slate-900 mb-0.5">
+          Reorder pages easily
+        </h4>
+        <p className="text-[12.5px] text-slate-500 leading-[1.5]">
+          Drag and drop to rearrange pages
+        </p>
+      </div>
+    </div>
+  )}
+
+  {/* ⭐ Tip: Convert to Images (for all PDFs) */}
+  {analysis.type === 'pdf' && (
+    <div className="group flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-[0_4px_12px_-2px_rgba(99,102,241,0.1)] transition-all">
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-200 flex items-center justify-center shrink-0">
+        <span className="text-[18px]">🖼️</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <h4 className="text-[14px] font-bold text-slate-900 mb-0.5">
+          Converted to {analysis.pageCount === 1 ? '1 image' : `${analysis.pageCount} images`}
+        </h4>
+        <p className="text-[12.5px] text-slate-500 leading-[1.5]">
+          Extract each page as PNG or JPG images
+        </p>
+      </div>
+    </div>
+  )}
+
+  {/* ⭐ Tip: Sign PDF (prioritize for 1-page PDFs) */}
+  {analysis.type === 'pdf' && analysis.isSinglePage && (
+    <div className="group flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-[0_4px_12px_-2px_rgba(99,102,241,0.1)] transition-all">
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center shrink-0">
+        <span className="text-[18px]">✍️</span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <h4 className="text-[14px] font-bold text-slate-900 mb-0.5">
+          Perfect for signing
+        </h4>
+        <p className="text-[12.5px] text-slate-500 leading-[1.5]">
+          Add your digital signature in seconds
+        </p>
+      </div>
+    </div>
+  )}
+
+  {/* ⭐ IMAGE tips */}
+  {analysis.type === 'image' && (
+    <>
+      <div className="group flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-[0_4px_12px_-2px_rgba(99,102,241,0.1)] transition-all">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-pink-200 flex items-center justify-center shrink-0">
+          <span className="text-[18px]">📄</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <h4 className="text-[14px] font-bold text-slate-900 mb-0.5">
+            {analysis.isMultiple ? `Combined into 1 PDF` : 'Converted to PDF'}
+          </h4>
+          <p className="text-[12.5px] text-slate-500 leading-[1.5]">
+            {analysis.isMultiple 
+              ? `Merge all ${analysis.count} images into a single PDF document`
+              : 'Convert your image to a professional PDF file'
+            }
+          </p>
+        </div>
+      </div>
+
+      <div className="group flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-[0_4px_12px_-2px_rgba(99,102,241,0.1)] transition-all">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-200 flex items-center justify-center shrink-0">
+          <span className="text-[18px]">📥</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <h4 className="text-[14px] font-bold text-slate-900 mb-0.5">
+            Ready in seconds
+          </h4>
+          <p className="text-[12.5px] text-slate-500 leading-[1.5]">
+            Instant conversion right in your browser
+          </p>
+        </div>
+      </div>
+    </>
+  )}
+
+</div>
+
+      {/* Bottom Message */}
+      <div className="mt-6 flex items-center justify-center lg:justify-start gap-2 text-[12.5px] text-slate-500 font-medium">
+        <Lock size={12} className="text-emerald-500" strokeWidth={2.5} />
+        <span>All in seconds. All free. All private.</span>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
               {/* RIGHT: UPLOAD or ANALYSIS PANEL */}
               <motion.div
@@ -154,7 +461,7 @@ export default function HomePage() {
 
                 <AnimatePresence mode="wait">
                   {!analysis ? (
-                    /* ⭐ UPLOAD DROPZONE */
+                    /* ⭐ UPLOAD DROPZONE (Rectangle) */
                     <motion.div
                       key="upload"
                       initial={{ opacity: 0, y: 10 }}
@@ -165,45 +472,108 @@ export default function HomePage() {
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
                       onClick={() => fileInputRef.current?.click()}
-                      className={`relative rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer group ${
+                      className={`relative rounded-3xl border-2 border-dashed transition-all duration-300 cursor-pointer group overflow-hidden ${
                         isDragging
-                          ? 'border-indigo-500 bg-indigo-50/50 scale-[1.02]'
-                          : 'border-slate-300 bg-white/50 hover:border-indigo-400 hover:bg-white/80'
+                          ? 'border-indigo-500 bg-gradient-to-br from-indigo-100 via-purple-50 to-indigo-50 scale-[1.02] shadow-[0_20px_50px_-12px_rgba(99,102,241,0.35)]'
+                          : 'border-slate-300 bg-gradient-to-br from-white via-slate-50/50 to-indigo-50/30 hover:border-indigo-400 hover:shadow-[0_20px_50px_-12px_rgba(99,102,241,0.2)] hover:-translate-y-1'
                       }`}
                     >
-                      <div className="flex flex-col items-center justify-center px-8 py-16 md:py-20 text-center">
-                        <div
-                          className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300 ${
-                            isDragging
-                              ? 'bg-indigo-600 scale-110'
-                              : 'bg-indigo-50 group-hover:bg-indigo-100'
-                          }`}
-                        >
-                          <Upload
-                            size={28}
-                            className={`transition-colors ${isDragging ? 'text-white' : 'text-indigo-600'}`}
-                            strokeWidth={2}
-                          />
+                      {/* Decorative floating file icons */}
+                      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute top-4 right-6 opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-500">
+                          <FileText size={56} strokeWidth={1.5} className="text-indigo-600 rotate-12" />
+                        </div>
+                        <div className="absolute bottom-4 left-6 opacity-[0.06] group-hover:opacity-[0.12] transition-opacity duration-500">
+                          <Files size={60} strokeWidth={1.5} className="text-purple-600 -rotate-12" />
+                        </div>
+                        <div className="absolute top-8 left-14 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-500">
+                          <FileText size={28} strokeWidth={1.5} className="text-purple-500 -rotate-6" />
+                        </div>
+                        <div className="absolute bottom-8 right-12 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-500">
+                          <FileText size={36} strokeWidth={1.5} className="text-indigo-500 rotate-6" />
+                        </div>
+                      </div>
+
+                      {/* Main Content (Rectangle padding) */}
+                      <div className="relative flex flex-col items-center justify-center px-6 md:px-8 py-12 md:py-14 text-center">
+                        
+                        {/* Upload Icon Container (Smaller) */}
+                        <div className="relative mb-4">
+                          {/* Glow effect */}
+                          <div className={`absolute inset-0 rounded-2xl transition-all duration-500 ${
+                            isDragging 
+                              ? 'bg-indigo-500/40 blur-xl scale-125' 
+                              : 'bg-indigo-500/0 blur-xl scale-100 group-hover:bg-indigo-500/20 group-hover:scale-110'
+                          }`} />
+                          
+                          {/* Icon container - smaller now */}
+                          <div
+                            className={`relative w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                              isDragging
+                                ? 'bg-gradient-to-br from-indigo-600 to-purple-600 scale-110 rotate-6'
+                                : 'bg-gradient-to-br from-indigo-500 to-purple-600 group-hover:scale-105 group-hover:-rotate-6 shadow-[0_10px_30px_-5px_rgba(99,102,241,0.5)]'
+                            }`}
+                          >
+                            <Upload
+                              size={26}
+                              className="text-white"
+                              strokeWidth={2.5}
+                            />
+                          </div>
+
+                          {/* Floating indicator dots */}
+                          {!isDragging && (
+                            <>
+                              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white animate-pulse" />
+                              <div className="absolute -bottom-1 -left-1 w-2 h-2 rounded-full bg-amber-400 border-2 border-white" />
+                            </>
+                          )}
                         </div>
 
-                        <h3 className="text-[20px] md:text-[22px] font-bold text-slate-900 mb-2">
-                          {isDragging ? 'Drop them here!' : 'Drop your files here'}
+                        {/* Headline */}
+                        <h3 className="text-[20px] md:text-[22px] font-extrabold text-slate-900 mb-2 tracking-tight">
+                          {isDragging ? '✨ Drop it now!' : 'Drop your files here'}
                         </h3>
 
-                        <p className="text-[13px] text-slate-500 mb-6">
-                          Merge PDF · Compress PDF · Image to PDF
+                        {/* Subheadline */}
+                        <p className="text-[14px] text-slate-500 mb-1 max-w-xs">
+                          or click anywhere to browse
                         </p>
 
+                        {/* Smart hint */}
+                        <p className="text-[12px] text-indigo-600 font-semibold mb-5 flex items-center gap-1.5">
+                          <Sparkles size={12} strokeWidth={2.5} />
+                          <span>We&apos;ll recommend the perfect tool</span>
+                        </p>
+
+                        {/* Browse Button */}
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             fileInputRef.current?.click();
                           }}
-                          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-white border border-slate-200 hover:border-indigo-400 hover:bg-slate-50 text-slate-700 text-[13px] font-semibold shadow-sm transition-all"
+                          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-white border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 text-[13px] font-bold shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_16px_-4px_rgba(99,102,241,0.3)] transition-all"
                         >
+                          <FileText size={15} strokeWidth={2.2} />
                           Browse Files
                         </button>
+
+                        {/* File format pills */}
+                        <div className="flex items-center gap-2 mt-5">
+                          <span className="px-2.5 py-1 rounded-md bg-white/80 border border-slate-200 text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                            PDF
+                          </span>
+                          <span className="px-2.5 py-1 rounded-md bg-white/80 border border-slate-200 text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                            JPG
+                          </span>
+                          <span className="px-2.5 py-1 rounded-md bg-white/80 border border-slate-200 text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                            PNG
+                          </span>
+                          <span className="px-2.5 py-1 rounded-md bg-white/80 border border-slate-200 text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                            WEBP
+                          </span>
+                        </div>
                       </div>
                     </motion.div>
                   ) : (
@@ -263,7 +633,7 @@ export default function HomePage() {
                         </button>
                       </div>
 
-                      {/* File list preview (for multiple files) */}
+                      {/* File list preview */}
                       {analysis.isMultiple && analysis.files.length <= 5 && (
                         <div className="px-6 py-3 border-b border-slate-100 bg-slate-50/50">
                           <div className="flex flex-wrap gap-1.5">
@@ -298,7 +668,6 @@ export default function HomePage() {
                           </p>
                         </div>
 
-                        {/* Top Recommendation Card */}
                         <button
                           onClick={() => goToTool(analysis.topRecommendation.href)}
                           className="group w-full p-4 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 hover:border-indigo-400 hover:shadow-[0_8px_20px_-6px_rgba(99,102,241,0.3)] transition-all duration-300 mb-3"
@@ -335,44 +704,38 @@ export default function HomePage() {
                           </div>
                         </button>
 
-                        {/* Other Recommendations */}
                         {analysis.otherRecommendations.length > 0 && (
-                          <>
-                            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2 mt-4">
-                              Or try these
-                            </p>
-                            <div className="grid grid-cols-1 gap-2">
-                              {analysis.otherRecommendations.map((tool: any) => (
-                                <button
-                                  key={tool.href}
-                                  onClick={() => goToTool(tool.href)}
-                                  className="group flex items-center gap-3 p-3 rounded-lg bg-white border border-slate-100 hover:border-slate-300 hover:bg-slate-50 transition-all"
-                                >
-                                  <div
-                                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                                    style={{
-                                      backgroundColor: tool.bgColor,
-                                      color: tool.color,
-                                    }}
-                                  >
-                                    <div className="scale-75">{tool.icon}</div>
-                                  </div>
-                                  <div className="flex-1 text-left">
-                                    <h4 className="text-[13px] font-semibold text-slate-900">
-                                      {tool.label}
-                                    </h4>
-                                  </div>
-                                  <ChevronRight
-                                    size={16}
-                                    className="text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-all"
-                                  />
-                                </button>
-                              ))}
-                            </div>
-                          </>
-                        )}
+  <>
+    <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3 mt-5">
+      Or try these
+    </p>
+    <div className="grid grid-cols-2 gap-2">
+      {analysis.otherRecommendations.map((tool: any) => (
+        <button
+          key={tool.href}
+          onClick={() => goToTool(tool.href)}
+          className="group flex items-center gap-2 p-2.5 rounded-lg bg-white border border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/30 hover:shadow-sm transition-all text-left"
+        >
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
+            style={{
+              backgroundColor: tool.bgColor,
+              color: tool.color,
+            }}
+          >
+            <div className="scale-[0.65]">{tool.icon}</div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-[12.5px] font-bold text-slate-900 truncate">
+              {tool.label}
+            </h4>
+          </div>
+        </button>
+      ))}
+    </div>
+  </>
+)}
 
-                        {/* Upload Different Files */}
                         <button
                           onClick={resetAnalysis}
                           className="w-full mt-4 py-2.5 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 text-[13px] font-semibold transition-all"

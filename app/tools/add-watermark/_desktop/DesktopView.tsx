@@ -9,6 +9,7 @@ import ProcessingOverlay from '../../_components/ProcessingOverlay';
 import { useAddWatermarkContext } from '../_context/AddWatermarkContext';
 import PreviewPanel from './PreviewPanel';
 import WatermarkOptionsPanel from './WatermarkOptionsPanel';
+import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 
 export default function DesktopView() {
   const {
@@ -18,6 +19,8 @@ export default function DesktopView() {
     applyAndPrepare,
     watermarkedPdfUrl,        // ⭐ ADDED (was downloadWatermarkedFile)
   } = useAddWatermarkContext();
+
+  useToolFileReceiver((files: File[]) => addPdf(files));
 
   // ⭐ Auto-download flag
   const shouldDownloadRef = useRef(false);
