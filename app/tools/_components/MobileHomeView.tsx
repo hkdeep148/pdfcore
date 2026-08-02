@@ -3,20 +3,22 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, ChevronRight, X, Shield, Lock, Zap } from 'lucide-react';
+import { Search, ChevronRight, X } from 'lucide-react';
 import { tools } from '../_config/tools';
 
+// Infer the tool type from your config
+type Tool = (typeof tools)[number];
 
 export default function MobileHomeView() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filter tools based on search query
-  const filteredTools = useMemo(() => {
+  const filteredTools = useMemo<Tool[]>(() => {
     if (!searchQuery.trim()) return tools;
-    
+
     const query = searchQuery.toLowerCase();
     return tools.filter(
-      (tool: any) =>
+      (tool) =>
         tool.label.toLowerCase().includes(query) ||
         tool.description?.toLowerCase().includes(query) ||
         tool.category?.toLowerCase().includes(query)
@@ -28,7 +30,7 @@ export default function MobileHomeView() {
       {/* ============ SEARCH-FIRST HERO ============ */}
       <section className="relative bg-gradient-to-b from-[#F4F2FF] via-[#FAF9FF] to-white pt-12 pb-8 px-4">
         
-                        {/* Compact Headline */}
+        {/* Compact Headline */}
         <div className="text-center mb-6">
           <h1 className="text-[26px] sm:text-[30px] font-extrabold tracking-tight text-[#07122E] leading-[1.2] mb-2">
             Find the perfect{' '}
@@ -39,54 +41,17 @@ export default function MobileHomeView() {
           <p className="text-[13px] font-medium text-slate-500 leading-[1.5] mb-5">
             Fast, free, and works right in your browser
           </p>
-
-                    {/* ============ ⭐ TRUST BADGES (Icon Circle Style) ============ */}
-          <div className="flex items-center justify-center gap-5 sm:gap-7">
-            
-            {/* 100% Free */}
-            <div className="flex flex-col items-center gap-2 text-center">
-              <div className="w-11 h-11 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm">
-                <Shield size={19} className="text-emerald-600" strokeWidth={2.2} />
-              </div>
-              <span className="text-[11.5px] font-bold text-[#07122E] leading-tight">
-                100% Free
-              </span>
-            </div>
-
-            {/* Secure & Private */}
-            <div className="flex flex-col items-center gap-2 text-center">
-              <div className="w-11 h-11 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center shadow-sm">
-                <Lock size={19} className="text-indigo-600" strokeWidth={2.2} />
-              </div>
-              <span className="text-[11.5px] font-bold text-[#07122E] leading-tight">
-                Secure &amp; Private
-              </span>
-            </div>
-
-            {/* Lightning Fast */}
-            <div className="flex flex-col items-center gap-2 text-center">
-              <div className="w-11 h-11 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center shadow-sm">
-                <Zap size={19} className="text-orange-600" strokeWidth={2.2} />
-              </div>
-              <span className="text-[11.5px] font-bold text-[#07122E] leading-tight">
-                Lightning Fast
-              </span>
-            </div>
-            
-          </div>
         </div>
 
         {/* ============ ⭐ SEARCH BAR ============ */}
         <div className="max-w-md mx-auto mb-2">
           <div className="relative group">
-            {/* Search Icon */}
             <Search
               size={18}
               strokeWidth={2.2}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#5B4EF5] transition-colors"
             />
             
-            {/* Input */}
             <input
               type="text"
               value={searchQuery}
@@ -96,7 +61,6 @@ export default function MobileHomeView() {
               autoComplete="off"
             />
 
-            {/* Clear Button (only shows when there's text) */}
             {searchQuery && (
               <button
                 type="button"
@@ -109,7 +73,6 @@ export default function MobileHomeView() {
             )}
           </div>
 
-          {/* Search hint - only shows when NOT searching */}
           {!searchQuery && (
             <p className="text-[11.5px] text-center text-slate-400 mt-3 font-medium">
               Try &quot;merge&quot;, &quot;compress&quot;, or &quot;convert&quot;
@@ -121,14 +84,13 @@ export default function MobileHomeView() {
         <div className="max-w-md mx-auto space-y-3 mt-8">
           {filteredTools.length > 0 ? (
             <>
-              {/* Results count when searching */}
               {searchQuery && (
                 <p className="text-[12px] font-semibold text-slate-500 px-1 mb-1">
                   {filteredTools.length} {filteredTools.length === 1 ? 'tool' : 'tools'} found
                 </p>
               )}
 
-              {filteredTools.map((tool: any) => (
+              {filteredTools.map((tool) => (
                 <Link
                   key={tool.href}
                   href={tool.href}
@@ -161,7 +123,6 @@ export default function MobileHomeView() {
               ))}
             </>
           ) : (
-            /* ============ NO RESULTS STATE ============ */
             <div className="text-center py-12 px-4">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
                 <Search size={24} className="text-slate-400" strokeWidth={2} />

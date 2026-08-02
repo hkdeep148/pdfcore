@@ -31,7 +31,7 @@ export default function ToolsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-white font-['Inter',sans-serif] text-[#07122E]">
+    <div className="relative min-h-screen bg-[#F8F9FC] font-['Inter',sans-serif] text-[#07122E]">
       <main>
         {/* ============ HERO ============ */}
         <section className="max-w-[1440px] mx-auto px-5 md:px-8 pt-10 md:pt-16 pb-8 md:pb-10 text-center">

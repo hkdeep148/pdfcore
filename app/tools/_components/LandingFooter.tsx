@@ -10,17 +10,14 @@ import {
   Zap,
   WifiOff,
   Layers,
-  Mail,
 } from 'lucide-react';
 import { openCookieSettings } from './CookieBanner';
 
 export default function LandingFooter() {
   return (
     <>
-      {/* ================ WHY CHOOSE US SECTION ================ */}
+      {/* ================ WHY CHOOSE US SECTION (DESKTOP) ================ */}
       <section className="relative">
-
-        {/* ============ DESKTOP WHY CHOOSE US (hidden md:block) ============ */}
         <div className="hidden md:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 md:pb-24">
           {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8 md:mb-12">
@@ -90,99 +87,74 @@ export default function LandingFooter() {
       <footer className="relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          {/* ============ ⭐ MOBILE: What Makes Us Different (100% Honest) ============ */}
-          <div className="md:hidden -mx-4 pt-16 pb-12 px-4 bg-gradient-to-b from-white via-[#FAF9FF] to-[#F4F2FF]">
-            <div className="max-w-md mx-auto text-center">
-              
-              {/* Small label */}
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-[#5B4EF5] mb-3">
-                What Makes Us Different
+          {/* ============ ⭐ MOBILE: Comparison Table ============ */}
+          <div className="md:hidden -mx-4 pt-16 pb-14 px-5 bg-white">
+            <div className="max-w-md mx-auto">
+
+              {/* Header */}
+              <div className="text-center mb-8">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400 mb-3">
+                  The Difference
+                </p>
+                <h3 className="text-[26px] font-semibold text-[#07122E] tracking-tight leading-[1.15]">
+                  Why choose{' '}
+                  <span className="text-[#5B4EF5]">PDF Core</span>
+                  <span className="text-[#07122E]">?</span>
+                </h3>
+                <p className="text-[13.5px] text-slate-500 mt-3 leading-relaxed">
+                  See how we compare to typical online PDF tools.
+                </p>
+              </div>
+
+              {/* Comparison Table */}
+              <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white">
+                
+                {/* Table Header */}
+                <div className="grid grid-cols-[1fr_72px_72px] bg-slate-50/70 border-b border-slate-200">
+                  <div className="px-4 py-3.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                    Feature
+                  </div>
+                  <div className="px-2 py-3.5 text-center">
+                    <div className="text-[11px] font-bold text-[#5B4EF5] tracking-tight">
+                      PDF Core
+                    </div>
+                  </div>
+                  <div className="px-2 py-3.5 text-center">
+                    <div className="text-[11px] font-semibold text-slate-400 tracking-tight">
+                      Others
+                    </div>
+                  </div>
+                </div>
+
+                {/* Rows */}
+                <ComparisonRow feature="100% Free forever" us={true} them={false} themLabel="Limited" />
+                <ComparisonRow feature="No sign-up needed" us={true} them={false} />
+                <ComparisonRow feature="Files stay on device" us={true} them={false} />
+                <ComparisonRow feature="Works offline" us={true} them={false} />
+                <ComparisonRow feature="Zero ads" us={true} them={false} />
+                <ComparisonRow feature="No watermarks" us={true} them={false} isLast />
+              </div>
+
+              {/* Footnote */}
+              <p className="text-[12px] text-slate-400 text-center mt-4 leading-relaxed">
+                Based on common limitations of popular online PDF tools.
               </p>
 
-              {/* Headline */}
-              <h3 className="text-[22px] font-extrabold text-[#07122E] tracking-tight leading-[1.2] mb-8">
-                Built for people who{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-                  care about privacy.
-                </span>
-              </h3>
+              {/* CTA */}
+              <Link
+  href="/tools"
+  className="group mt-6 flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#5B4EF5] to-[#8B5CF6] text-white text-[14px] font-semibold shadow-[0_4px_16px_-4px_rgba(91,78,245,0.4)] hover:shadow-[0_8px_24px_-4px_rgba(91,78,245,0.5)] hover:-translate-y-0.5 transition-all duration-200"
+>
+  Try PDF Core free
+  <ArrowRight 
+    size={15} 
+    strokeWidth={2.5} 
+    className="group-hover:translate-x-0.5 transition-transform" 
+  />
+</Link>
 
-              {/* HONEST STATS GRID */}
-              <div className="grid grid-cols-3 gap-3 mb-8">
-                <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs">
-                  <div className="text-[20px] font-extrabold text-[#5B4EF5] leading-tight">10+</div>
-                  <div className="text-[10.5px] font-semibold text-slate-500 mt-1 leading-tight">Free Tools</div>
-                </div>
-                <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs">
-                  <div className="text-[20px] font-extrabold text-emerald-600 leading-tight">100%</div>
-                  <div className="text-[10.5px] font-semibold text-slate-500 mt-1 leading-tight">Private &amp; Local</div>
-                </div>
-                <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs">
-                  <div className="text-[20px] font-extrabold text-orange-600 leading-tight">0</div>
-                  <div className="text-[10.5px] font-semibold text-slate-500 mt-1 leading-tight">Sign-ups Needed</div>
-                </div>
-              </div>
-
-              {/* HOW IT WORKS */}
-              <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-sm">
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-slate-500 mb-5 text-center">
-                  How It Works
-                </p>
-                
-                <div className="flex items-center justify-between gap-2">
-                  {/* Step 1 */}
-                  <div className="text-center flex-1">
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-2 flex items-center justify-center text-white text-[14px] font-extrabold shadow-[0_4px_10px_-2px_rgba(99,102,241,0.4)]">
-                      1
-                    </div>
-                    <div className="text-[11px] font-bold text-[#07122E] leading-tight">
-                      Choose Tool
-                    </div>
-                  </div>
-
-                  {/* Arrow */}
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-
-                  {/* Step 2 */}
-                  <div className="text-center flex-1">
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-2 flex items-center justify-center text-white text-[14px] font-extrabold shadow-[0_4px_10px_-2px_rgba(99,102,241,0.4)]">
-                      2
-                    </div>
-                    <div className="text-[11px] font-bold text-[#07122E] leading-tight">
-                      Add Your File
-                    </div>
-                  </div>
-
-                  {/* Arrow */}
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-
-                  {/* Step 3 */}
-                  <div className="text-center flex-1">
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 mx-auto mb-2 flex items-center justify-center text-white text-[14px] font-extrabold shadow-[0_4px_10px_-2px_rgba(16,185,129,0.4)]">
-                      ✓
-                    </div>
-                    <div className="text-[11px] font-bold text-[#07122E] leading-tight">
-                      Done!
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom note */}
-                <p className="text-[11px] text-slate-500 text-center mt-4 leading-[1.5]">
-                  Everything happens in your browser.<br/>
-                  <span className="font-bold text-emerald-600">Nothing is uploaded.</span>
-                </p>
-              </div>
-              
             </div>
           </div>
-
-          {/* ⭐ Bottom fade back to white */}
-          <div className="md:hidden -mx-4 h-12 bg-gradient-to-b from-[#F4F2FF] to-white" />
 
           {/* Desktop: Original "Ready to get started" CTA */}
           <div className="hidden md:flex flex-col md:flex-row items-center justify-between gap-6 py-10 md:py-14">
@@ -229,8 +201,6 @@ export default function LandingFooter() {
                   <span>100% Free</span>
                 </div>
               </div>
-
-              
             </div>
 
             {/* Column 2: Tools */}
@@ -308,5 +278,87 @@ function FooterLink({ href, children }: FooterLinkProps) {
         {children}
       </Link>
     </li>
+  );
+}
+
+/* ============ COMPARISON ROW COMPONENT ============ */
+interface ComparisonRowProps {
+  feature: string;
+  us: boolean;
+  them: boolean;
+  themLabel?: string;
+  isLast?: boolean;
+}
+
+function ComparisonRow({ feature, us, them, themLabel, isLast }: ComparisonRowProps) {
+  return (
+    <div
+      className={`grid grid-cols-[1fr_72px_72px] items-center ${
+        !isLast ? 'border-b border-slate-100' : ''
+      }`}
+    >
+      <div className="px-4 py-3.5 text-[13px] font-medium text-[#07122E]">
+        {feature}
+      </div>
+
+      {/* Us column */}
+      <div className="px-2 py-3.5 flex justify-center">
+        {us ? (
+          <div className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center">
+            <svg
+              viewBox="0 0 24 24"
+              className="w-3.5 h-3.5 text-emerald-600"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+        ) : (
+          <span className="text-[12px] text-slate-400">—</span>
+        )}
+      </div>
+
+      {/* Them column */}
+      <div className="px-2 py-3.5 flex justify-center">
+        {themLabel ? (
+          <span className="text-[11px] font-medium text-slate-400">
+            {themLabel}
+          </span>
+        ) : them ? (
+          <div className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center">
+            <svg
+              viewBox="0 0 24 24"
+              className="w-3.5 h-3.5 text-emerald-600"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+        ) : (
+          <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center">
+            <svg
+              viewBox="0 0 24 24"
+              className="w-3 h-3 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
