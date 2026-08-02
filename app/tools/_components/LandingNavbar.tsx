@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
-import { Search } from 'lucide-react';
+import { Combine, Search } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 import { tools } from '../_config/tools';
 
@@ -17,6 +17,7 @@ const toolsByCategory = {
 
 // Simple top-level links (clean & focused)
 const simpleLinks = [
+  { label: 'Merge PDF', href: 'tools/merge-pdf' },
   { label: 'Blog', href: '/blog' },
   { label: 'FAQ', href: '/faq' },
   { label: 'Security', href: '/security' },
