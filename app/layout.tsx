@@ -41,9 +41,10 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
-    >
+  lang="en"
+  data-scroll-behavior="smooth"
+  className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
+>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {/* ⭐ Wrap with PendingFileProvider */}
         <PendingFileProvider>

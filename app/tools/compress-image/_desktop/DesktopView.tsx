@@ -418,13 +418,12 @@ export default function DesktopView() {
     >
       {/* ⭐ Single hidden file input with .extension accept */}
       <input
-        ref={fileInputRef}
-        type="file"
-        accept=".jpg,.jpeg,.png,.webp"
-        onChange={handleFileInput}
-        className="hidden"
-        multiple
-      />
+  ref={fileInputRef}
+  type="file"
+  onChange={handleFileInput}
+  className="hidden"
+  multiple
+/>
 
       {files.length === 0 ? (
         <div

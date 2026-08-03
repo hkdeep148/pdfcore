@@ -22,7 +22,6 @@ import {
   Eye,
 } from 'lucide-react';
 
-// ============ TYPES ============
 type CompressionMode = 'quality' | 'size';
 type OutputFormat = 'image/jpeg' | 'image/webp';
 
@@ -39,7 +38,6 @@ interface FileStatus {
   reduction?: number;
 }
 
-// ============ CONSTANTS ============
 const COMPRESSION_LEVELS = [
   { label: 'Light', value: 90, description: 'Best quality', icon: '🎯' },
   { label: 'Balanced', value: 75, description: 'Recommended', icon: '⚖️', recommended: true },
@@ -61,7 +59,6 @@ const DIMENSION_PRESETS = [
   { value: 400, label: 'Thumbnail (400px)', icon: '🔍' },
 ];
 
-// ============ UTILITY ============
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
   const k = 1024;
@@ -80,7 +77,6 @@ function getFileExtension(mimeType: string): string {
   return map[mimeType.toLowerCase()] || 'jpg';
 }
 
-// ============ MAIN COMPONENT ============
 export default function MobileView() {
   const [files, setFiles] = useState<FileStatus[]>([]);
   const [processing, setProcessing] = useState(false);
@@ -100,16 +96,14 @@ export default function MobileView() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const tool = getToolByPath('/tools/compress-image')!;
 
-  // ⭐ SINGLE handleFiles function (used by both file input AND tool receiver)
   const handleFiles = useCallback((newFiles: File[]) => {
     const SUPPORTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     const MAX_SIZE = 50 * 1024 * 1024;
-
     const validFiles: FileStatus[] = [];
     const errors: string[] = [];
 
     for (const file of newFiles) {
-      if (!SUPPORTED.includes(file.type.toLowerCase())) {
+      if (!file.type.startsWith('image/') || !SUPPORTED.includes(file.type.toLowerCase())) {
         errors.push(`${file.name}: Please select JPG, PNG, or WEBP images only`);
         continue;
       }
@@ -117,7 +111,6 @@ export default function MobileView() {
         errors.push(`${file.name}: Too large (max 50 MB)`);
         continue;
       }
-
       validFiles.push({
         id: `${Date.now()}-${Math.random()}`,
         original: file,
@@ -129,11 +122,9 @@ export default function MobileView() {
 
     if (errors.length > 0) setError(errors.join(', '));
     else setError(null);
-
     setFiles((prev) => [...prev, ...validFiles]);
   }, []);
 
-  // Sync filename with uploaded file
   useEffect(() => {
     if (files.length === 1) {
       const name = files[0].original.name.replace(/\.[^/.]+$/, '');
@@ -144,10 +135,8 @@ export default function MobileView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [files.length]);
 
-  // Receive files from Smart Suggestions
   useToolFileReceiver((files: File[]) => handleFiles(files));
 
-  // ⭐ Simple file change handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) handleFiles(Array.from(e.target.files));
     e.target.value = '';
@@ -158,29 +147,10 @@ export default function MobileView() {
   const compressFile = async (fileStatus: FileStatus): Promise<FileStatus> => {
     try {
       const { compressImage } = await import('../lib/compressor');
-      const result = await compressImage(fileStatus.original, {
-        mode,
-        quality,
-        targetSizeKB: targetSize,
-        outputFormat,
-        maxDimension,
-      });
-      const compressedUrl = URL.createObjectURL(result.blob);
-      return {
-        ...fileStatus,
-        compressed: result.blob,
-        compressedUrl,
-        compressedSize: result.compressedSize,
-        status: 'done',
-        reduction: result.reduction,
-      };
+      const result = await compressImage(fileStatus.original, { mode, quality, targetSizeKB: targetSize, outputFormat, maxDimension });
+      return { ...fileStatus, compressed: result.blob, compressedUrl: URL.createObjectURL(result.blob), compressedSize: result.compressedSize, status: 'done', reduction: result.reduction };
     } catch (err) {
-      console.error('Compression failed:', err);
-      return {
-        ...fileStatus,
-        status: 'error',
-        error: err instanceof Error ? err.message : 'Compression failed',
-      };
+      return { ...fileStatus, status: 'error', error: err instanceof Error ? err.message : 'Compression failed' };
     }
   };
 
@@ -188,18 +158,13 @@ export default function MobileView() {
     if (files.length === 0) return;
     setProcessing(true);
     setError(null);
-
-    setFiles((prev) =>
-      prev.map((f) => (f.status === 'pending' ? { ...f, status: 'compressing' as const } : f))
-    );
-
+    setFiles((prev) => prev.map((f) => (f.status === 'pending' ? { ...f, status: 'compressing' as const } : f)));
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.status !== 'compressing' && file.status !== 'pending') continue;
       const result = await compressFile(file);
       setFiles((prev) => prev.map((f) => (f.id === file.id ? result : f)));
     }
-
     setProcessing(false);
     setShowSuccess(true);
   };
@@ -208,38 +173,23 @@ export default function MobileView() {
     if (files.length === 0) return;
     setProcessing(true);
     setError(null);
-
     const resetFiles = files.map((f) => {
       if (f.compressedUrl) URL.revokeObjectURL(f.compressedUrl);
-      return {
-        ...f,
-        compressed: undefined,
-        compressedUrl: undefined,
-        compressedSize: undefined,
-        status: 'compressing' as const,
-        error: undefined,
-        reduction: undefined,
-      };
+      return { ...f, compressed: undefined, compressedUrl: undefined, compressedSize: undefined, status: 'compressing' as const, error: undefined, reduction: undefined };
     });
-
     setFiles(resetFiles);
-
     for (let i = 0; i < resetFiles.length; i++) {
-      const file = resetFiles[i];
-      const result = await compressFile(file);
-      setFiles((prev) => prev.map((f) => (f.id === file.id ? result : f)));
+      const result = await compressFile(resetFiles[i]);
+      setFiles((prev) => prev.map((f) => (f.id === resetFiles[i].id ? result : f)));
     }
-
     setProcessing(false);
   };
 
   const handleDownloadSingle = (file: FileStatus) => {
     if (!file.compressed || !file.compressedUrl) return;
-    const ext = getFileExtension(file.compressed.type);
-    const nameWithoutExt = file.original.name.replace(/\.[^/.]+$/, '');
     const link = document.createElement('a');
     link.href = file.compressedUrl;
-    link.download = `${nameWithoutExt}-compressed.${ext}`;
+    link.download = `${file.original.name.replace(/\.[^/.]+$/, '')}-compressed.${getFileExtension(file.compressed.type)}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -249,19 +199,14 @@ export default function MobileView() {
     const completedFiles = files.filter((f) => f.status === 'done' && f.compressed);
     if (completedFiles.length === 0) return;
     if (completedFiles.length === 1) return handleDownloadSingle(completedFiles[0]);
-
     setZipping(true);
     try {
       const JSZip = (await import('jszip')).default;
       const zip = new JSZip();
-
       for (const file of completedFiles) {
         if (!file.compressed) continue;
-        const ext = getFileExtension(file.compressed.type);
-        const nameWithoutExt = file.original.name.replace(/\.[^/.]+$/, '');
-        zip.file(`${nameWithoutExt}-compressed.${ext}`, file.compressed);
+        zip.file(`${file.original.name.replace(/\.[^/.]+$/, '')}-compressed.${getFileExtension(file.compressed.type)}`, file.compressed);
       }
-
       const blob = await zip.generateAsync({ type: 'blob' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -271,155 +216,86 @@ export default function MobileView() {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-    } catch (err) {
-      setError('Failed to create ZIP file');
-    } finally {
-      setZipping(false);
-    }
+    } catch { setError('Failed to create ZIP file'); }
+    finally { setZipping(false); }
   };
 
   const handleRemoveFile = (id: string) => {
     setFiles((prev) => {
       const file = prev.find((f) => f.id === id);
-      if (file) {
-        URL.revokeObjectURL(file.originalUrl);
-        if (file.compressedUrl) URL.revokeObjectURL(file.compressedUrl);
-      }
+      if (file) { URL.revokeObjectURL(file.originalUrl); if (file.compressedUrl) URL.revokeObjectURL(file.compressedUrl); }
       return prev.filter((f) => f.id !== id);
     });
   };
 
   const handleClearAll = () => {
-    files.forEach((f) => {
-      URL.revokeObjectURL(f.originalUrl);
-      if (f.compressedUrl) URL.revokeObjectURL(f.compressedUrl);
-    });
+    files.forEach((f) => { URL.revokeObjectURL(f.originalUrl); if (f.compressedUrl) URL.revokeObjectURL(f.compressedUrl); });
     setFiles([]);
     setError(null);
     setShowSuccess(false);
   };
 
-  const handleStartOver = () => {
-    handleClearAll();
-    setShowSuccess(false);
-  };
-
-  const handleBackToEdit = () => {
-    setShowSuccess(false);
-  };
-
   const totalOriginalSize = files.reduce((sum, f) => sum + f.originalSize, 0);
   const totalCompressedSize = files.reduce((sum, f) => sum + (f.compressedSize || 0), 0);
-  const totalReduction = totalOriginalSize > 0
-    ? Math.round(((totalOriginalSize - totalCompressedSize) / totalOriginalSize) * 100)
-    : 0;
+  const totalReduction = totalOriginalSize > 0 ? Math.round(((totalOriginalSize - totalCompressedSize) / totalOriginalSize) * 100) : 0;
   const completedCount = files.filter((f) => f.status === 'done').length;
   const hasCompleted = completedCount > 0;
 
   return (
     <ToolShellMobile fixedHeight={files.length > 0}>
-      {/* ⭐ Hidden file input — uses .extensions to avoid Samsung Photo Picker */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        onChange={handleFileChange}
-        accept=".jpg,.jpeg,.png,.webp"
-        multiple
-      />
+      {/* ⭐ NO accept attribute — forces Android file manager instead of Samsung Photo Picker */}
+      <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} multiple />
 
       {error && (
         <div className="mx-4 mt-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between shrink-0">
           <span className="text-[13px] text-red-600 font-medium">{error}</span>
-          <button onClick={() => setError(null)} className="text-red-400">
-            <X size={16} />
-          </button>
+          <button onClick={() => setError(null)} className="text-red-400"><X size={16} /></button>
         </div>
       )}
 
       {showSuccess && hasCompleted && files[0]?.compressed && files[0]?.compressedSize ? (
         <MobileSuccessScreen
           title={completedCount === 1 ? 'Image Compressed!' : `${completedCount} Images Compressed!`}
-          subtitle={completedCount === 1 
-            ? 'Your image is ready to download' 
-            : 'Your images are ready to download'
-          }
+          subtitle={completedCount === 1 ? 'Your image is ready to download' : 'Your images are ready to download'}
           filename={files[0].original.name}
           iconVariant="image"
           previewImage={files[0].compressedUrl}
-          compressionStats={{
-            originalSize: formatBytes(totalOriginalSize),
-            compressedSize: formatBytes(totalCompressedSize),
-            savedPercentage: totalReduction,
-            savedBytes: formatBytes(totalOriginalSize - totalCompressedSize),
-            format: files[0].compressed?.type.split('/')[1]?.toUpperCase(),
-          }}
-          downloadLabel={completedCount === 1 
-            ? 'Download Image' 
-            : `Download All (${completedCount}) as ZIP`
-          }
+          compressionStats={{ originalSize: formatBytes(totalOriginalSize), compressedSize: formatBytes(totalCompressedSize), savedPercentage: totalReduction, savedBytes: formatBytes(totalOriginalSize - totalCompressedSize), format: files[0].compressed?.type.split('/')[1]?.toUpperCase() }}
+          downloadLabel={completedCount === 1 ? 'Download Image' : `Download All (${completedCount}) as ZIP`}
           statusBadge={{ label: 'Compressed', color: 'green' }}
           onDownload={handleDownloadAll}
-          onPreview={files[0].compressedUrl 
-            ? () => window.open(files[0].compressedUrl, '_blank') 
-            : undefined
-          }
-          onStartOver={handleStartOver}
-          onBack={handleBackToEdit}
+          onPreview={files[0].compressedUrl ? () => window.open(files[0].compressedUrl, '_blank') : undefined}
+          onStartOver={() => { handleClearAll(); setShowSuccess(false); }}
+          onBack={() => setShowSuccess(false)}
         />
       ) : files.length === 0 ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
       ) : (
         <>
-          <MobileToolHeader
-            filename={filename}
-            onFilenameChange={setFilename}
-            onBack={handleClearAll}
-          />
+          <MobileToolHeader filename={filename} onFilenameChange={setFilename} onBack={handleClearAll} />
 
           <div className="flex-1 overflow-y-auto px-4 pt-2 pb-[140px] bg-[#F5F5FA]">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">
-                {files.length} {files.length === 1 ? 'Image' : 'Images'}
-              </p>
+              <p className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">{files.length} {files.length === 1 ? 'Image' : 'Images'}</p>
               <div className="flex items-center gap-1">
-                <button onClick={openFilePicker} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#4F46E5] bg-[#EEF2FF] active:scale-95 transition-all">
-                  <Upload size={11} strokeWidth={2.5} />Add
-                </button>
-                <button onClick={handleClearAll} disabled={processing} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-red-600 bg-red-50 active:scale-95 transition-all disabled:opacity-50">
-                  <Trash2 size={11} strokeWidth={2.5} />Clear
-                </button>
+                <button onClick={openFilePicker} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#4F46E5] bg-[#EEF2FF] active:scale-95 transition-all"><Upload size={11} strokeWidth={2.5} />Add</button>
+                <button onClick={handleClearAll} disabled={processing} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-red-600 bg-red-50 active:scale-95 transition-all disabled:opacity-50"><Trash2 size={11} strokeWidth={2.5} />Clear</button>
               </div>
             </div>
 
             <div className="space-y-2 mb-4">
-              {files.map((file) => (
-                <FileCard
-                  key={file.id}
-                  file={file}
-                  onRemove={() => handleRemoveFile(file.id)}
-                  onDownload={() => handleDownloadSingle(file)}
-                  onCompare={() => setComparingFile(file)}
-                  disabled={processing}
-                />
-              ))}
+              {files.map((file) => (<FileCard key={file.id} file={file} onRemove={() => handleRemoveFile(file.id)} onDownload={() => handleDownloadSingle(file)} onCompare={() => setComparingFile(file)} disabled={processing} />))}
             </div>
 
             <button onClick={() => setSettingsOpen(!settingsOpen)} className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white border border-[#E8EDF5] active:bg-[#F8FAFF] transition-colors">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4F46E5] to-[#6D5DF6] flex items-center justify-center">
-                  <Zap size={12} className="text-white" strokeWidth={2.5} fill="currentColor" />
-                </div>
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4F46E5] to-[#6D5DF6] flex items-center justify-center"><Zap size={12} className="text-white" strokeWidth={2.5} fill="currentColor" /></div>
                 <div className="text-left">
                   <p className="text-[13px] font-bold text-[#07122E]">Settings</p>
-                  <p className="text-[10px] text-[#6B7280]">
-                    {COMPRESSION_LEVELS.find(l => l.value === quality)?.label} · {outputFormat === 'image/jpeg' ? 'JPG' : 'WEBP'}
-                  </p>
+                  <p className="text-[10px] text-[#6B7280]">{COMPRESSION_LEVELS.find(l => l.value === quality)?.label} · {outputFormat === 'image/jpeg' ? 'JPG' : 'WEBP'}</p>
                 </div>
               </div>
-              <svg viewBox="0 0 24 24" className={`w-4 h-4 text-[#6B7280] transition-transform ${settingsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
+              <svg viewBox="0 0 24 24" className={`w-4 h-4 text-[#6B7280] transition-transform ${settingsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
             </button>
 
             {settingsOpen && (
@@ -459,9 +335,7 @@ export default function MobileView() {
                       <span className="text-[12px] font-bold text-[#6B7280]">KB</span>
                     </div>
                     <div className="grid grid-cols-4 gap-1.5">
-                      {SIZE_PRESETS.map((preset) => (
-                        <button key={preset.value} onClick={() => setTargetSize(preset.value)} disabled={processing} className={`px-2 py-2 rounded-lg text-[10px] font-bold border transition-all active:scale-95 ${targetSize === preset.value ? 'border-[#4F46E5] bg-[#EEF2FF] text-[#4F46E5]' : 'border-[#E8EDF5] bg-white text-[#4B5563]'}`}>{preset.label}</button>
-                      ))}
+                      {SIZE_PRESETS.map((preset) => (<button key={preset.value} onClick={() => setTargetSize(preset.value)} disabled={processing} className={`px-2 py-2 rounded-lg text-[10px] font-bold border transition-all active:scale-95 ${targetSize === preset.value ? 'border-[#4F46E5] bg-[#EEF2FF] text-[#4F46E5]' : 'border-[#E8EDF5] bg-white text-[#4B5563]'}`}>{preset.label}</button>))}
                     </div>
                   </div>
                 )}
@@ -504,9 +378,7 @@ export default function MobileView() {
                   <button onClick={handleDownloadAll} disabled={zipping} className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-[#4F46E5] to-[#6D5DF6] text-white text-[13px] font-bold shadow-[0_4px_14px_-4px_rgba(79,70,229,0.5)] active:scale-95 transition-all disabled:opacity-50">
                     {zipping ? (<><Loader2 size={14} className="animate-spin" strokeWidth={2.5} />Zipping...</>) : completedCount > 1 ? (<><Package size={14} strokeWidth={2.5} />Download All</>) : (<><Download size={14} strokeWidth={2.5} />Download</>)}
                   </button>
-                  <button onClick={handleRecompress} disabled={processing} className="flex items-center justify-center px-4 py-3.5 rounded-2xl bg-white border-2 border-[#E8EDF5] text-[#4B5563] active:scale-95 transition-all disabled:opacity-50" aria-label="Re-compress">
-                    <RotateCcw size={16} strokeWidth={2.5} />
-                  </button>
+                  <button onClick={handleRecompress} disabled={processing} className="flex items-center justify-center px-4 py-3.5 rounded-2xl bg-white border-2 border-[#E8EDF5] text-[#4B5563] active:scale-95 transition-all disabled:opacity-50" aria-label="Re-compress"><RotateCcw size={16} strokeWidth={2.5} /></button>
                 </div>
               )}
             </div>
@@ -515,37 +387,17 @@ export default function MobileView() {
       )}
 
       {comparingFile && comparingFile.compressedUrl && comparingFile.compressedSize && (
-        <ComparisonSlider
-          originalUrl={comparingFile.originalUrl}
-          compressedUrl={comparingFile.compressedUrl}
-          originalSize={comparingFile.originalSize}
-          compressedSize={comparingFile.compressedSize}
-          reduction={comparingFile.reduction || 0}
-          filename={comparingFile.original.name}
-          onClose={() => setComparingFile(null)}
-        />
+        <ComparisonSlider originalUrl={comparingFile.originalUrl} compressedUrl={comparingFile.compressedUrl} originalSize={comparingFile.originalSize} compressedSize={comparingFile.compressedSize} reduction={comparingFile.reduction || 0} filename={comparingFile.original.name} onClose={() => setComparingFile(null)} />
       )}
     </ToolShellMobile>
   );
 }
 
-// ============ FILE CARD ============
-interface FileCardProps {
-  file: FileStatus;
-  onRemove: () => void;
-  onDownload: () => void;
-  onCompare: () => void;
-  disabled: boolean;
-}
+interface FileCardProps { file: FileStatus; onRemove: () => void; onDownload: () => void; onCompare: () => void; disabled: boolean; }
 
 function FileCard({ file, onRemove, onDownload, onCompare, disabled }: FileCardProps) {
   const [dimensions, setDimensions] = useState<{ w: number; h: number } | null>(null);
-
-  useEffect(() => {
-    const img = new Image();
-    img.onload = () => setDimensions({ w: img.naturalWidth, h: img.naturalHeight });
-    img.src = file.originalUrl;
-  }, [file.originalUrl]);
+  useEffect(() => { const img = new Image(); img.onload = () => setDimensions({ w: img.naturalWidth, h: img.naturalHeight }); img.src = file.originalUrl; }, [file.originalUrl]);
 
   const fileFormat = file.original.type.split('/')[1]?.toUpperCase() || 'IMG';
   const compressedFormat = file.compressed?.type.split('/')[1]?.toUpperCase();
@@ -555,29 +407,18 @@ function FileCard({ file, onRemove, onDownload, onCompare, disabled }: FileCardP
     <div className="flex gap-3 p-3 rounded-xl bg-white border border-[#E8EDF5]">
       <div className="relative w-16 h-16 rounded-lg bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] overflow-hidden shrink-0 border border-slate-100">
         <img src={file.status === 'done' && file.compressedUrl ? file.compressedUrl : file.originalUrl} alt={file.original.name} className="w-full h-full object-cover" />
-        {file.status === 'compressing' && (
-          <div className="absolute inset-0 bg-slate-900/70 flex items-center justify-center">
-            <Loader2 size={16} className="text-white animate-spin" strokeWidth={2.5} />
-          </div>
-        )}
+        {file.status === 'compressing' && (<div className="absolute inset-0 bg-slate-900/70 flex items-center justify-center"><Loader2 size={16} className="text-white animate-spin" strokeWidth={2.5} /></div>)}
       </div>
-
       <div className="flex-1 min-w-0 flex flex-col justify-between">
         <div>
           <p className="text-[12.5px] font-bold text-[#07122E] truncate mb-1">{file.original.name}</p>
           <div className="flex items-center gap-1.5 text-[11px] mb-1 flex-wrap">
-            {file.status === 'done' && file.compressedSize ? (
-              <>
-                <span className="text-[#9CA3AF] line-through text-[10.5px]">{formatBytes(file.originalSize)}</span>
-                <span className="text-[#9CA3AF] text-[10px]">→</span>
-                <span className="text-[#4F46E5] font-extrabold text-[11.5px]">{formatBytes(file.compressedSize)}</span>
-                {file.reduction !== undefined && file.reduction > 0 && (
-                  <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-white text-[9px] font-extrabold">-{file.reduction}%</span>
-                )}
-              </>
-            ) : (
-              <span className="text-[#6B7280] font-semibold">{formatBytes(file.originalSize)}</span>
-            )}
+            {file.status === 'done' && file.compressedSize ? (<>
+              <span className="text-[#9CA3AF] line-through text-[10.5px]">{formatBytes(file.originalSize)}</span>
+              <span className="text-[#9CA3AF] text-[10px]">→</span>
+              <span className="text-[#4F46E5] font-extrabold text-[11.5px]">{formatBytes(file.compressedSize)}</span>
+              {file.reduction !== undefined && file.reduction > 0 && (<span className="px-1.5 py-0.5 rounded bg-emerald-500 text-white text-[9px] font-extrabold">-{file.reduction}%</span>)}
+            </>) : (<span className="text-[#6B7280] font-semibold">{formatBytes(file.originalSize)}</span>)}
           </div>
           <div className="flex items-center gap-1.5 text-[9.5px] text-[#9CA3AF] font-semibold">
             {dimensions && <span>{dimensions.w} × {dimensions.h}</span>}
@@ -585,26 +426,15 @@ function FileCard({ file, onRemove, onDownload, onCompare, disabled }: FileCardP
             {file.status === 'pending' && (<>{dimensions && <span className="text-[#D1D5DB]">•</span>}<span className="text-amber-700 font-bold">Waiting</span></>)}
           </div>
         </div>
-
         {file.status === 'done' && (
           <div className="flex items-center gap-1.5 mt-2">
-            <button onClick={onCompare} className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-md bg-purple-50 text-purple-600 text-[10px] font-bold active:scale-95 transition-all">
-              <Eye size={10} strokeWidth={2.5} />Compare
-            </button>
-            <button onClick={onDownload} className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-md bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold active:scale-95 transition-all">
-              <Download size={10} strokeWidth={2.5} />Save
-            </button>
+            <button onClick={onCompare} className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-md bg-purple-50 text-purple-600 text-[10px] font-bold active:scale-95 transition-all"><Eye size={10} strokeWidth={2.5} />Compare</button>
+            <button onClick={onDownload} className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-md bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold active:scale-95 transition-all"><Download size={10} strokeWidth={2.5} />Save</button>
           </div>
         )}
-
-        {file.status === 'error' && (
-          <div className="mt-1.5 text-[10px] text-red-600 font-medium">{file.error || 'Failed'}</div>
-        )}
+        {file.status === 'error' && (<div className="mt-1.5 text-[10px] text-red-600 font-medium">{file.error || 'Failed'}</div>)}
       </div>
-
-      <button onClick={onRemove} disabled={disabled} className="self-start w-7 h-7 rounded-lg text-[#9CA3AF] hover:bg-red-50 hover:text-red-600 flex items-center justify-center transition-colors shrink-0 disabled:opacity-50" aria-label="Remove">
-        <X size={13} strokeWidth={2.5} />
-      </button>
+      <button onClick={onRemove} disabled={disabled} className="self-start w-7 h-7 rounded-lg text-[#9CA3AF] hover:bg-red-50 hover:text-red-600 flex items-center justify-center transition-colors shrink-0 disabled:opacity-50" aria-label="Remove"><X size={13} strokeWidth={2.5} /></button>
     </div>
   );
 }
