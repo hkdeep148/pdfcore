@@ -108,37 +108,7 @@ export default function MobileView() {
   const errors: string[] = [];
 
   for (const file of newFiles) {
-    // ⭐ DEBUG: Detect real file format from magic bytes
-    try {
-      const arrayBuffer = await file.slice(0, 12).arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-      const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
-      
-      let realFormat = 'Unknown';
-      if (bytes[0] === 0xFF && bytes[1] === 0xD8) {
-        realFormat = 'JPEG';
-      } else if (bytes[0] === 0x89 && bytes[1] === 0x50) {
-        realFormat = 'PNG';
-      } else if (bytes[0] === 0x52 && bytes[1] === 0x49) {
-        realFormat = 'WEBP';
-      } else if (bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70) {
-        const brand = String.fromCharCode(bytes[8], bytes[9], bytes[10], bytes[11]);
-        realFormat = `HEIC/HEIF (${brand})`;
-      }
-      
-      alert(
-        `📄 FILE DEBUG INFO\n\n` +
-        `Name: ${file.name}\n` +
-        `Claimed Type: ${file.type}\n` +
-        `Actual Format: ${realFormat}\n` +
-        `Size: ${(file.size / 1024).toFixed(1)} KB\n\n` +
-        `Magic Bytes: ${hex}`
-      );
-    } catch (err) {
-      alert(`Failed to read file signature: ${err}`);
-    }
-
-    // Original validation
+    // Validate format
     if (!SUPPORTED.includes(file.type.toLowerCase())) {
       errors.push(`${file.name}: Unsupported format`);
       continue;
@@ -148,13 +118,27 @@ export default function MobileView() {
       continue;
     }
 
-    validFiles.push({
-      id: `${Date.now()}-${Math.random()}`,
-      original: file,
-      originalUrl: URL.createObjectURL(file),
-      originalSize: file.size,
-      status: 'pending',
-    });
+    try {
+      // ⭐ CRITICAL FIX: Read file into memory NOW before Samsung revokes access!
+      const buffer = await file.arrayBuffer();
+      
+      // Create a NEW File object from the buffer - this one won't be revoked
+      const stableFile = new File([buffer], file.name, {
+        type: file.type,
+        lastModified: file.lastModified,
+      });
+
+      validFiles.push({
+        id: `${Date.now()}-${Math.random()}`,
+        original: stableFile,  // ⭐ Use the stable copy, not the original
+        originalUrl: URL.createObjectURL(stableFile),
+        originalSize: stableFile.size,
+        status: 'pending',
+      });
+    } catch (err) {
+      console.error('Failed to read file:', err);
+      errors.push(`${file.name}: Could not read file. Please try again.`);
+    }
   }
 
   if (errors.length > 0) setError(errors.join(', '));
@@ -162,7 +146,6 @@ export default function MobileView() {
 
   setFiles((prev) => [...prev, ...validFiles]);
 }, []);
-
   // Sync filename with uploaded file
 useEffect(() => {
   if (files.length === 1) {
