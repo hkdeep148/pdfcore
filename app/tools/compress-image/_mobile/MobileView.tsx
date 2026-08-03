@@ -153,13 +153,7 @@ useEffect(() => {
 
   const compressFile = async (fileStatus: FileStatus): Promise<FileStatus> => {
   try {
-    // 🔍 Show file info in an alert
-    alert(`Starting compression:\nName: ${fileStatus.original.name}\nType: ${fileStatus.original.type}\nSize: ${(fileStatus.original.size / 1024).toFixed(0)} KB`);
-    
     const { compressImage } = await import('../lib/compressor');
-    
-    alert('✅ Compressor library loaded successfully');
-    
     const result = await compressImage(fileStatus.original, {
       mode,
       quality,
@@ -167,9 +161,6 @@ useEffect(() => {
       outputFormat,
       maxDimension,
     });
-    
-    alert(`✅ Compression success!\nOriginal: ${fileStatus.original.size} bytes\nCompressed: ${result.compressedSize} bytes\nReduction: ${result.reduction}%`);
-    
     const compressedUrl = URL.createObjectURL(result.blob);
     return {
       ...fileStatus,
@@ -180,18 +171,11 @@ useEffect(() => {
       reduction: result.reduction,
     };
   } catch (err) {
-    // 🚨 THIS IS WHAT YOU NEED - show the actual error
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    const errorStack = err instanceof Error ? err.stack : 'No stack';
-    
-    alert(`❌ COMPRESSION FAILED\n\nError: ${errorMsg}\n\nStack:\n${errorStack?.slice(0, 500)}`);
-    
-    console.error('❌ Full error:', err);
-    
+    console.error('Compression failed:', err);
     return {
       ...fileStatus,
       status: 'error',
-      error: errorMsg,
+      error: err instanceof Error ? err.message : 'Compression failed',
     };
   }
 };

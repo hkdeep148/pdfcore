@@ -1,13 +1,7 @@
 'use client';
 
-/**
- * Image compressor using jSquash (Squoosh's engines).
- * Uses MozJPEG for JPEG, standard PNG encoder, and libwebp for WebP.
- * For PNG photos, users should convert to WEBP or JPG for best compression.
- */
-
 export type CompressionMode = 'quality' | 'size';
-export type OutputFormat = 'same' | 'image/jpeg' | 'image/png' | 'image/webp';
+export type OutputFormat = 'image/jpeg' | 'image/webp';
 
 export interface CompressOptions {
   mode: CompressionMode;
@@ -33,12 +27,16 @@ export async function compressImage(
 ): Promise<CompressResult> {
   const originalSize = file.size;
 
-  try {
-    const result = await compressWithJSquash(file, options);
+  console.log('🔵 [Compressor] Starting');
+  console.log('🔵 File:', file.name, file.type, `${(file.size / 1024).toFixed(0)}KB`);
 
-    // If compressed is larger, return original
+  // ⭐ Try jSquash first
+  try {
+    console.log('🔵 Attempting jSquash...');
+    const result = await compressWithJSquash(file, options);
+    
     if (result.blob.size >= originalSize) {
-      console.log('Compressed larger than original, keeping original');
+      console.log('⚠️ Compressed larger than original');
       return {
         blob: file,
         format: file.type,
@@ -48,11 +46,9 @@ export async function compressImage(
       };
     }
 
-    const reduction = Math.max(
-      0,
-      Math.round(((originalSize - result.blob.size) / originalSize) * 100)
-    );
-
+    const reduction = Math.max(0, Math.round(((originalSize - result.blob.size) / originalSize) * 100));
+    console.log('✅ jSquash success:', `${reduction}% reduction`);
+    
     return {
       blob: result.blob,
       format: result.format,
@@ -61,8 +57,30 @@ export async function compressImage(
       reduction,
     };
   } catch (err) {
-    console.warn('jSquash failed, using fallback:', err);
-    return await compressWithFallback(file, options);
+    console.warn('⚠️ jSquash failed:', err instanceof Error ? err.message : err);
+  }
+
+  // ⭐ Try browser-image-compression fallback
+  try {
+    console.log('🟡 Attempting browser-image-compression fallback...');
+    const result = await compressWithFallback(file, options);
+    console.log('✅ Fallback success');
+    return result;
+  } catch (err) {
+    console.warn('⚠️ Fallback also failed:', err instanceof Error ? err.message : err);
+  }
+
+  // ⭐ Last resort: Pure Canvas API (works on ANY image the browser can display)
+  try {
+    console.log('🟠 Attempting Canvas fallback (last resort)...');
+    const result = await compressWithCanvas(file, options);
+    console.log('✅ Canvas success');
+    return result;
+  } catch (err) {
+    console.error('❌ All compression methods failed:', err);
+    throw new Error(
+      `Unable to compress this image. It may be corrupted or in an unsupported format. Try re-saving the image and try again.`
+    );
   }
 }
 
@@ -75,28 +93,23 @@ async function compressWithJSquash(
     mode,
     quality = 75,
     targetSizeKB = 500,
-    outputFormat = 'same',
+    outputFormat = 'image/jpeg',
     maxDimension = 0,
     onProgress,
   } = options;
 
   onProgress?.('Decoding image...');
-
   const imageData = await decodeImage(file);
-  const targetFormat = getTargetFormat(file.type, outputFormat);
+  const targetFormat = outputFormat;
 
-  // Optional resize
   let finalImageData = imageData;
-  if (
-    maxDimension > 0 &&
-    (imageData.width > maxDimension || imageData.height > maxDimension)
-  ) {
+  if (maxDimension > 0 && (imageData.width > maxDimension || imageData.height > maxDimension)) {
     onProgress?.('Resizing image...');
     finalImageData = await resizeImage(imageData, maxDimension);
   }
 
-  onProgress?.(`Compressing to ${getFormatName(targetFormat)}...`);
-
+  onProgress?.(`Compressing...`);
+  
   let blob: Blob;
   if (mode === 'quality') {
     blob = await encodeImage(finalImageData, targetFormat, quality);
@@ -145,11 +158,6 @@ async function encodeImage(
       auto_subsample: true,
     });
     return new Blob([buffer], { type: 'image/jpeg' });
-  } else if (format === 'image/png') {
-    // Standard PNG encoding - PNG is lossless, minimal compression
-    const pngModule = await import('@jsquash/png');
-    const buffer = await pngModule.encode(imageData);
-    return new Blob([buffer], { type: 'image/png' });
   } else if (format === 'image/webp') {
     const webpModule = await import('@jsquash/webp');
     const buffer = await webpModule.encode(imageData, {
@@ -164,10 +172,7 @@ async function encodeImage(
 }
 
 // ============ RESIZE IMAGE ============
-async function resizeImage(
-  imageData: ImageData,
-  maxDimension: number
-): Promise<ImageData> {
+async function resizeImage(imageData: ImageData, maxDimension: number): Promise<ImageData> {
   const { width, height } = imageData;
   let newWidth = width;
   let newHeight = height;
@@ -217,7 +222,6 @@ async function compressToTargetSize(
     iteration++;
     const mid = Math.floor((low + high) / 2);
     onProgress?.(`Optimizing (${iteration}/${maxIterations})...`);
-
     const blob = await encodeImage(imageData, format, mid);
 
     if (blob.size <= targetBytes) {
@@ -231,36 +235,7 @@ async function compressToTargetSize(
   return bestBlob || (await encodeImage(imageData, format, 1));
 }
 
-// ============ HELPERS ============
-function getTargetFormat(originalMime: string, outputFormat: OutputFormat): string {
-  if (outputFormat === 'same') {
-    const mime = originalMime.toLowerCase();
-    if (mime === 'image/jpg') return 'image/jpeg';
-    return mime;
-  }
-  return outputFormat;
-}
-
-function getFormatName(mime: string): string {
-  const map: Record<string, string> = {
-    'image/jpeg': 'JPG',
-    'image/png': 'PNG',
-    'image/webp': 'WEBP',
-  };
-  return map[mime] || 'image';
-}
-
-export function getFileExtension(mimeType: string): string {
-  const map: Record<string, string> = {
-    'image/jpeg': 'jpg',
-    'image/jpg': 'jpg',
-    'image/png': 'png',
-    'image/webp': 'webp',
-  };
-  return map[mimeType.toLowerCase()] || 'jpg';
-}
-
-// ============ FALLBACK ============
+// ============ BROWSER-IMAGE-COMPRESSION FALLBACK ============
 async function compressWithFallback(
   file: File,
   options: CompressOptions
@@ -269,12 +244,9 @@ async function compressWithFallback(
     mode,
     quality = 75,
     targetSizeKB = 500,
-    outputFormat = 'same',
+    outputFormat = 'image/jpeg',
     maxDimension = 0,
-    onProgress,
   } = options;
-
-  onProgress?.('Using fallback compression...');
 
   const imageCompression = (await import('browser-image-compression')).default;
 
@@ -293,15 +265,10 @@ async function compressWithFallback(
     compressionOptions.maxWidthOrHeight = maxDimension;
   }
 
-  if (outputFormat !== 'same') {
-    compressionOptions.fileType = outputFormat;
-  }
+  compressionOptions.fileType = outputFormat;
 
   const compressed = await imageCompression(file, compressionOptions);
-  const reduction = Math.max(
-    0,
-    Math.round(((file.size - compressed.size) / file.size) * 100)
-  );
+  const reduction = Math.max(0, Math.round(((file.size - compressed.size) / file.size) * 100));
 
   return {
     blob: compressed,
@@ -310,4 +277,110 @@ async function compressWithFallback(
     compressedSize: compressed.size,
     reduction,
   };
+}
+
+// ============ ⭐ CANVAS FALLBACK (LAST RESORT) ============
+// This works on ANY image the browser can display
+async function compressWithCanvas(
+  file: File,
+  options: CompressOptions
+): Promise<CompressResult> {
+  const {
+    quality = 75,
+    outputFormat = 'image/jpeg',
+    maxDimension = 0,
+  } = options;
+
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    
+    // Set timeout for slow loading
+    const timeoutId = setTimeout(() => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Image load timeout (30s)'));
+    }, 30000);
+
+    img.onload = () => {
+      clearTimeout(timeoutId);
+      URL.revokeObjectURL(url);
+      
+      try {
+        // Calculate dimensions
+        let width = img.naturalWidth;
+        let height = img.naturalHeight;
+
+        if (maxDimension > 0) {
+          if (width > height && width > maxDimension) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else if (height > maxDimension) {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        // Create canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas not supported'));
+          return;
+        }
+
+        // Enable high quality rendering
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+
+        // Draw image to canvas
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to blob
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('Canvas toBlob failed'));
+              return;
+            }
+
+            const reduction = Math.max(0, Math.round(((file.size - blob.size) / file.size) * 100));
+
+            resolve({
+              blob,
+              format: outputFormat,
+              originalSize: file.size,
+              compressedSize: blob.size,
+              reduction,
+            });
+          },
+          outputFormat,
+          quality / 100
+        );
+      } catch (err) {
+        reject(err);
+      }
+    };
+
+    img.onerror = () => {
+      clearTimeout(timeoutId);
+      URL.revokeObjectURL(url);
+      reject(new Error('Image failed to load - file may be corrupted'));
+    };
+
+    img.src = url;
+  });
+}
+
+// ============ HELPER ============
+export function getFileExtension(mimeType: string): string {
+  const map: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/jpg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+  };
+  return map[mimeType.toLowerCase()] || 'jpg';
 }
