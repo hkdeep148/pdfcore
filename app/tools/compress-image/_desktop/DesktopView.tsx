@@ -95,39 +95,91 @@ export default function DesktopView() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFiles = useCallback((newFiles: File[]) => {
-    
-    const SUPPORTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    const MAX_SIZE = 50 * 1024 * 1024;
+  // ⭐ UPDATED: Async + reads file into memory immediately (Samsung fix)
+  const handleFiles = useCallback(async (newFiles: File[]) => {
+  const SUPPORTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const MAX_SIZE = 50 * 1024 * 1024;
 
-    const validFiles: FileStatus[] = [];
-    const errors: string[] = [];
+  const validFiles: FileStatus[] = [];
+  const errors: string[] = [];
 
-    for (const file of newFiles) {
-      if (!SUPPORTED.includes(file.type.toLowerCase())) {
-        errors.push(`${file.name}: Unsupported format`);
-        continue;
-      }
-      if (file.size > MAX_SIZE) {
-        errors.push(`${file.name}: Too large (max 50 MB)`);
-        continue;
-      }
-
-      validFiles.push({
-        id: `${Date.now()}-${Math.random()}`,
-        original: file,
-        originalUrl: URL.createObjectURL(file),
-        originalSize: file.size,
-        status: 'pending',
-      });
+  for (const file of newFiles) {
+    // Validate format
+    if (!SUPPORTED.includes(file.type.toLowerCase())) {
+      errors.push(`${file.name}: Unsupported format`);
+      continue;
+    }
+    if (file.size > MAX_SIZE) {
+      errors.push(`${file.name}: Too large (max 50 MB)`);
+      continue;
     }
 
-    if (errors.length > 0) setError(errors.join(', '));
-    else setError(null);
+    // ⭐ Try to read file with retry logic (Samsung fix)
+    let stableFile: File | null = null;
 
-    setFiles((prev) => [...prev, ...validFiles]);
-  }, []);
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const buffer = await file.arrayBuffer();
+        stableFile = new File([buffer], file.name, {
+          type: file.type,
+          lastModified: file.lastModified,
+        });
+        break; // Success — exit retry loop
+      } catch (err) {
+        console.warn(`⚠️ Read attempt ${attempt}/3 failed for ${file.name}:`, err);
+        
+        if (attempt < 3) {
+          // Wait a bit before retry
+          await new Promise(resolve => setTimeout(resolve, 100 * attempt));
+        }
+      }
+    }
 
+    // ⭐ If all retries failed, try using createObjectURL directly as fallback
+    if (!stableFile) {
+      try {
+        // Last resort: use the file directly without reading into memory
+        // This works on some Samsung devices even when arrayBuffer() fails
+        const url = URL.createObjectURL(file);
+        
+        // Test if URL is accessible by creating an image
+        const isAccessible = await new Promise<boolean>((resolve) => {
+          const img = new Image();
+          img.onload = () => { resolve(true); URL.revokeObjectURL(url); };
+          img.onerror = () => { resolve(false); URL.revokeObjectURL(url); };
+          img.src = url;
+          // Timeout after 3 seconds
+          setTimeout(() => resolve(false), 3000);
+        });
+
+        if (isAccessible) {
+          // File is accessible, use it directly
+          stableFile = file;
+          console.log('✅ Using file directly (without buffer copy)');
+        }
+      } catch (err) {
+        console.error('❌ All read methods failed:', err);
+      }
+    }
+
+    if (stableFile) {
+      validFiles.push({
+        id: `${Date.now()}-${Math.random()}`,
+        original: stableFile,
+        originalUrl: URL.createObjectURL(stableFile),
+        originalSize: stableFile.size,
+        status: 'pending',
+      });
+    } else {
+      errors.push(`${file.name}: Could not read file. Please try selecting it again.`);
+    }
+  }
+
+  if (errors.length > 0) setError(errors.join(', '));
+  else setError(null);
+
+  setFiles((prev) => [...prev, ...validFiles]);
+}, []);
   useToolFileReceiver((files: File[]) => handleFiles(files));
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -648,7 +700,7 @@ export default function DesktopView() {
       ) : (
         <div className="flex-1 flex flex-col bg-white rounded-2xl border border-[#E8EDF5] shadow-[0_4px_20px_-4px_rgba(15,23,42,0.06)] overflow-hidden">
           
-          {/* ⭐ MINIMAL SUCCESS BAR */}
+          {/* MINIMAL SUCCESS BAR */}
           {hasCompleted && (
             <div className="flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
               <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shrink-0">
@@ -700,7 +752,7 @@ export default function DesktopView() {
             </div>
           )}
 
-          {/* ⭐ FILE LIST — Horizontal Cards */}
+          {/* FILE LIST — Horizontal Cards */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {files.map((file) => (
               <FileCard

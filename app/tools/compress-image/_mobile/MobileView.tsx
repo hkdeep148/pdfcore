@@ -118,26 +118,64 @@ export default function MobileView() {
       continue;
     }
 
-    try {
-      // ⭐ CRITICAL FIX: Read file into memory NOW before Samsung revokes access!
-      const buffer = await file.arrayBuffer();
-      
-      // Create a NEW File object from the buffer - this one won't be revoked
-      const stableFile = new File([buffer], file.name, {
-        type: file.type,
-        lastModified: file.lastModified,
-      });
+    // ⭐ Try to read file with retry logic (Samsung fix)
+    let stableFile: File | null = null;
 
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const buffer = await file.arrayBuffer();
+        stableFile = new File([buffer], file.name, {
+          type: file.type,
+          lastModified: file.lastModified,
+        });
+        break; // Success — exit retry loop
+      } catch (err) {
+        console.warn(`⚠️ Read attempt ${attempt}/3 failed for ${file.name}:`, err);
+        
+        if (attempt < 3) {
+          // Wait a bit before retry
+          await new Promise(resolve => setTimeout(resolve, 100 * attempt));
+        }
+      }
+    }
+
+    // ⭐ If all retries failed, try using createObjectURL directly as fallback
+    if (!stableFile) {
+      try {
+        // Last resort: use the file directly without reading into memory
+        // This works on some Samsung devices even when arrayBuffer() fails
+        const url = URL.createObjectURL(file);
+        
+        // Test if URL is accessible by creating an image
+        const isAccessible = await new Promise<boolean>((resolve) => {
+          const img = new Image();
+          img.onload = () => { resolve(true); URL.revokeObjectURL(url); };
+          img.onerror = () => { resolve(false); URL.revokeObjectURL(url); };
+          img.src = url;
+          // Timeout after 3 seconds
+          setTimeout(() => resolve(false), 3000);
+        });
+
+        if (isAccessible) {
+          // File is accessible, use it directly
+          stableFile = file;
+          console.log('✅ Using file directly (without buffer copy)');
+        }
+      } catch (err) {
+        console.error('❌ All read methods failed:', err);
+      }
+    }
+
+    if (stableFile) {
       validFiles.push({
         id: `${Date.now()}-${Math.random()}`,
-        original: stableFile,  // ⭐ Use the stable copy, not the original
+        original: stableFile,
         originalUrl: URL.createObjectURL(stableFile),
         originalSize: stableFile.size,
         status: 'pending',
       });
-    } catch (err) {
-      console.error('Failed to read file:', err);
-      errors.push(`${file.name}: Could not read file. Please try again.`);
+    } else {
+      errors.push(`${file.name}: Could not read file. Please try selecting it again.`);
     }
   }
 
