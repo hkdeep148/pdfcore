@@ -39,11 +39,16 @@ export const TOOL_FILE_REGISTRY: Record<string, ToolFileConfig> = {
   },
 
   // ============ OPTIMIZE ============
-  '/tools/compress-pdf': {
-    path: '/tools/compress-pdf',
-    accept: 'pdf',
-    mode: 'multiple',
-  },
+'/tools/compress-pdf': {
+  path: '/tools/compress-pdf',
+  accept: 'pdf',
+  mode: 'multiple',
+},
+'/tools/compress-image': {
+  path: '/tools/compress-image',
+  accept: 'image',
+  mode: 'multiple',
+},
 
   // ============ EDIT ============
   '/tools/rotate-pdf': {

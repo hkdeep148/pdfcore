@@ -140,9 +140,27 @@ function calculateToolScore(
       break;
 
     case '/tools/image-to-pdf':
-      // Only relevant for images
-      if (analysis.type === 'image') score += 100;
-      else score += 5;
+      // Only relevant for images - lower score for large images (compress is better)
+      if (analysis.type === 'image') {
+        if (analysis.sizeInKB > 5000) score += 60;      // Large image → compress first
+        else if (analysis.sizeInKB > 2000) score += 75;  // Medium → still good for PDF
+        else score += 100;                                 // Small → PDF is best
+      } else {
+        score += 5;
+      }
+      break;
+
+    case '/tools/compress-image':
+      // Best for large images
+      if (analysis.type === 'image') {
+        if (analysis.sizeInKB > 5000) score += 100;     // 5+ MB → BEST MATCH ⭐
+        else if (analysis.sizeInKB > 2000) score += 85;  // 2-5 MB → great
+        else if (analysis.sizeInKB > 500) score += 70;   // 500KB-2MB → good
+        else if (analysis.sizeInKB > 100) score += 50;   // 100-500KB → ok
+        else score += 20;                                  // Small → low priority
+      } else {
+        score += 5;
+      }
       break;
 
     case '/tools/rotate-pdf':
@@ -277,39 +295,43 @@ export async function analyzeFiles(files: File[]): Promise<FileAnalysis> {
   });
 
   // ⭐ Filter out irrelevant tools based on file type
-const relevantTools = tools.filter((tool) => {
-  // If user uploaded PDFs → hide "Image to PDF" (only for images)
-  if (type === 'pdf' && tool.href === '/tools/image-to-pdf') {
-    return false;
-  }
-  
-  // If user uploaded Images → hide all PDF-specific tools
-  if (type === 'image') {
-    const pdfOnlyTools = [
-      '/tools/pdf-to-image',
-      '/tools/merge-pdf',
-      '/tools/split-pdf',
-      '/tools/organize-pdf',
-      '/tools/compress-pdf',
-      '/tools/rotate-pdf',
-      '/tools/sign-pdf',
-      '/tools/add-watermark',
-      '/tools/unlock-pdf',
-    ];
-    return !pdfOnlyTools.includes(tool.href);
-  }
-  
-  return true;
-});
+  const relevantTools = tools.filter((tool) => {
+    // If user uploaded PDFs → hide image-only tools
+    if (type === 'pdf') {
+      const imageOnlyTools = [
+        '/tools/image-to-pdf',
+        '/tools/compress-image',
+      ];
+      return !imageOnlyTools.includes(tool.href);
+    }
+    
+    // If user uploaded Images → hide all PDF-specific tools
+    if (type === 'image') {
+      const pdfOnlyTools = [
+        '/tools/pdf-to-image',
+        '/tools/merge-pdf',
+        '/tools/split-pdf',
+        '/tools/organize-pdf',
+        '/tools/compress-pdf',
+        '/tools/rotate-pdf',
+        '/tools/sign-pdf',
+        '/tools/add-watermark',
+        '/tools/unlock-pdf',
+      ];
+      return !pdfOnlyTools.includes(tool.href);
+    }
+    
+    return true;
+  });
 
-// Score only relevant tools
-const scoredTools = relevantTools.map((tool) => ({
-  tool,
-  score: calculateToolScore(tool.href, scoringContext),
-}));
+  // Score only relevant tools
+  const scoredTools = relevantTools.map((tool) => ({
+    tool,
+    score: calculateToolScore(tool.href, scoringContext),
+  }));
 
-// Sort by score (highest first)
-scoredTools.sort((a, b) => b.score - a.score);
+  // Sort by score (highest first)
+  scoredTools.sort((a, b) => b.score - a.score);
 
   // Top recommendation is the highest scored tool
   const topRecommendation = scoredTools[0].tool;
@@ -341,6 +363,13 @@ scoredTools.sort((a, b) => b.score - a.score);
       topReason = isMultiple 
         ? `Combine ${images.length} images into one PDF`
         : 'Convert image to PDF';
+      break;
+    case '/tools/compress-image':
+      topReason = isMultiple
+        ? `Reduce size of ${images.length} images`
+        : totalMB > 5
+          ? `Reduce ${totalSize} to save space`
+          : 'Reduce image file size';
       break;
     case '/tools/sign-pdf':
       topReason = hasForms 

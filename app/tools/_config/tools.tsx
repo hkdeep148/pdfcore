@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Files,
   PenTool,
+  ImageDown,
 } from 'lucide-react';
 import { Tool } from '../_types';
 
@@ -30,7 +31,7 @@ export const tools: (Tool & {
   color: string;
   bgColor: string;
   mobileUpload: MobileUploadInfo;
-  popular?: boolean;              // ⭐ Marks popular tools shown on homepage
+  popular?: boolean;
 })[] = [
   {
     href: '/tools/image-to-pdf',
@@ -40,7 +41,7 @@ export const tools: (Tool & {
     color: '#8B3DFF',
     bgColor: '#F3E8FF',
     icon: <ImageIcon size={28} strokeWidth={2} />,
-    popular: true,                // ⭐ POPULAR
+    popular: true,
     mobileUpload: {
       titleLine1: 'Convert Images',
       titleLine2: 'to PDF',
@@ -61,7 +62,7 @@ export const tools: (Tool & {
     color: '#16A34A',
     bgColor: '#DCFCE7',
     icon: <ImageIcon size={28} strokeWidth={2} />,
-    popular: true,                // ⭐ POPULAR
+    popular: true,
     mobileUpload: {
       titleLine1: 'Convert PDF',
       titleLine2: 'to Images',
@@ -82,7 +83,7 @@ export const tools: (Tool & {
     color: '#2563EB',
     bgColor: '#EAF1FF',
     icon: <Combine size={28} strokeWidth={2} />,
-    popular: true,                // ⭐ POPULAR
+    popular: true,
     mobileUpload: {
       titleLine1: 'Merge PDF',
       titleLine2: 'Files',
@@ -103,7 +104,7 @@ export const tools: (Tool & {
     color: '#F97316',
     bgColor: '#FFEDD5',
     icon: <SplitSquareHorizontal size={28} strokeWidth={2} />,
-    popular: true,                // ⭐ POPULAR
+    popular: true,
     mobileUpload: {
       titleLine1: 'Split PDF',
       titleLine2: 'Pages',
@@ -124,7 +125,6 @@ export const tools: (Tool & {
     color: '#7C3AED',
     bgColor: '#EDE9FE',
     icon: <Files size={28} strokeWidth={2} />,
-    // ❌ Not popular - shown only on /tools page
     mobileUpload: {
       titleLine1: 'Organize',
       titleLine2: 'PDF Pages',
@@ -145,7 +145,7 @@ export const tools: (Tool & {
     color: '#F43F5E',
     bgColor: '#FFE4E6',
     icon: <Maximize2 size={28} strokeWidth={2} />,
-    popular: true,                // ⭐ POPULAR
+    popular: true,
     mobileUpload: {
       titleLine1: 'Compress',
       titleLine2: 'PDF',
@@ -166,11 +166,11 @@ export const tools: (Tool & {
     color: '#DB2777',
     bgColor: '#FCE7F3',
     icon: <Unlock size={28} strokeWidth={2} />,
-    popular: true,                // ⭐ POPULAR
+    popular: true,
     mobileUpload: {
-      titleLine1: 'Unlock PDF',
-      titleLine2: 'Files',
-      titleAccent: 'Unlock',
+      titleLine1: 'Unlock',                           // ⭐ FIXED: Was "Unlock PDF"
+      titleLine2: 'PDF Files',                        // ⭐ FIXED: Was "Files"
+      titleAccent: 'PDF',                             // ⭐ FIXED: Was "Unlock"
       description: 'Remove password protection\nfrom PDFs.',
       uploadTitle: 'Upload PDF',
       uploadSubtitle: 'Drag & drop your PDF here\nor choose a file',
@@ -187,11 +187,11 @@ export const tools: (Tool & {
     color: '#1E40AF',
     bgColor: '#DBEAFE',
     icon: <PenTool size={28} strokeWidth={2} />,
-    popular: true,                // ⭐ POPULAR
+    popular: true,
     mobileUpload: {
       titleLine1: 'Sign PDF',
       titleLine2: 'Documents',
-      titleAccent: 'Sign',
+      titleAccent: 'Documents',                       // ⭐ FIXED: Was "Sign"
       description: 'Add your signature\nto PDF files easily.',
       uploadTitle: 'Upload PDF',
       uploadSubtitle: 'Drag & drop your PDF here\nor choose a file',
@@ -208,7 +208,7 @@ export const tools: (Tool & {
     color: '#F59E0B',
     bgColor: '#FEF3C7',
     icon: <RotateCw size={28} strokeWidth={2} />,
-    popular: true,                // ⭐ POPULAR
+    popular: true,
     mobileUpload: {
       titleLine1: 'Rotate PDF',
       titleLine2: 'Pages',
@@ -222,6 +222,27 @@ export const tools: (Tool & {
     },
   },
   {
+    href: '/tools/compress-image',
+    label: 'Compress Image',
+    description: 'Reduce image file size without losing quality',
+    category: 'optimize',
+    color: '#0EA5E9',
+    bgColor: '#E0F2FE',
+    icon: <ImageDown size={28} strokeWidth={2} />,
+    popular: true,
+    mobileUpload: {
+      titleLine1: 'Compress',
+      titleLine2: 'Images',
+      titleAccent: 'Images',                          // ⭐ FIXED: Was "Compress"
+      description: 'Reduce image file size\nwhile keeping quality.',
+      uploadTitle: 'Upload Images',
+      uploadSubtitle: 'Drag & drop images here\nor choose files',
+      buttonText: 'Choose Images',
+      fileSizeNote: 'Supports JPG, PNG, WEBP up to 50 MB each',
+      fileType: 'image',
+    },
+  },
+  {
     href: '/tools/add-watermark',
     label: 'Add Watermark',
     description: 'Add custom text watermarks to your PDFs',
@@ -229,11 +250,10 @@ export const tools: (Tool & {
     color: '#0EA5A4',
     bgColor: '#CCFBF1',
     icon: <PenTool size={28} strokeWidth={2} />,
-    // ❌ Not popular - shown only on /tools page
     mobileUpload: {
       titleLine1: 'Add Watermark',
       titleLine2: 'to PDF',
-      titleAccent: 'Watermark',
+      titleAccent: 'PDF',                             // ⭐ FIXED: Was "Watermark"
       description: 'Add text or image watermarks\nto your PDF.',
       uploadTitle: 'Upload PDF',
       uploadSubtitle: 'Drag & drop your PDF here\nor choose a file',
@@ -244,17 +264,9 @@ export const tools: (Tool & {
   },
 ];
 
-// ============ ⭐ DERIVED HELPERS (computed once at module load) ============
-
-/**
- * Popular tools shown on homepage.
- * Computed once when module loads — zero runtime cost per render.
- */
+// ============ ⭐ DERIVED HELPERS ============
 export const popularTools = tools.filter((tool) => tool.popular);
 
-/**
- * Tools grouped by category (useful for categorized menus/pages).
- */
 export const toolsByCategory = tools.reduce((acc, tool) => {
   if (!acc[tool.category]) acc[tool.category] = [];
   acc[tool.category].push(tool);
@@ -271,10 +283,6 @@ export const categoryLabels: Record<string, string> = {
 };
 
 // ============ HELPERS ============
-
-/**
- * Get tool info by current URL path.
- */
 export function getToolByPath(pathname: string): (typeof tools)[0] | undefined {
   return tools.find((t) => t.href === pathname);
 }

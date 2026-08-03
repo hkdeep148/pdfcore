@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Folder, ArrowUp, ShieldCheck } from 'lucide-react';
+import { Upload, Zap, FileText, Package, Image as ImageIcon } from 'lucide-react';
 
 export interface MobileEmptyStateProps {
   titleLine1: string;
@@ -33,22 +33,25 @@ export default function MobileEmptyState({
   const line2After = line2Parts[1] || '';
 
   return (
-    <div className="bg-white">
-      <div className="px-6 pt-6 pb-6">
-        {/* ============ TITLE ============ */}
+    <div className="lg:hidden flex-1 bg-[#F8F9FC] font-['Inter',sans-serif] text-[#07122E]">
+      <main className="max-w-lg mx-auto px-4 pt-6 pb-8">
+        
+        {/* ============ COMPACT HEADER ============ */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="mb-6"
+          className="text-center mb-6"
         >
-          <h1 className="text-[26px] font-extrabold text-[#07122E] leading-[1.15] mb-2">
+          <h1 className="text-[26px] font-extrabold tracking-tight text-[#07122E] leading-tight mb-1">
             {titleLine1}{' '}
             {line2Before}
-            <span className="text-[#2563EB]">{titleAccent}</span>
+            <span className="bg-gradient-to-r from-[#4F46E5] to-[#6D5DF6] bg-clip-text text-transparent">
+              {titleAccent}
+            </span>
             {line2After}
           </h1>
-          <p className="text-[14px] text-[#5B6472] leading-relaxed">
+          <p className="text-[13px] text-[#6B7280] font-medium">
             {description.replace(/\n/g, ' ')}
           </p>
         </motion.div>
@@ -60,51 +63,90 @@ export default function MobileEmptyState({
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="w-full bg-white rounded-3xl border-2 border-dashed border-[#93C5FD] hover:border-[#2563EB] py-8 px-6 active:scale-[0.99] transition-all"
+          className="w-full relative border-2 border-dashed border-[#DDE5F0] hover:border-[#4F46E5]/50 active:border-[#4F46E5] bg-white rounded-2xl transition-all"
         >
-          {/* Upload Icon with Ripple */}
-          <div className="relative w-18 h-18 mx-auto mb-4" style={{ width: '72px', height: '72px' }}>
-            <div className="absolute inset-0 rounded-full bg-[#DBEAFE] animate-ping opacity-40" />
-            <div className="relative w-full h-full rounded-full bg-gradient-to-br from-[#3B82F6] to-[#2563EB] flex items-center justify-center shadow-[0_10px_30px_-6px_rgba(37,99,235,0.5)]">
-              <ArrowUp size={28} className="text-white" strokeWidth={2.5} />
+          <div className="flex flex-col items-center justify-center py-12 px-6">
+            {/* Icon */}
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#4F46E5] to-[#6D5DF6] flex items-center justify-center mb-4 shadow-[0_8px_20px_-4px_rgba(79,70,229,0.4)]">
+              <Upload size={26} className="text-white" strokeWidth={2.2} />
             </div>
+
+            {/* Title */}
+            <h2 className="text-[17px] font-bold text-[#07122E] mb-1 text-center">
+              {uploadTitle}
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-[12px] text-[#6B7280] text-center mb-4">
+              {uploadSubtitle.replace(/\n/g, ' ')}
+            </p>
+
+            {/* CTA Button (visual, whole area is button) */}
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#4F46E5] to-[#6D5DF6] text-white text-[13px] font-bold shadow-[0_4px_14px_-4px_rgba(79,70,229,0.5)]">
+              {fileType === 'image' ? (
+                <ImageIcon size={14} strokeWidth={2.5} />
+              ) : (
+                <FileText size={14} strokeWidth={2.5} />
+              )}
+              {buttonText}
+            </div>
+
+            {/* File info */}
+            <p className="text-[11px] text-[#9CA3AF] mt-4 font-medium">
+              {fileSizeNote}
+            </p>
           </div>
-
-          {/* Title */}
-          <h2 className="text-center text-[17px] font-bold text-[#07122E] mb-1.5">
-            {uploadTitle}
-          </h2>
-
-          {/* Subtitle */}
-          <p className="text-center text-[12.5px] text-[#8A93A3] mb-5">
-            {uploadSubtitle.replace(/\n/g, ' ')}
-          </p>
-
-          {/* CTA Button */}
-          <div className="w-full py-3 rounded-2xl bg-gradient-to-b from-[#3B82F6] to-[#2563EB] text-white font-bold text-[14px] flex items-center justify-center gap-2 shadow-[0_6px_20px_-6px_rgba(37,99,235,0.5)]">
-            <Folder size={16} strokeWidth={2.5} />
-            {buttonText}
-          </div>
-
-          {/* File info */}
-          <p className="text-center text-[11.5px] text-[#B0B7C3] mt-4 font-medium">
-            {fileSizeNote}
-          </p>
         </motion.button>
+
+        {/* ============ FEATURE CHIPS ============ */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="grid grid-cols-3 gap-2 mt-4"
+        >
+          <div className="flex flex-col items-center text-center p-3 rounded-xl bg-white border border-[#E8EDF5]">
+            <Zap size={16} className="text-[#4F46E5] mb-1.5" strokeWidth={2.2} />
+            <p className="text-[10px] font-bold text-[#07122E]">Fast</p>
+          </div>
+          <div className="flex flex-col items-center text-center p-3 rounded-xl bg-white border border-[#E8EDF5]">
+            {fileType === 'image' ? (
+              <ImageIcon size={16} className="text-emerald-600 mb-1.5" strokeWidth={2.2} />
+            ) : (
+              <FileText size={16} className="text-emerald-600 mb-1.5" strokeWidth={2.2} />
+            )}
+            <p className="text-[10px] font-bold text-[#07122E]">Batch</p>
+          </div>
+          <div className="flex flex-col items-center text-center p-3 rounded-xl bg-white border border-[#E8EDF5]">
+            <Package size={16} className="text-purple-600 mb-1.5" strokeWidth={2.2} />
+            <p className="text-[10px] font-bold text-[#07122E]">Private</p>
+          </div>
+        </motion.div>
 
         {/* ============ PRIVACY FOOTER ============ */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="mt-5 flex items-center justify-center gap-2"
+          transition={{ duration: 0.4, delay: 0.3 }}
+          className="mt-6 flex items-center justify-center gap-1.5 py-2"
         >
-          <ShieldCheck size={14} className="text-[#16A34A]" strokeWidth={2.5} />
-          <p className="text-[11.5px] text-[#5B6472] font-medium">
-            Your files stay private &mdash; processed on your device
+          <svg 
+            viewBox="0 0 24 24" 
+            className="w-3 h-3 text-emerald-600" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2.5" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <p className="text-[10.5px] text-[#6B7280] font-medium">
+            Your files stay private — processed on your device
           </p>
         </motion.div>
-      </div>
+
+      </main>
     </div>
   );
 }
