@@ -80,6 +80,48 @@ function getFileExtension(mimeType: string): string {
   return map[mimeType.toLowerCase()] || 'jpg';
 }
 
+/**
+ * ⭐ PERMANENT FIX: Reads file into memory using FileReader
+ * 
+ * Why FileReader instead of file.arrayBuffer():
+ * - FileReader works reliably on ALL Android versions (including Samsung)
+ * - file.arrayBuffer() can fail on Android 10+ due to Scoped Storage
+ * - FileReader was designed before Scoped Storage and has better permission handling
+ * - Once read into memory, the file can never be "revoked"
+ */
+function readFileIntoMemory(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = () => {
+      try {
+        const arrayBuffer = reader.result as ArrayBuffer;
+        
+        // Create a new File from the buffer — this copy lives in memory
+        // and can never be revoked by Android's Scoped Storage
+        const stableFile = new File([arrayBuffer], file.name, {
+          type: file.type || 'image/jpeg', // Fallback type if missing
+          lastModified: file.lastModified,
+        });
+        
+        resolve(stableFile);
+      } catch (err) {
+        reject(new Error(`Failed to create file copy: ${err}`));
+      }
+    };
+    
+    reader.onerror = () => {
+      reject(new Error(
+        reader.error?.message || 'Failed to read file. Please select the image again.'
+      ));
+    };
+    
+    // ⭐ KEY: readAsArrayBuffer triggers the read IMMEDIATELY
+    // This is more reliable than file.arrayBuffer() on Android
+    reader.readAsArrayBuffer(file);
+  });
+}
+
 // ============ MAIN COMPONENT ============
 export default function MobileView() {
   const [files, setFiles] = useState<FileStatus[]>([]);
@@ -118,55 +160,10 @@ export default function MobileView() {
       continue;
     }
 
-    // ⭐ Try to read file with retry logic (Samsung fix)
-    let stableFile: File | null = null;
-
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        const buffer = await file.arrayBuffer();
-        stableFile = new File([buffer], file.name, {
-          type: file.type,
-          lastModified: file.lastModified,
-        });
-        break; // Success — exit retry loop
-      } catch (err) {
-        console.warn(`⚠️ Read attempt ${attempt}/3 failed for ${file.name}:`, err);
-        
-        if (attempt < 3) {
-          // Wait a bit before retry
-          await new Promise(resolve => setTimeout(resolve, 100 * attempt));
-        }
-      }
-    }
-
-    // ⭐ If all retries failed, try using createObjectURL directly as fallback
-    if (!stableFile) {
-      try {
-        // Last resort: use the file directly without reading into memory
-        // This works on some Samsung devices even when arrayBuffer() fails
-        const url = URL.createObjectURL(file);
-        
-        // Test if URL is accessible by creating an image
-        const isAccessible = await new Promise<boolean>((resolve) => {
-          const img = new Image();
-          img.onload = () => { resolve(true); URL.revokeObjectURL(url); };
-          img.onerror = () => { resolve(false); URL.revokeObjectURL(url); };
-          img.src = url;
-          // Timeout after 3 seconds
-          setTimeout(() => resolve(false), 3000);
-        });
-
-        if (isAccessible) {
-          // File is accessible, use it directly
-          stableFile = file;
-          console.log('✅ Using file directly (without buffer copy)');
-        }
-      } catch (err) {
-        console.error('❌ All read methods failed:', err);
-      }
-    }
-
-    if (stableFile) {
+    try {
+      // ⭐ PERMANENT FIX: Use FileReader (most compatible with Android/Samsung)
+      const stableFile = await readFileIntoMemory(file);
+      
       validFiles.push({
         id: `${Date.now()}-${Math.random()}`,
         original: stableFile,
@@ -174,8 +171,9 @@ export default function MobileView() {
         originalSize: stableFile.size,
         status: 'pending',
       });
-    } else {
-      errors.push(`${file.name}: Could not read file. Please try selecting it again.`);
+    } catch (err) {
+      console.error('Failed to read file:', err);
+      errors.push(`${file.name}: Could not read file. Please try again.`);
     }
   }
 
