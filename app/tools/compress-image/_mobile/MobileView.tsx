@@ -152,33 +152,49 @@ useEffect(() => {
   const openFilePicker = () => fileInputRef.current?.click();
 
   const compressFile = async (fileStatus: FileStatus): Promise<FileStatus> => {
-    try {
-      const { compressImage } = await import('../lib/compressor');
-      const result = await compressImage(fileStatus.original, {
-        mode,
-        quality,
-        targetSizeKB: targetSize,
-        outputFormat,
-        maxDimension,
-      });
-      const compressedUrl = URL.createObjectURL(result.blob);
-      return {
-        ...fileStatus,
-        compressed: result.blob,
-        compressedUrl,
-        compressedSize: result.compressedSize,
-        status: 'done',
-        reduction: result.reduction,
-      };
-    } catch (err) {
-      console.error('Compression failed:', err);
-      return {
-        ...fileStatus,
-        status: 'error',
-        error: err instanceof Error ? err.message : 'Compression failed',
-      };
-    }
-  };
+  try {
+    // 🔍 Show file info in an alert
+    alert(`Starting compression:\nName: ${fileStatus.original.name}\nType: ${fileStatus.original.type}\nSize: ${(fileStatus.original.size / 1024).toFixed(0)} KB`);
+    
+    const { compressImage } = await import('../lib/compressor');
+    
+    alert('✅ Compressor library loaded successfully');
+    
+    const result = await compressImage(fileStatus.original, {
+      mode,
+      quality,
+      targetSizeKB: targetSize,
+      outputFormat,
+      maxDimension,
+    });
+    
+    alert(`✅ Compression success!\nOriginal: ${fileStatus.original.size} bytes\nCompressed: ${result.compressedSize} bytes\nReduction: ${result.reduction}%`);
+    
+    const compressedUrl = URL.createObjectURL(result.blob);
+    return {
+      ...fileStatus,
+      compressed: result.blob,
+      compressedUrl,
+      compressedSize: result.compressedSize,
+      status: 'done',
+      reduction: result.reduction,
+    };
+  } catch (err) {
+    // 🚨 THIS IS WHAT YOU NEED - show the actual error
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    const errorStack = err instanceof Error ? err.stack : 'No stack';
+    
+    alert(`❌ COMPRESSION FAILED\n\nError: ${errorMsg}\n\nStack:\n${errorStack?.slice(0, 500)}`);
+    
+    console.error('❌ Full error:', err);
+    
+    return {
+      ...fileStatus,
+      status: 'error',
+      error: errorMsg,
+    };
+  }
+};
 
   const handleCompress = async () => {
     if (files.length === 0) return;
