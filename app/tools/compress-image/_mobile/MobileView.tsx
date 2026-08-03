@@ -100,143 +100,89 @@ export default function MobileView() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const tool = getToolByPath('/tools/compress-image')!;
 
-  // ⭐ This is ONLY used by useToolFileReceiver (files already in memory)
-const handleFiles = useCallback((newFiles: File[]) => {
-  const SUPPORTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  const MAX_SIZE = 50 * 1024 * 1024;
+  // ⭐ SINGLE handleFiles function (used by both file input AND tool receiver)
+  const handleFiles = useCallback((newFiles: File[]) => {
+    const SUPPORTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const MAX_SIZE = 50 * 1024 * 1024;
 
-  const validFiles: FileStatus[] = [];
-  const errors: string[] = [];
+    const validFiles: FileStatus[] = [];
+    const errors: string[] = [];
 
-  for (const file of newFiles) {
-    if (!SUPPORTED.includes(file.type.toLowerCase())) {
-      errors.push(`${file.name}: Please select JPG, PNG, or WEBP images only`);
-      continue;
-    }
-    if (file.size > MAX_SIZE) {
-      errors.push(`${file.name}: Too large (max 50 MB)`);
-      continue;
-    }
-
-    validFiles.push({
-      id: `${Date.now()}-${Math.random()}`,
-      original: file,
-      originalUrl: URL.createObjectURL(file),
-      originalSize: file.size,
-      status: 'pending',
-    });
-  }
-
-  if (errors.length > 0) setError(errors.join(', '));
-  else setError(null);
-
-  setFiles((prev) => [...prev, ...validFiles]);
-}, []);
-  // Sync filename with uploaded file
-useEffect(() => {
-  if (files.length === 1) {
-    const name = files[0].original.name.replace(/\.[^/.]+$/, '');
-    setFilename(`${name}-compressed`);
-  } else if (files.length > 1) {
-    setFilename(`${files.length}-images-compressed`);
-  }
-}, [files.length]);
-
-  useToolFileReceiver((files: File[]) => handleFiles(files));
-
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const inputFiles = e.target.files;
-  if (!inputFiles || inputFiles.length === 0) return;
-
-  const SUPPORTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-  const MAX_SIZE = 50 * 1024 * 1024;
-
-  const validFiles: FileStatus[] = [];
-  const errors: string[] = [];
-
-  // ⭐ Read ALL files IMMEDIATELY in the event handler
-  for (let i = 0; i < inputFiles.length; i++) {
-    const file = inputFiles[i];
-
-    if (!SUPPORTED.includes(file.type.toLowerCase())) {
-      errors.push(`${file.name}: Unsupported format`);
-      continue;
-    }
-    if (file.size > MAX_SIZE) {
-      errors.push(`${file.name}: Too large (max 50 MB)`);
-      continue;
-    }
-
-    try {
-      // ⭐ Read file using FileReader INSIDE the event handler
-      const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as ArrayBuffer);
-        reader.onerror = () => reject(new Error('Failed to read file'));
-        reader.readAsArrayBuffer(file);
-      });
-
-      // Create stable File from buffer
-      const stableFile = new File([arrayBuffer], file.name, {
-        type: file.type || 'image/jpeg',
-        lastModified: file.lastModified,
-      });
+    for (const file of newFiles) {
+      if (!SUPPORTED.includes(file.type.toLowerCase())) {
+        errors.push(`${file.name}: Please select JPG, PNG, or WEBP images only`);
+        continue;
+      }
+      if (file.size > MAX_SIZE) {
+        errors.push(`${file.name}: Too large (max 50 MB)`);
+        continue;
+      }
 
       validFiles.push({
-        id: `${Date.now()}-${Math.random()}-${i}`,
-        original: stableFile,
-        originalUrl: URL.createObjectURL(stableFile),
-        originalSize: stableFile.size,
+        id: `${Date.now()}-${Math.random()}`,
+        original: file,
+        originalUrl: URL.createObjectURL(file),
+        originalSize: file.size,
         status: 'pending',
       });
-    } catch (err) {
-      console.error('Failed to read file:', file.name, err);
-      errors.push(`${file.name}: Could not read file. Please try again.`);
     }
-  }
 
-  // Reset input AFTER reading
-  e.target.value = '';
+    if (errors.length > 0) setError(errors.join(', '));
+    else setError(null);
 
-  // Update state
-  if (errors.length > 0) setError(errors.join(', '));
-  else setError(null);
-
-  if (validFiles.length > 0) {
     setFiles((prev) => [...prev, ...validFiles]);
-  }
-}, []);
+  }, []);
+
+  // Sync filename with uploaded file
+  useEffect(() => {
+    if (files.length === 1) {
+      const name = files[0].original.name.replace(/\.[^/.]+$/, '');
+      setFilename(`${name}-compressed`);
+    } else if (files.length > 1) {
+      setFilename(`${files.length}-images-compressed`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [files.length]);
+
+  // Receive files from Smart Suggestions
+  useToolFileReceiver((files: File[]) => handleFiles(files));
+
+  // ⭐ Simple file change handler
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.length) handleFiles(Array.from(e.target.files));
+    e.target.value = '';
+  };
 
   const openFilePicker = () => fileInputRef.current?.click();
 
   const compressFile = async (fileStatus: FileStatus): Promise<FileStatus> => {
-  try {
-    const { compressImage } = await import('../lib/compressor');
-    const result = await compressImage(fileStatus.original, {
-      mode,
-      quality,
-      targetSizeKB: targetSize,
-      outputFormat,
-      maxDimension,
-    });
-    const compressedUrl = URL.createObjectURL(result.blob);
-    return {
-      ...fileStatus,
-      compressed: result.blob,
-      compressedUrl,
-      compressedSize: result.compressedSize,
-      status: 'done',
-      reduction: result.reduction,
-    };
-  } catch (err) {
-    console.error('Compression failed:', err);
-    return {
-      ...fileStatus,
-      status: 'error',
-      error: err instanceof Error ? err.message : 'Compression failed',
-    };
-  }
-};
+    try {
+      const { compressImage } = await import('../lib/compressor');
+      const result = await compressImage(fileStatus.original, {
+        mode,
+        quality,
+        targetSizeKB: targetSize,
+        outputFormat,
+        maxDimension,
+      });
+      const compressedUrl = URL.createObjectURL(result.blob);
+      return {
+        ...fileStatus,
+        compressed: result.blob,
+        compressedUrl,
+        compressedSize: result.compressedSize,
+        status: 'done',
+        reduction: result.reduction,
+      };
+    } catch (err) {
+      console.error('Compression failed:', err);
+      return {
+        ...fileStatus,
+        status: 'error',
+        error: err instanceof Error ? err.message : 'Compression failed',
+      };
+    }
+  };
 
   const handleCompress = async () => {
     if (files.length === 0) return;
@@ -372,17 +318,16 @@ useEffect(() => {
 
   return (
     <ToolShellMobile fixedHeight={files.length > 0}>
-      {/* Hidden file input */}
+      {/* ⭐ Hidden file input — uses .extensions to avoid Samsung Photo Picker */}
       <input
-  ref={fileInputRef}
-  type="file"
-  className="hidden"
-  onChange={handleFileChange}
-  accept="*/*"
-  multiple
-/>
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        onChange={handleFileChange}
+        accept=".jpg,.jpeg,.png,.webp"
+        multiple
+      />
 
-      {/* Error banner */}
       {error && (
         <div className="mx-4 mt-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between shrink-0">
           <span className="text-[13px] text-red-600 font-medium">{error}</span>
@@ -392,7 +337,6 @@ useEffect(() => {
         </div>
       )}
 
-      {/* 🎊 SUCCESS SCREEN */}
       {showSuccess && hasCompleted && files[0]?.compressed && files[0]?.compressedSize ? (
         <MobileSuccessScreen
           title={completedCount === 1 ? 'Image Compressed!' : `${completedCount} Images Compressed!`}
@@ -414,10 +358,7 @@ useEffect(() => {
             ? 'Download Image' 
             : `Download All (${completedCount}) as ZIP`
           }
-          statusBadge={{
-            label: 'Compressed',
-            color: 'green',
-          }}
+          statusBadge={{ label: 'Compressed', color: 'green' }}
           onDownload={handleDownloadAll}
           onPreview={files[0].compressedUrl 
             ? () => window.open(files[0].compressedUrl, '_blank') 
@@ -427,49 +368,30 @@ useEffect(() => {
           onBack={handleBackToEdit}
         />
       ) : files.length === 0 ? (
-        /* 📤 EMPTY STATE - Uses shared component */
-        <MobileEmptyState 
-          {...tool.mobileUpload}
-          onUpload={openFilePicker}
-        />
+        <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
       ) : (
-        /* 📝 FILE LIST + SETTINGS */
         <>
-          {/* Header */}
           <MobileToolHeader
-  filename={filename}
-  onFilenameChange={setFilename}
-  onBack={handleClearAll}
-/>
+            filename={filename}
+            onFilenameChange={setFilename}
+            onBack={handleClearAll}
+          />
 
-          {/* Content Area (scrollable) */}
           <div className="flex-1 overflow-y-auto px-4 pt-2 pb-[140px] bg-[#F5F5FA]">
-            
-            {/* Files Info Header */}
             <div className="flex items-center justify-between mb-3">
               <p className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">
                 {files.length} {files.length === 1 ? 'Image' : 'Images'}
               </p>
               <div className="flex items-center gap-1">
-                <button
-                  onClick={openFilePicker}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#4F46E5] bg-[#EEF2FF] active:scale-95 transition-all"
-                >
-                  <Upload size={11} strokeWidth={2.5} />
-                  Add
+                <button onClick={openFilePicker} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-[#4F46E5] bg-[#EEF2FF] active:scale-95 transition-all">
+                  <Upload size={11} strokeWidth={2.5} />Add
                 </button>
-                <button
-                  onClick={handleClearAll}
-                  disabled={processing}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-red-600 bg-red-50 active:scale-95 transition-all disabled:opacity-50"
-                >
-                  <Trash2 size={11} strokeWidth={2.5} />
-                  Clear
+                <button onClick={handleClearAll} disabled={processing} className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-red-600 bg-red-50 active:scale-95 transition-all disabled:opacity-50">
+                  <Trash2 size={11} strokeWidth={2.5} />Clear
                 </button>
               </div>
             </div>
 
-            {/* File Cards */}
             <div className="space-y-2 mb-4">
               {files.map((file) => (
                 <FileCard
@@ -483,11 +405,7 @@ useEffect(() => {
               ))}
             </div>
 
-            {/* Settings Toggle Card */}
-            <button
-              onClick={() => setSettingsOpen(!settingsOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white border border-[#E8EDF5] active:bg-[#F8FAFF] transition-colors"
-            >
+            <button onClick={() => setSettingsOpen(!settingsOpen)} className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white border border-[#E8EDF5] active:bg-[#F8FAFF] transition-colors">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#4F46E5] to-[#6D5DF6] flex items-center justify-center">
                   <Zap size={12} className="text-white" strokeWidth={2.5} fill="currentColor" />
@@ -499,90 +417,33 @@ useEffect(() => {
                   </p>
                 </div>
               </div>
-              <svg
-                viewBox="0 0 24 24"
-                className={`w-4 h-4 text-[#6B7280] transition-transform ${settingsOpen ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg viewBox="0 0 24 24" className={`w-4 h-4 text-[#6B7280] transition-transform ${settingsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9" />
               </svg>
             </button>
 
-            {/* Settings Expanded */}
             {settingsOpen && (
               <div className="mt-2 rounded-xl bg-white border border-[#E8EDF5] p-4 space-y-4">
-                
-                {/* Mode Toggle */}
                 <div>
-                  <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-2 block">
-                    Mode
-                  </label>
+                  <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-2 block">Mode</label>
                   <div className="grid grid-cols-2 gap-1 p-1 rounded-lg bg-[#F1F5F9]">
-                    <button
-                      onClick={() => setMode('quality')}
-                      disabled={processing}
-                      className={`px-3 py-2 rounded-md text-[11px] font-bold transition-all ${
-                        mode === 'quality'
-                          ? 'bg-white text-[#4F46E5] shadow-sm'
-                          : 'text-[#6B7280]'
-                      }`}
-                    >
-                      Quality
-                    </button>
-                    <button
-                      onClick={() => setMode('size')}
-                      disabled={processing}
-                      className={`px-3 py-2 rounded-md text-[11px] font-bold transition-all ${
-                        mode === 'size'
-                          ? 'bg-white text-[#4F46E5] shadow-sm'
-                          : 'text-[#6B7280]'
-                      }`}
-                    >
-                      Target Size
-                    </button>
+                    <button onClick={() => setMode('quality')} disabled={processing} className={`px-3 py-2 rounded-md text-[11px] font-bold transition-all ${mode === 'quality' ? 'bg-white text-[#4F46E5] shadow-sm' : 'text-[#6B7280]'}`}>Quality</button>
+                    <button onClick={() => setMode('size')} disabled={processing} className={`px-3 py-2 rounded-md text-[11px] font-bold transition-all ${mode === 'size' ? 'bg-white text-[#4F46E5] shadow-sm' : 'text-[#6B7280]'}`}>Target Size</button>
                   </div>
                 </div>
 
-                {/* Compression Level */}
                 {mode === 'quality' && (
                   <div>
-                    <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-2 block">
-                      Compression Level
-                    </label>
+                    <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-2 block">Compression Level</label>
                     <div className="grid grid-cols-3 gap-1.5">
                       {COMPRESSION_LEVELS.map((preset) => {
                         const isSelected = quality === preset.value;
                         return (
-                          <button
-                            key={preset.value}
-                            onClick={() => setQuality(preset.value)}
-                            disabled={processing}
-                            className={`relative p-2.5 rounded-lg border-2 transition-all active:scale-95 ${
-                              isSelected
-                                ? 'border-[#4F46E5] bg-[#EEF2FF]'
-                                : 'border-[#E8EDF5] bg-white'
-                            } disabled:opacity-50`}
-                          >
-                            {preset.recommended && (
-                              <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[8px] font-extrabold uppercase tracking-wider shadow-sm whitespace-nowrap">
-                                Best
-                              </div>
-                            )}
-                            <div className={`text-[16px] mb-0.5 ${preset.recommended ? 'mt-1' : ''}`}>
-                              {preset.icon}
-                            </div>
-                            <div className={`text-[11px] font-extrabold ${
-                              isSelected ? 'text-[#4F46E5]' : 'text-[#07122E]'
-                            }`}>
-                              {preset.label}
-                            </div>
-                            <div className="text-[8.5px] text-[#6B7280] font-medium mt-0.5 leading-tight">
-                              {preset.description}
-                            </div>
+                          <button key={preset.value} onClick={() => setQuality(preset.value)} disabled={processing} className={`relative p-2.5 rounded-lg border-2 transition-all active:scale-95 ${isSelected ? 'border-[#4F46E5] bg-[#EEF2FF]' : 'border-[#E8EDF5] bg-white'} disabled:opacity-50`}>
+                            {preset.recommended && (<div className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-emerald-500 text-white text-[8px] font-extrabold uppercase tracking-wider shadow-sm whitespace-nowrap">Best</div>)}
+                            <div className={`text-[16px] mb-0.5 ${preset.recommended ? 'mt-1' : ''}`}>{preset.icon}</div>
+                            <div className={`text-[11px] font-extrabold ${isSelected ? 'text-[#4F46E5]' : 'text-[#07122E]'}`}>{preset.label}</div>
+                            <div className="text-[8.5px] text-[#6B7280] font-medium mt-0.5 leading-tight">{preset.description}</div>
                           </button>
                         );
                       })}
@@ -590,169 +451,60 @@ useEffect(() => {
                   </div>
                 )}
 
-                {/* Size Mode */}
                 {mode === 'size' && (
                   <div>
-                    <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-2 block">
-                      Target Size
-                    </label>
+                    <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-2 block">Target Size</label>
                     <div className="flex items-center gap-2 mb-2">
-                      <input
-                        type="number"
-                        min="10"
-                        max="10240"
-                        value={targetSize}
-                        onChange={(e) => setTargetSize(Number(e.target.value))}
-                        disabled={processing}
-                        className="flex-1 px-3 py-2 rounded-lg border border-[#E8EDF5] text-[13px] font-semibold text-[#07122E] focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#EEF2FF] disabled:opacity-50"
-                      />
+                      <input type="number" min="10" max="10240" value={targetSize} onChange={(e) => setTargetSize(Number(e.target.value))} disabled={processing} className="flex-1 px-3 py-2 rounded-lg border border-[#E8EDF5] text-[13px] font-semibold text-[#07122E] focus:outline-none focus:border-[#4F46E5] focus:ring-2 focus:ring-[#EEF2FF] disabled:opacity-50" />
                       <span className="text-[12px] font-bold text-[#6B7280]">KB</span>
                     </div>
                     <div className="grid grid-cols-4 gap-1.5">
                       {SIZE_PRESETS.map((preset) => (
-                        <button
-                          key={preset.value}
-                          onClick={() => setTargetSize(preset.value)}
-                          disabled={processing}
-                          className={`px-2 py-2 rounded-lg text-[10px] font-bold border transition-all active:scale-95 ${
-                            targetSize === preset.value
-                              ? 'border-[#4F46E5] bg-[#EEF2FF] text-[#4F46E5]'
-                              : 'border-[#E8EDF5] bg-white text-[#4B5563]'
-                          }`}
-                        >
-                          {preset.label}
-                        </button>
+                        <button key={preset.value} onClick={() => setTargetSize(preset.value)} disabled={processing} className={`px-2 py-2 rounded-lg text-[10px] font-bold border transition-all active:scale-95 ${targetSize === preset.value ? 'border-[#4F46E5] bg-[#EEF2FF] text-[#4F46E5]' : 'border-[#E8EDF5] bg-white text-[#4B5563]'}`}>{preset.label}</button>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Format */}
                 <div>
-                  <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-2 block">
-                    Format
-                  </label>
+                  <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-2 block">Format</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => setOutputFormat('image/jpeg')}
-                      disabled={processing}
-                      className={`relative p-3 rounded-lg border-2 transition-all active:scale-95 ${
-                        outputFormat === 'image/jpeg'
-                          ? 'border-[#4F46E5] bg-[#EEF2FF]'
-                          : 'border-[#E8EDF5] bg-white'
-                      }`}
-                    >
+                    <button onClick={() => setOutputFormat('image/jpeg')} disabled={processing} className={`relative p-3 rounded-lg border-2 transition-all active:scale-95 ${outputFormat === 'image/jpeg' ? 'border-[#4F46E5] bg-[#EEF2FF]' : 'border-[#E8EDF5] bg-white'}`}>
                       <div className="text-[18px] mb-0.5">🌍</div>
-                      <div className={`text-[12px] font-extrabold mb-0.5 ${
-                        outputFormat === 'image/jpeg' ? 'text-[#4F46E5]' : 'text-[#07122E]'
-                      }`}>
-                        JPG
-                      </div>
-                      <div className="text-[9px] text-emerald-600 font-bold">
-                        Best for all
-                      </div>
+                      <div className={`text-[12px] font-extrabold mb-0.5 ${outputFormat === 'image/jpeg' ? 'text-[#4F46E5]' : 'text-[#07122E]'}`}>JPG</div>
+                      <div className="text-[9px] text-emerald-600 font-bold">Best for all</div>
                     </button>
-
-                    <button
-                      onClick={() => setOutputFormat('image/webp')}
-                      disabled={processing}
-                      className={`relative p-3 rounded-lg border-2 transition-all active:scale-95 ${
-                        outputFormat === 'image/webp'
-                          ? 'border-[#4F46E5] bg-[#EEF2FF]'
-                          : 'border-[#E8EDF5] bg-white'
-                      }`}
-                    >
+                    <button onClick={() => setOutputFormat('image/webp')} disabled={processing} className={`relative p-3 rounded-lg border-2 transition-all active:scale-95 ${outputFormat === 'image/webp' ? 'border-[#4F46E5] bg-[#EEF2FF]' : 'border-[#E8EDF5] bg-white'}`}>
                       <div className="text-[18px] mb-0.5">⚡</div>
-                      <div className={`text-[12px] font-extrabold mb-0.5 ${
-                        outputFormat === 'image/webp' ? 'text-[#4F46E5]' : 'text-[#07122E]'
-                      }`}>
-                        WEBP
-                      </div>
-                      <div className="text-[9px] text-purple-600 font-bold">
-                        Max savings
-                      </div>
+                      <div className={`text-[12px] font-extrabold mb-0.5 ${outputFormat === 'image/webp' ? 'text-[#4F46E5]' : 'text-[#07122E]'}`}>WEBP</div>
+                      <div className="text-[9px] text-purple-600 font-bold">Max savings</div>
                     </button>
                   </div>
-                  {outputFormat === 'image/webp' && (
-                    <p className="mt-2 text-[10px] text-amber-700 leading-relaxed">
-                      ⚠ Not supported on older iOS/Office
-                    </p>
-                  )}
+                  {outputFormat === 'image/webp' && (<p className="mt-2 text-[10px] text-amber-700 leading-relaxed">⚠ Not supported on older iOS/Office</p>)}
                 </div>
 
-                {/* Image Size */}
                 <div>
-                  <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-2 block">
-                    Image Size
-                  </label>
-                  <select
-                    value={maxDimension}
-                    onChange={(e) => setMaxDimension(Number(e.target.value))}
-                    disabled={processing}
-                    className="w-full px-3 py-2.5 rounded-lg border-2 border-[#E8EDF5] text-[12px] font-bold text-[#07122E] focus:outline-none focus:border-[#4F46E5] disabled:opacity-50 bg-white"
-                  >
-                    {DIMENSION_PRESETS.map((preset) => (
-                      <option key={preset.value} value={preset.value}>
-                        {preset.icon} {preset.label}
-                      </option>
-                    ))}
+                  <label className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-2 block">Image Size</label>
+                  <select value={maxDimension} onChange={(e) => setMaxDimension(Number(e.target.value))} disabled={processing} className="w-full px-3 py-2.5 rounded-lg border-2 border-[#E8EDF5] text-[12px] font-bold text-[#07122E] focus:outline-none focus:border-[#4F46E5] disabled:opacity-50 bg-white">
+                    {DIMENSION_PRESETS.map((preset) => (<option key={preset.value} value={preset.value}>{preset.icon} {preset.label}</option>))}
                   </select>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Sticky Bottom Action Bar */}
           <div className="absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-white via-white to-transparent pt-6">
             <div className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               {!hasCompleted ? (
-                <button
-                  onClick={handleCompress}
-                  disabled={processing || files.length === 0}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-[#4F46E5] to-[#6D5DF6] text-white text-[14px] font-bold shadow-[0_4px_14px_-4px_rgba(79,70,229,0.5)] active:scale-95 transition-all disabled:opacity-50"
-                >
-                  {processing ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" strokeWidth={2.5} />
-                      Compressing...
-                    </>
-                  ) : (
-                    <>
-                      <Zap size={16} strokeWidth={2.5} />
-                      Compress {files.length} {files.length === 1 ? 'Image' : 'Images'}
-                    </>
-                  )}
+                <button onClick={handleCompress} disabled={processing || files.length === 0} className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-[#4F46E5] to-[#6D5DF6] text-white text-[14px] font-bold shadow-[0_4px_14px_-4px_rgba(79,70,229,0.5)] active:scale-95 transition-all disabled:opacity-50">
+                  {processing ? (<><Loader2 size={16} className="animate-spin" strokeWidth={2.5} />Compressing...</>) : (<><Zap size={16} strokeWidth={2.5} />Compress {files.length} {files.length === 1 ? 'Image' : 'Images'}</>)}
                 </button>
               ) : (
                 <div className="flex gap-2">
-                  <button
-                    onClick={handleDownloadAll}
-                    disabled={zipping}
-                    className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-[#4F46E5] to-[#6D5DF6] text-white text-[13px] font-bold shadow-[0_4px_14px_-4px_rgba(79,70,229,0.5)] active:scale-95 transition-all disabled:opacity-50"
-                  >
-                    {zipping ? (
-                      <>
-                        <Loader2 size={14} className="animate-spin" strokeWidth={2.5} />
-                        Zipping...
-                      </>
-                    ) : completedCount > 1 ? (
-                      <>
-                        <Package size={14} strokeWidth={2.5} />
-                        Download All
-                      </>
-                    ) : (
-                      <>
-                        <Download size={14} strokeWidth={2.5} />
-                        Download
-                      </>
-                    )}
+                  <button onClick={handleDownloadAll} disabled={zipping} className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-r from-[#4F46E5] to-[#6D5DF6] text-white text-[13px] font-bold shadow-[0_4px_14px_-4px_rgba(79,70,229,0.5)] active:scale-95 transition-all disabled:opacity-50">
+                    {zipping ? (<><Loader2 size={14} className="animate-spin" strokeWidth={2.5} />Zipping...</>) : completedCount > 1 ? (<><Package size={14} strokeWidth={2.5} />Download All</>) : (<><Download size={14} strokeWidth={2.5} />Download</>)}
                   </button>
-                  <button
-                    onClick={handleRecompress}
-                    disabled={processing}
-                    className="flex items-center justify-center px-4 py-3.5 rounded-2xl bg-white border-2 border-[#E8EDF5] text-[#4B5563] active:scale-95 transition-all disabled:opacity-50"
-                    aria-label="Re-compress"
-                  >
+                  <button onClick={handleRecompress} disabled={processing} className="flex items-center justify-center px-4 py-3.5 rounded-2xl bg-white border-2 border-[#E8EDF5] text-[#4B5563] active:scale-95 transition-all disabled:opacity-50" aria-label="Re-compress">
                     <RotateCcw size={16} strokeWidth={2.5} />
                   </button>
                 </div>
@@ -762,7 +514,6 @@ useEffect(() => {
         </>
       )}
 
-      {/* Comparison Modal */}
       {comparingFile && comparingFile.compressedUrl && comparingFile.compressedSize && (
         <ComparisonSlider
           originalUrl={comparingFile.originalUrl}
@@ -803,11 +554,7 @@ function FileCard({ file, onRemove, onDownload, onCompare, disabled }: FileCardP
   return (
     <div className="flex gap-3 p-3 rounded-xl bg-white border border-[#E8EDF5]">
       <div className="relative w-16 h-16 rounded-lg bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] overflow-hidden shrink-0 border border-slate-100">
-        <img
-          src={file.status === 'done' && file.compressedUrl ? file.compressedUrl : file.originalUrl}
-          alt={file.original.name}
-          className="w-full h-full object-cover"
-        />
+        <img src={file.status === 'done' && file.compressedUrl ? file.compressedUrl : file.originalUrl} alt={file.original.name} className="w-full h-full object-cover" />
         {file.status === 'compressing' && (
           <div className="absolute inset-0 bg-slate-900/70 flex items-center justify-center">
             <Loader2 size={16} className="text-white animate-spin" strokeWidth={2.5} />
@@ -817,82 +564,45 @@ function FileCard({ file, onRemove, onDownload, onCompare, disabled }: FileCardP
 
       <div className="flex-1 min-w-0 flex flex-col justify-between">
         <div>
-          <p className="text-[12.5px] font-bold text-[#07122E] truncate mb-1">
-            {file.original.name}
-          </p>
-
+          <p className="text-[12.5px] font-bold text-[#07122E] truncate mb-1">{file.original.name}</p>
           <div className="flex items-center gap-1.5 text-[11px] mb-1 flex-wrap">
             {file.status === 'done' && file.compressedSize ? (
               <>
-                <span className="text-[#9CA3AF] line-through text-[10.5px]">
-                  {formatBytes(file.originalSize)}
-                </span>
+                <span className="text-[#9CA3AF] line-through text-[10.5px]">{formatBytes(file.originalSize)}</span>
                 <span className="text-[#9CA3AF] text-[10px]">→</span>
-                <span className="text-[#4F46E5] font-extrabold text-[11.5px]">
-                  {formatBytes(file.compressedSize)}
-                </span>
+                <span className="text-[#4F46E5] font-extrabold text-[11.5px]">{formatBytes(file.compressedSize)}</span>
                 {file.reduction !== undefined && file.reduction > 0 && (
-                  <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-white text-[9px] font-extrabold">
-                    -{file.reduction}%
-                  </span>
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-500 text-white text-[9px] font-extrabold">-{file.reduction}%</span>
                 )}
               </>
             ) : (
-              <span className="text-[#6B7280] font-semibold">
-                {formatBytes(file.originalSize)}
-              </span>
+              <span className="text-[#6B7280] font-semibold">{formatBytes(file.originalSize)}</span>
             )}
           </div>
-
           <div className="flex items-center gap-1.5 text-[9.5px] text-[#9CA3AF] font-semibold">
             {dimensions && <span>{dimensions.w} × {dimensions.h}</span>}
-            {formatChanged && (
-              <>
-                {dimensions && <span className="text-[#D1D5DB]">•</span>}
-                <span>{fileFormat} → {compressedFormat}</span>
-              </>
-            )}
-            {file.status === 'pending' && (
-              <>
-                {dimensions && <span className="text-[#D1D5DB]">•</span>}
-                <span className="text-amber-700 font-bold">Waiting</span>
-              </>
-            )}
+            {formatChanged && (<>{dimensions && <span className="text-[#D1D5DB]">•</span>}<span>{fileFormat} → {compressedFormat}</span></>)}
+            {file.status === 'pending' && (<>{dimensions && <span className="text-[#D1D5DB]">•</span>}<span className="text-amber-700 font-bold">Waiting</span></>)}
           </div>
         </div>
 
         {file.status === 'done' && (
           <div className="flex items-center gap-1.5 mt-2">
-            <button
-              onClick={onCompare}
-              className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-md bg-purple-50 text-purple-600 text-[10px] font-bold active:scale-95 transition-all"
-            >
-              <Eye size={10} strokeWidth={2.5} />
-              Compare
+            <button onClick={onCompare} className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-md bg-purple-50 text-purple-600 text-[10px] font-bold active:scale-95 transition-all">
+              <Eye size={10} strokeWidth={2.5} />Compare
             </button>
-            <button
-              onClick={onDownload}
-              className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-md bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold active:scale-95 transition-all"
-            >
-              <Download size={10} strokeWidth={2.5} />
-              Save
+            <button onClick={onDownload} className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-md bg-[#EEF2FF] text-[#4F46E5] text-[10px] font-bold active:scale-95 transition-all">
+              <Download size={10} strokeWidth={2.5} />Save
             </button>
           </div>
         )}
 
         {file.status === 'error' && (
-          <div className="mt-1.5 text-[10px] text-red-600 font-medium">
-            {file.error || 'Failed'}
-          </div>
+          <div className="mt-1.5 text-[10px] text-red-600 font-medium">{file.error || 'Failed'}</div>
         )}
       </div>
 
-      <button
-        onClick={onRemove}
-        disabled={disabled}
-        className="self-start w-7 h-7 rounded-lg text-[#9CA3AF] hover:bg-red-50 hover:text-red-600 flex items-center justify-center transition-colors shrink-0 disabled:opacity-50"
-        aria-label="Remove"
-      >
+      <button onClick={onRemove} disabled={disabled} className="self-start w-7 h-7 rounded-lg text-[#9CA3AF] hover:bg-red-50 hover:text-red-600 flex items-center justify-center transition-colors shrink-0 disabled:opacity-50" aria-label="Remove">
         <X size={13} strokeWidth={2.5} />
       </button>
     </div>
