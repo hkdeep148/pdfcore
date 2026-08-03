@@ -100,37 +100,68 @@ export default function MobileView() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const tool = getToolByPath('/tools/compress-image')!;
 
-  const handleFiles = useCallback((newFiles: File[]) => {
-    const SUPPORTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    const MAX_SIZE = 50 * 1024 * 1024;
+  const handleFiles = useCallback(async (newFiles: File[]) => {
+  const SUPPORTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const MAX_SIZE = 50 * 1024 * 1024;
 
-    const validFiles: FileStatus[] = [];
-    const errors: string[] = [];
+  const validFiles: FileStatus[] = [];
+  const errors: string[] = [];
 
-    for (const file of newFiles) {
-      if (!SUPPORTED.includes(file.type.toLowerCase())) {
-        errors.push(`${file.name}: Unsupported format`);
-        continue;
+  for (const file of newFiles) {
+    // ⭐ DEBUG: Detect real file format from magic bytes
+    try {
+      const arrayBuffer = await file.slice(0, 12).arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+      
+      let realFormat = 'Unknown';
+      if (bytes[0] === 0xFF && bytes[1] === 0xD8) {
+        realFormat = 'JPEG';
+      } else if (bytes[0] === 0x89 && bytes[1] === 0x50) {
+        realFormat = 'PNG';
+      } else if (bytes[0] === 0x52 && bytes[1] === 0x49) {
+        realFormat = 'WEBP';
+      } else if (bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70) {
+        const brand = String.fromCharCode(bytes[8], bytes[9], bytes[10], bytes[11]);
+        realFormat = `HEIC/HEIF (${brand})`;
       }
-      if (file.size > MAX_SIZE) {
-        errors.push(`${file.name}: Too large (max 50 MB)`);
-        continue;
-      }
-
-      validFiles.push({
-        id: `${Date.now()}-${Math.random()}`,
-        original: file,
-        originalUrl: URL.createObjectURL(file),
-        originalSize: file.size,
-        status: 'pending',
-      });
+      
+      alert(
+        `📄 FILE DEBUG INFO\n\n` +
+        `Name: ${file.name}\n` +
+        `Claimed Type: ${file.type}\n` +
+        `Actual Format: ${realFormat}\n` +
+        `Size: ${(file.size / 1024).toFixed(1)} KB\n\n` +
+        `Magic Bytes: ${hex}`
+      );
+    } catch (err) {
+      alert(`Failed to read file signature: ${err}`);
     }
 
-    if (errors.length > 0) setError(errors.join(', '));
-    else setError(null);
+    // Original validation
+    if (!SUPPORTED.includes(file.type.toLowerCase())) {
+      errors.push(`${file.name}: Unsupported format`);
+      continue;
+    }
+    if (file.size > MAX_SIZE) {
+      errors.push(`${file.name}: Too large (max 50 MB)`);
+      continue;
+    }
 
-    setFiles((prev) => [...prev, ...validFiles]);
-  }, []);
+    validFiles.push({
+      id: `${Date.now()}-${Math.random()}`,
+      original: file,
+      originalUrl: URL.createObjectURL(file),
+      originalSize: file.size,
+      status: 'pending',
+    });
+  }
+
+  if (errors.length > 0) setError(errors.join(', '));
+  else setError(null);
+
+  setFiles((prev) => [...prev, ...validFiles]);
+}, []);
 
   // Sync filename with uploaded file
 useEffect(() => {
