@@ -110,7 +110,7 @@ const handleFiles = useCallback((newFiles: File[]) => {
 
   for (const file of newFiles) {
     if (!SUPPORTED.includes(file.type.toLowerCase())) {
-      errors.push(`${file.name}: Unsupported format`);
+      errors.push(`${file.name}: Please select JPG, PNG, or WEBP images only`);
       continue;
     }
     if (file.size > MAX_SIZE) {
@@ -374,13 +374,13 @@ useEffect(() => {
     <ToolShellMobile fixedHeight={files.length > 0}>
       {/* Hidden file input */}
       <input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        onChange={handleFileChange}
-        accept="image/jpeg,image/jpg,image/png,image/webp"
-        multiple
-      />
+  ref={fileInputRef}
+  type="file"
+  className="hidden"
+  onChange={handleFileChange}
+  accept="*/*"
+  multiple
+/>
 
       {/* Error banner */}
       {error && (
