@@ -80,48 +80,6 @@ function getFileExtension(mimeType: string): string {
   return map[mimeType.toLowerCase()] || 'jpg';
 }
 
-/**
- * ⭐ PERMANENT FIX: Reads file into memory using FileReader
- * 
- * Why FileReader instead of file.arrayBuffer():
- * - FileReader works reliably on ALL Android versions (including Samsung)
- * - file.arrayBuffer() can fail on Android 10+ due to Scoped Storage
- * - FileReader was designed before Scoped Storage and has better permission handling
- * - Once read into memory, the file can never be "revoked"
- */
-function readFileIntoMemory(file: File): Promise<File> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    
-    reader.onload = () => {
-      try {
-        const arrayBuffer = reader.result as ArrayBuffer;
-        
-        // Create a new File from the buffer — this copy lives in memory
-        // and can never be revoked by Android's Scoped Storage
-        const stableFile = new File([arrayBuffer], file.name, {
-          type: file.type || 'image/jpeg', // Fallback type if missing
-          lastModified: file.lastModified,
-        });
-        
-        resolve(stableFile);
-      } catch (err) {
-        reject(new Error(`Failed to create file copy: ${err}`));
-      }
-    };
-    
-    reader.onerror = () => {
-      reject(new Error(
-        reader.error?.message || 'Failed to read file. Please select the image again.'
-      ));
-    };
-    
-    // ⭐ KEY: readAsArrayBuffer triggers the read IMMEDIATELY
-    // This is more reliable than file.arrayBuffer() on Android
-    reader.readAsArrayBuffer(file);
-  });
-}
-
 // ============ MAIN COMPONENT ============
 export default function MobileView() {
   const [files, setFiles] = useState<FileStatus[]>([]);
@@ -142,7 +100,8 @@ export default function MobileView() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const tool = getToolByPath('/tools/compress-image')!;
 
-  const handleFiles = useCallback(async (newFiles: File[]) => {
+  // ⭐ This is ONLY used by useToolFileReceiver (files already in memory)
+const handleFiles = useCallback((newFiles: File[]) => {
   const SUPPORTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
   const MAX_SIZE = 50 * 1024 * 1024;
 
@@ -150,7 +109,6 @@ export default function MobileView() {
   const errors: string[] = [];
 
   for (const file of newFiles) {
-    // Validate format
     if (!SUPPORTED.includes(file.type.toLowerCase())) {
       errors.push(`${file.name}: Unsupported format`);
       continue;
@@ -160,21 +118,13 @@ export default function MobileView() {
       continue;
     }
 
-    try {
-      // ⭐ PERMANENT FIX: Use FileReader (most compatible with Android/Samsung)
-      const stableFile = await readFileIntoMemory(file);
-      
-      validFiles.push({
-        id: `${Date.now()}-${Math.random()}`,
-        original: stableFile,
-        originalUrl: URL.createObjectURL(stableFile),
-        originalSize: stableFile.size,
-        status: 'pending',
-      });
-    } catch (err) {
-      console.error('Failed to read file:', err);
-      errors.push(`${file.name}: Could not read file. Please try again.`);
-    }
+    validFiles.push({
+      id: `${Date.now()}-${Math.random()}`,
+      original: file,
+      originalUrl: URL.createObjectURL(file),
+      originalSize: file.size,
+      status: 'pending',
+    });
   }
 
   if (errors.length > 0) setError(errors.join(', '));
@@ -194,10 +144,68 @@ useEffect(() => {
 
   useToolFileReceiver((files: File[]) => handleFiles(files));
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.length) handleFiles(Array.from(e.target.files));
-    e.target.value = '';
-  };
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const inputFiles = e.target.files;
+  if (!inputFiles || inputFiles.length === 0) return;
+
+  const SUPPORTED = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  const MAX_SIZE = 50 * 1024 * 1024;
+
+  const validFiles: FileStatus[] = [];
+  const errors: string[] = [];
+
+  // ⭐ Read ALL files IMMEDIATELY in the event handler
+  for (let i = 0; i < inputFiles.length; i++) {
+    const file = inputFiles[i];
+
+    if (!SUPPORTED.includes(file.type.toLowerCase())) {
+      errors.push(`${file.name}: Unsupported format`);
+      continue;
+    }
+    if (file.size > MAX_SIZE) {
+      errors.push(`${file.name}: Too large (max 50 MB)`);
+      continue;
+    }
+
+    try {
+      // ⭐ Read file using FileReader INSIDE the event handler
+      const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as ArrayBuffer);
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsArrayBuffer(file);
+      });
+
+      // Create stable File from buffer
+      const stableFile = new File([arrayBuffer], file.name, {
+        type: file.type || 'image/jpeg',
+        lastModified: file.lastModified,
+      });
+
+      validFiles.push({
+        id: `${Date.now()}-${Math.random()}-${i}`,
+        original: stableFile,
+        originalUrl: URL.createObjectURL(stableFile),
+        originalSize: stableFile.size,
+        status: 'pending',
+      });
+    } catch (err) {
+      console.error('Failed to read file:', file.name, err);
+      errors.push(`${file.name}: Could not read file. Please try again.`);
+    }
+  }
+
+  // Reset input AFTER reading
+  e.target.value = '';
+
+  // Update state
+  if (errors.length > 0) setError(errors.join(', '));
+  else setError(null);
+
+  if (validFiles.length > 0) {
+    setFiles((prev) => [...prev, ...validFiles]);
+  }
+}, []);
 
   const openFilePicker = () => fileInputRef.current?.click();
 
