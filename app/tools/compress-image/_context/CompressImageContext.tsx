@@ -61,6 +61,11 @@ interface CompressImageContextValue {
   handleDownloadSingle: (file: FileStatus) => void;
   handleDownloadAll: () => Promise<void>;
 
+  // Success Modal
+  successModalOpen: boolean;
+  setSuccessModalOpen: (open: boolean) => void;
+  lastDownloadCount: number;
+
   // UI
   comparingFile: FileStatus | null;
   setComparingFile: (f: FileStatus | null) => void;
@@ -121,6 +126,9 @@ export function CompressImageProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingFadeOut, setLoadingFadeOut] = useState(false);
 
+  // ⭐ Success Modal State
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [lastDownloadCount, setLastDownloadCount] = useState(1);
   // Timer ref for cleanup
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -271,7 +279,7 @@ export function CompressImageProvider({ children }: { children: ReactNode }) {
     }
 
     setProcessing(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [files, mode, quality, targetSize, outputFormat, maxDimension]);
 
   const handleRecompress = useCallback(async () => {
@@ -300,57 +308,65 @@ export function CompressImageProvider({ children }: { children: ReactNode }) {
     }
 
     setProcessing(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [files, mode, quality, targetSize, outputFormat, maxDimension]);
 
   // ============ DOWNLOAD ============
   const handleDownloadSingle = useCallback((file: FileStatus) => {
-    if (!file.compressed || !file.compressedUrl) return;
-    const ext = getFileExtension(file.compressed.type);
-    const nameWithoutExt = file.original.name.replace(/\.[^/.]+$/, '');
+  if (!file.compressed || !file.compressedUrl) return;
+  const ext = getFileExtension(file.compressed.type);
+  const nameWithoutExt = file.original.name.replace(/\.[^/.]+$/, '');
+  const link = document.createElement('a');
+  link.href = file.compressedUrl;
+  link.download = `${nameWithoutExt}-compressed.${ext}`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // ⭐ Track single file download
+  setLastDownloadCount(1);
+  setTimeout(() => setSuccessModalOpen(true), 300);
+}, []);
+
+  const handleDownloadAll = useCallback(async () => {
+  const completedFiles = files.filter((f) => f.status === 'done' && f.compressed);
+  if (completedFiles.length === 0) return;
+  if (completedFiles.length === 1) {
+    handleDownloadSingle(completedFiles[0]);
+    return;
+  }
+
+  setZipping(true);
+  try {
+    const JSZip = (await import('jszip')).default;
+    const zip = new JSZip();
+
+    for (const file of completedFiles) {
+      if (!file.compressed) continue;
+      const ext = getFileExtension(file.compressed.type);
+      const nameWithoutExt = file.original.name.replace(/\.[^/.]+$/, '');
+      zip.file(`${nameWithoutExt}-compressed.${ext}`, file.compressed);
+    }
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = file.compressedUrl;
-    link.download = `${nameWithoutExt}-compressed.${ext}`;
+    link.href = url;
+    link.download = `compressed-images-${Date.now()}.zip`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, []);
+    URL.revokeObjectURL(url);
 
-  const handleDownloadAll = useCallback(async () => {
-    const completedFiles = files.filter((f) => f.status === 'done' && f.compressed);
-    if (completedFiles.length === 0) return;
-    if (completedFiles.length === 1) {
-      handleDownloadSingle(completedFiles[0]);
-      return;
-    }
-
-    setZipping(true);
-    try {
-      const JSZip = (await import('jszip')).default;
-      const zip = new JSZip();
-
-      for (const file of completedFiles) {
-        if (!file.compressed) continue;
-        const ext = getFileExtension(file.compressed.type);
-        const nameWithoutExt = file.original.name.replace(/\.[^/.]+$/, '');
-        zip.file(`${nameWithoutExt}-compressed.${ext}`, file.compressed);
-      }
-
-      const blob = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `compressed-images-${Date.now()}.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch {
-      setError('Failed to create ZIP file');
-    } finally {
-      setZipping(false);
-    }
-  }, [files, handleDownloadSingle]);
+    // ⭐ Track ZIP download count
+    setLastDownloadCount(completedFiles.length);
+    setTimeout(() => setSuccessModalOpen(true), 300);
+  } catch {
+    setError('Failed to create ZIP file');
+  } finally {
+    setZipping(false);
+  }
+}, [files, handleDownloadSingle]);
 
   // ============ DERIVED VALUES ============
   const totalOriginalSize = files.reduce((sum, f) => sum + f.originalSize, 0);
@@ -387,6 +403,10 @@ export function CompressImageProvider({ children }: { children: ReactNode }) {
     zipping,
     handleDownloadSingle,
     handleDownloadAll,
+    // Success Modal
+    successModalOpen,
+    setSuccessModalOpen,
+    lastDownloadCount,
     // UI
     comparingFile,
     setComparingFile,

@@ -6,12 +6,14 @@ import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import DesktopUploadPage from '../../_components/DesktopUploadPage';
 import ComparisonSlider from '../ComparisonSlider';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
+import DesktopSuccessModal from '../../_components/DesktopSuccessModal';
+import DesktopLoadingScreen from '../../_components/DesktopLoadingScreen';
 import {
   useCompressImageContext,
+  formatBytes,
   type FileStatus,
 } from '../_context/CompressImageContext';
-// Step 4 will create these — import them now so structure is clear
-import LoadingScreen from './LoadingScreen';
+
 import SettingsPanel from './SettingsPanel';
 import ActionButton from './ActionButton';
 import FileListPanel from './FileListPanel';
@@ -31,6 +33,15 @@ export default function DesktopView() {
     // UI
     comparingFile,
     setComparingFile,
+    // Success Modal
+    successModalOpen,
+    setSuccessModalOpen,
+    lastDownloadCount,
+    // Derived — for modal
+    completedCount,
+    totalOriginalSize,
+    totalCompressedSize,
+    totalReduction,
   } = useCompressImageContext();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -46,7 +57,13 @@ export default function DesktopView() {
 
   // ============ LOADING SCREEN ============
   if (isLoading) {
-    return <LoadingScreen fadeOut={loadingFadeOut} />;
+    return (
+      <DesktopLoadingScreen
+        fadeOut={loadingFadeOut}
+        title="Preparing your images"
+        subtitle="Setting up the compressor"
+      />
+    );
   }
 
   // ============ UPLOAD SCREEN ============
@@ -88,53 +105,77 @@ export default function DesktopView() {
   );
 
   // ============ TOOL SCREEN ============
-return (
-  <div className="animate-tool-enter">
-    <ToolShellDesktop
-      title="Compress Images"
-      subtitle="Reduce file size while keeping quality — 100% in your browser"
-      rightPanel={
-        <div className="animate-panel-right">
-          <SettingsPanel />
+  return (
+    <div className="animate-tool-enter">
+      <ToolShellDesktop
+        title="Compress Images"
+        subtitle="Reduce file size while keeping quality — 100% in your browser"
+        rightPanel={
+          <div className="animate-panel-right">
+            <SettingsPanel />
+          </div>
+        }
+        rightPanelTitle="Compression Settings"
+        actionButton={<ActionButton />}
+        headerAction={headerAction}
+        breadcrumbCategory="Optimize"
+      >
+        {/* Hidden file input — used by Add more button */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          onChange={handleFileInput}
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          multiple
+        />
+
+        {/* File List — slides in from LEFT */}
+        <div className="animate-panel-left">
+          <FileListPanel
+            onCompare={(file: FileStatus) => setComparingFile(file)}
+            onDownload={handleDownloadSingle}
+            onRemove={handleRemoveFile}
+          />
         </div>
-      }
-      rightPanelTitle="Compression Settings"
-      actionButton={<ActionButton />}
-      headerAction={headerAction}
-      breadcrumbCategory="Optimize"
-    >
-      {/* Hidden file input — used by Add more button */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        onChange={handleFileInput}
-        accept="image/jpeg,image/png,image/webp"
-        className="hidden"
-        multiple
-      />
 
-      {/* File List — slides in from LEFT */}
-      <div className="animate-panel-left">
-        <FileListPanel
-          onCompare={(file: FileStatus) => setComparingFile(file)}
-          onDownload={handleDownloadSingle}
-          onRemove={handleRemoveFile}
-        />
-      </div>
+        {/* Comparison Slider Modal */}
+        {comparingFile && comparingFile.compressedUrl && comparingFile.compressedSize && (
+          <ComparisonSlider
+            originalUrl={comparingFile.originalUrl}
+            compressedUrl={comparingFile.compressedUrl}
+            originalSize={comparingFile.originalSize}
+            compressedSize={comparingFile.compressedSize}
+            reduction={comparingFile.reduction || 0}
+            filename={comparingFile.original.name}
+            onClose={() => setComparingFile(null)}
+          />
+        )}
 
-      {/* Comparison Slider Modal */}
-      {comparingFile && comparingFile.compressedUrl && comparingFile.compressedSize && (
-        <ComparisonSlider
-          originalUrl={comparingFile.originalUrl}
-          compressedUrl={comparingFile.compressedUrl}
-          originalSize={comparingFile.originalSize}
-          compressedSize={comparingFile.compressedSize}
-          reduction={comparingFile.reduction || 0}
-          filename={comparingFile.original.name}
-          onClose={() => setComparingFile(null)}
-        />
-      )}
-    </ToolShellDesktop>
-  </div>
-);
+        {/* ⭐ Success Modal — shown after download */}
+        <DesktopSuccessModal
+  isOpen={successModalOpen}
+  onClose={() => setSuccessModalOpen(false)}
+  onStartOver={handleClearAll}
+  title={
+    lastDownloadCount === 1
+      ? 'Download Complete!'
+      : `${lastDownloadCount} Images Downloaded!`
+  }
+  subtitle={
+    lastDownloadCount === 1
+      ? 'Your compressed image has been saved'
+      : `${lastDownloadCount} compressed images have been saved`
+  }
+  stats={[
+    { label: 'Original', value: formatBytes(totalOriginalSize) },
+    { label: 'Compressed', value: formatBytes(totalCompressedSize), accent: true },
+  ]}
+  savingsBadge={`-${totalReduction}%`}
+  startOverLabel="Compress More"
+  doneLabel="Done"
+/>
+      </ToolShellDesktop>
+    </div>
+  );
 }

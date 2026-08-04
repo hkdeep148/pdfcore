@@ -5,6 +5,8 @@ import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileToolHeader from '../../_components/MobileToolHeader';
 import MobileSuccessScreen from '../../_components/MobileSuccessScreen';
+import MobileLoadingScreen from '../../_components/MobileLoadingScreen';
+import MobileCompressingScreen from '../../_components/MobileCompressingScreen';
 import ComparisonSlider from '../ComparisonSlider';
 import { getToolByPath } from '../../_config/tools';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
@@ -13,11 +15,7 @@ import {
   formatBytes,
   type FileStatus,
 } from '../_context/CompressImageContext';
-import {
-  Upload,
-  X,
-  Trash2,
-} from 'lucide-react';
+import { Upload, X, Trash2 } from 'lucide-react';
 
 import MobileSettingsSheet from './MobileSettingsSheet';
 import MobileActionBar from './MobileActionBar';
@@ -32,6 +30,8 @@ export default function MobileView() {
     handleDownloadSingle,
     handleDownloadAll,
     processing,
+    isLoading,
+    loadingFadeOut,
     error,
     setError,
     comparingFile,
@@ -58,10 +58,13 @@ export default function MobileView() {
     }
   }, [files.length, files]);
 
-  // Auto-show success screen when compression completes
+  // Auto-show success screen when compression completes (with smooth delay)
   useEffect(() => {
     if (hasCompleted && !processing && completedCount === files.length && files.length > 0) {
-      setShowSuccess(true);
+      const timer = setTimeout(() => {
+        setShowSuccess(true);
+      }, 600);
+      return () => clearTimeout(timer);
     }
   }, [hasCompleted, processing, completedCount, files.length]);
 
@@ -79,6 +82,45 @@ export default function MobileView() {
     setShowSuccess(false);
   };
 
+  // ═══════════════════════════════════════════
+  // LOADING SCREEN — first upload
+  // ═══════════════════════════════════════════
+  if (isLoading) {
+    return (
+      <ToolShellMobile fixedHeight={true}>
+        <MobileLoadingScreen
+          fadeOut={loadingFadeOut}
+          title="Preparing your images"
+          subtitle="Setting up the compressor"
+        />
+      </ToolShellMobile>
+    );
+  }
+
+  // ═══════════════════════════════════════════
+  // COMPRESSING SCREEN — during processing
+  // ═══════════════════════════════════════════
+  const isTransitioningToSuccess =
+  hasCompleted &&
+  completedCount === files.length &&
+  files.length > 0 &&
+  !showSuccess;
+
+if (processing || isTransitioningToSuccess) {
+  return (
+    <ToolShellMobile fixedHeight={true}>
+      <MobileCompressingScreen
+        title="Compressing images"
+        subtitle="This will only take a moment..."
+      />
+
+      </ToolShellMobile>
+    );
+  }
+
+  // ═══════════════════════════════════════════
+  // MAIN RENDER
+  // ═══════════════════════════════════════════
   return (
     <ToolShellMobile fixedHeight={files.length > 0}>
       {/* Hidden file input */}
@@ -125,6 +167,18 @@ export default function MobileView() {
           }
           onStartOver={handleStartOver}
           onBack={() => setShowSuccess(false)}
+          files={files
+            .filter((f) => f.status === 'done' && f.compressedUrl)
+            .map((f) => ({
+              id: f.id,
+              name: f.original.name,
+              thumbnailUrl: f.compressedUrl,
+              reduction: f.reduction,
+              onDownload: () => handleDownloadSingle(f),
+              onPreview: f.compressedUrl
+                ? () => window.open(f.compressedUrl, '_blank')
+                : undefined,
+            }))}
         />
       ) : files.length === 0 ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
