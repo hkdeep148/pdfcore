@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import ComparisonSlider from '../ComparisonSlider';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
+import DesktopUploadPage from '../../_components/DesktopUploadPage';
 import {
   Upload,
   Download,
@@ -93,6 +94,9 @@ export default function DesktopView() {
   const [outputFormat, setOutputFormat] = useState<OutputFormat>('image/jpeg');
   const [maxDimension, setMaxDimension] = useState(0);
 
+  const [showTool, setShowTool] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ⭐ Simple handleFiles — no FileReader needed with .extension accept
@@ -122,11 +126,22 @@ export default function DesktopView() {
       });
     }
 
-    if (errors.length > 0) setError(errors.join(', '));
-    else setError(null);
+    if (errors.length > 0) { setError(errors.join(', ')); return; }
+  else setError(null);
 
-    setFiles((prev) => [...prev, ...validFiles]);
-  }, []);
+  if (validFiles.length > 0) {
+    // ⭐ Show loading first, then add files
+    setIsLoading(true);
+    
+    setTimeout(() => {
+      setFiles((prev) => [...prev, ...validFiles]);
+      
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 600);
+    }, 800);
+  }
+}, []);
 
   // Receive files from Smart Suggestions
   useToolFileReceiver((files: File[]) => handleFiles(files));
@@ -406,7 +421,70 @@ export default function DesktopView() {
     </div>
   ) : null;
 
+
+  // ╔══════════════════════════════════════╗
+// ║  ⭐ LOADING SCREEN (after file pick) ║
+// ╚══════════════════════════════════════╝
+if (isLoading) {
   return (
+    <div className="hidden lg:flex flex-col h-full overflow-hidden bg-gradient-to-b from-[#F8FAFC] to-white">
+      {/* Same navbar */}
+      
+      {/* Loading Content */}
+      <div className="flex-1 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-6">
+          {/* Animated Icon */}
+          <div className="relative">
+            <div className="absolute inset-0 rounded-2xl bg-[#4F46E5]/20 blur-3xl animate-pulse" />
+            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#4F46E5] to-[#8B5CF6] flex items-center justify-center shadow-[0_20px_50px_-12px_rgba(79,70,229,0.5)] animate-loading-pulse">
+              <svg viewBox="0 0 24 24" className="w-10 h-10 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Text */}
+          <div className="text-center">
+            <h2 className="text-[20px] font-extrabold text-[#07122E] mb-2">
+              Preparing your files...
+            </h2>
+            <p className="text-[14px] text-[#6B7280] font-medium">
+              Setting up the compressor
+            </p>
+          </div>
+
+          {/* Progress Dots */}
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#4F46E5] animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-2 h-2 rounded-full bg-[#4F46E5] animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-2 h-2 rounded-full bg-[#4F46E5] animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+  if (files.length === 0) {
+  return (
+    <DesktopUploadPage
+      toolName="Compress Images"
+      toolAccent="Images"
+      toolDescription="Reduce image file size while keeping quality. Everything runs in your browser — your files never leave your device."
+      supportedFormats="JPG, PNG, WEBP"
+      maxSizeMB={50}
+      multiple={true}
+      buttonText="Choose Images"
+      fileType="image"
+      onFilesSelected={handleFiles}
+    />
+  );
+}
+
+  return (
+    <div className="animate-tool-enter">
     <ToolShellDesktop
       title="Compress Images"
       subtitle="Reduce file size while keeping quality — 100% in your browser"
@@ -498,6 +576,7 @@ export default function DesktopView() {
         <ComparisonSlider originalUrl={comparingFile.originalUrl} compressedUrl={comparingFile.compressedUrl} originalSize={comparingFile.originalSize} compressedSize={comparingFile.compressedSize} reduction={comparingFile.reduction || 0} filename={comparingFile.original.name} onClose={() => setComparingFile(null)} />
       )}
     </ToolShellDesktop>
+    </div>
   );
 }
 
