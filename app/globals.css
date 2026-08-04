@@ -25,19 +25,8 @@ html {
   scroll-padding-top: 80px;
 }
 
-/* Respect user's motion preferences (accessibility) */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
 
-  .skeleton-shimmer {
-    animation: none;
-    background: #e7ecf5;
-  }
-}
-
-/* ============ MODERN SKELETON SHIMMER EFFECT ============ */
+/* ============ SKELETON SHIMMER ============ */
 .skeleton-shimmer {
   background: linear-gradient(
     90deg,
@@ -59,110 +48,197 @@ html {
 }
 
 
-/* ============ SUBTLE PAGE ANIMATIONS ============ */
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slide-in-from-bottom {
-  from { transform: translateY(8px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes slide-in-from-right {
-  from { transform: translateX(20px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.animate-in {
-  animation-duration: 0.4s;
-  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
-  animation-fill-mode: both;
-}
-
-.fade-in {
-  animation-name: fade-in;
-}
-
-.slide-in-from-bottom-2 {
-  animation-name: slide-in-from-bottom;
-}
-
-.slide-in-from-bottom-4 {
-  animation-name: slide-in-from-bottom;
-}
-
-.slide-in-from-right {
-  animation-name: slide-in-from-right;
-}
-
-.duration-300 {
-  animation-duration: 0.3s;
-}
-
-.duration-500 {
-  animation-duration: 0.5s;
-}
-
-/* Respect reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .animate-in {
-    animation: none !important;
-  }
-}
-
-/* ============ TOOL TRANSITION ============ */
-@keyframes tool-fade-in {
-  from {
+/* ============ TOOL ENTRANCE ANIMATIONS ============ */
+@keyframes tool-slide-up {
+  0% {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(20px);
   }
-  to {
+  100% {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.animate-tool-enter {
-  animation: tool-fade-in 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
-}
-
-
-/* ============ TOOL TRANSITION ANIMATIONS ============ */
-@keyframes tool-fade-in {
-  from {
+@keyframes panel-slide-left {
+  0% {
     opacity: 0;
-    transform: translateY(16px) scale(0.98);
+    transform: translateX(-16px);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(0);
   }
 }
 
-@keyframes loading-pulse {
-  0%, 100% {
-    opacity: 0.4;
-    transform: scale(0.95);
+@keyframes panel-slide-right {
+  0% {
+    opacity: 0;
+    transform: translateX(16px);
   }
-  50% {
+  100% {
     opacity: 1;
-    transform: scale(1);
+    transform: translateX(0);
   }
 }
 
 .animate-tool-enter {
-  animation: tool-fade-in 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation: tool-slide-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.animate-loading-pulse {
-  animation: loading-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.animate-panel-left {
+  animation: panel-slide-left 0.5s 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.animate-panel-right {
+  animation: panel-slide-right 0.5s 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+
+/* ============ COMPRESS IMAGE — LOADING SCREEN ============ */
+@keyframes stack-1 {
+  0% {
+    transform: rotate(0deg) translateY(20px) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(0deg) translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes stack-2 {
+  0% {
+    transform: rotate(0deg) translateY(20px) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(-4deg) translateY(4px) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes stack-3 {
+  0% {
+    transform: rotate(0deg) translateY(20px) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(-8deg) translateY(8px) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes progress-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+.animate-stack-1 {
+  animation: stack-1 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-stack-2 {
+  animation: stack-2 0.6s 0.1s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-stack-3 {
+  animation: stack-3 0.7s 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-progress-slide {
+  width: 30%;
+  animation: progress-slide 1.4s ease-in-out infinite;
+}
+
+
+/* ============ ACCESSIBILITY — REDUCED MOTION ============ */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .skeleton-shimmer {
+    animation: none;
+    background: #e7ecf5;
+  }
+
   .animate-tool-enter,
-  .animate-loading-pulse {
+  .animate-panel-left,
+  .animate-panel-right,
+  .animate-stack-1,
+  .animate-stack-2,
+  .animate-stack-3,
+  .animate-progress-slide,
+  .animate-mobile-toolbar,
+  .animate-mobile-content,
+  .animate-mobile-bottom,
+  .animate-mobile-item {
     animation: none !important;
   }
+}
+
+/* ============ MOBILE ENTRANCE ANIMATIONS ============ */
+@keyframes mobile-toolbar-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mobile-content-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mobile-bottom-slide {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mobile-item-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-mobile-toolbar {
+  animation: mobile-toolbar-drop 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-mobile-content {
+  animation: mobile-content-rise 0.5s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-mobile-bottom {
+  animation: mobile-bottom-slide 0.5s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-mobile-item {
+  animation: mobile-item-appear 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
