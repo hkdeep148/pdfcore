@@ -210,40 +210,63 @@ export default function MobileView() {
               onDoubleTap={() => setIsReorderMode(true)}
               onRemove={(item) => removeImage(item.image.id)}
               activePageRef={activePageRef}
-              renderPage={(item) => {
-                const isSideways =
-                  item.image.rotation === 90 || item.image.rotation === 270;
+  renderPage={(item) => {
+  const isSideways =
+    item.image.rotation === 90 || item.image.rotation === 270;
 
-                // Per-image effective container aspect
-                const imgSize = item.image.pageSize ?? pageSize;
-                const imgOrient = item.image.orientation ?? orientation;
-                const containerAspect = getAspect(imgSize, imgOrient);
+  const imgSize = item.image.pageSize ?? pageSize;
+  const imgOrient = item.image.orientation ?? orientation;
+  const containerAspect = getAspect(imgSize, imgOrient);
+  const imageAspect = item.image.width / item.image.height;
 
-                const imageAspect = item.image.width / item.image.height;
-                const effectiveAspect = isSideways ? 1 / imageAspect : imageAspect;
+  // After rotation, image aspect flips
+  const rotatedImageAspect = isSideways ? 1 / imageAspect : imageAspect;
 
-                // Scale factor so rotated image fits inside container
-                let scale = 1;
-                if (isSideways) {
-                  const scaleByWidth = containerAspect / effectiveAspect;
-                  const scaleByHeight = effectiveAspect / containerAspect;
-                  scale = Math.min(1, scaleByWidth, scaleByHeight);
-                }
+  // With object-contain, the image fills container in one dimension.
+  // After CSS rotate, we need extra scale to keep it fitting.
+  //
+  // The scale factor is:
+  //   - If unrotated: 1 (already fits)
+  //   - If rotated: min(containerW/rotatedW, containerH/rotatedH)
+  //
+  // Since object-contain already scales the image to fit as UNROTATED,
+  // we compute how much to shrink AFTER rotation.
 
-                return (
-                  <img
-                    src={item.image.preview}
-                    alt=""
-                    className="w-full h-full object-contain bg-white select-none"
-                    draggable={false}
-                    style={{
-                      transform: `rotate(${item.image.rotation}deg) scale(${scale})`,
-                      transformOrigin: 'center',
-                      transition: 'transform 0.3s ease',
-                    }}
-                  />
-                );
-              }}
+  let scale = 1;
+  if (isSideways) {
+    // The unrotated image (via object-contain) has some displayed size.
+    // Its width relative to container = min(1, imageAspect / containerAspect)
+    // Its height relative to container = min(1, containerAspect / imageAspect)
+
+    const unrotatedDisplayW = Math.min(1, imageAspect / containerAspect);
+    const unrotatedDisplayH = Math.min(1, containerAspect / imageAspect);
+
+    // After 90° rotation, width becomes height and vice versa.
+    // The rotated bounding box needs to fit inside container.
+    // Rotated width = unrotatedDisplayH (in container units)
+    // Rotated height = unrotatedDisplayW (in container units)
+    // We need both ≤ 1.
+
+    const rotatedW = unrotatedDisplayH;
+    const rotatedH = unrotatedDisplayW;
+
+    scale = Math.min(1, 1 / rotatedW, 1 / rotatedH);
+  }
+
+  return (
+    <img
+      src={item.image.preview}
+      alt=""
+      className="w-full h-full object-contain bg-white select-none"
+      draggable={false}
+      style={{
+        transform: `rotate(${item.image.rotation}deg) scale(${scale})`,
+        transformOrigin: 'center',
+        transition: 'transform 0.3s ease',
+      }}
+    />
+  );
+}}
             />
           </div>
 
