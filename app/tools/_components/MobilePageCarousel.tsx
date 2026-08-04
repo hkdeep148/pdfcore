@@ -84,10 +84,24 @@ export default function MobilePageCarousel<T extends CarouselItem>({
   const cardHeight = cardWidth / activeAspect;
   const cardGap = 20;
 
-  const containerCenter = containerSize.width / 2;
-  const activeCardLeft = containerCenter - cardWidth / 2;
-  const cardSpacing = cardWidth + cardGap;
-  const trackOffset = activeCardLeft - safeIndex * cardSpacing;
+// Compute cumulative offsets for each card so active card is centered
+const containerCenter = containerSize.width / 2;
+
+// Get width of each card individually
+const cardWidths = items.map((item) => {
+  const aspect = item.aspectRatio ?? defaultAspectRatio;
+  const heightBasedW = maxCardHeight * aspect;
+  return Math.min(maxCardWidth, heightBasedW);
+});
+
+// Compute cumulative left position of the active card
+let cumulativeOffset = 0;
+for (let i = 0; i < safeIndex; i++) {
+  cumulativeOffset += cardWidths[i] + cardGap;
+}
+const activeCardWidth = cardWidths[safeIndex] ?? 0;
+const activeCardLeft = containerCenter - activeCardWidth / 2;
+const trackOffset = activeCardLeft - cumulativeOffset;
 
   // Swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -165,22 +179,27 @@ export default function MobilePageCarousel<T extends CarouselItem>({
           willChange: 'transform',
         }}
       >
-        {items.map((item, index) => {
-          const distance = Math.abs(index - safeIndex);
-          const isActive = index === safeIndex;
-          const cardScale = isActive ? 1 : Math.max(0.9, 1 - distance * 0.05);
-          const cardOpacity = isActive ? 1 : Math.max(0.6, 1 - distance * 0.2);
-          const itemAspect = item.aspectRatio ?? defaultAspectRatio;
+{items.map((item, index) => {
+  const distance = Math.abs(index - safeIndex);
+  const isActive = index === safeIndex;
+  const cardScale = isActive ? 1 : Math.max(0.9, 1 - distance * 0.05);
+  const cardOpacity = isActive ? 1 : Math.max(0.6, 1 - distance * 0.2);
+  const itemAspect = item.aspectRatio ?? defaultAspectRatio;
 
-          return (
-            <div
-              key={item.id}
-              className="flex-shrink-0"
-              style={{
-                width: `${cardWidth}px`,
-                height: `${cardHeight}px`,
-              }}
-            >
+  // 👇 Calculate per-item dimensions based on THIS item's aspect
+  const itemHeightBasedWidth = maxCardHeight * itemAspect;
+  const itemCardWidth = Math.min(maxCardWidth, itemHeightBasedWidth);
+  const itemCardHeight = itemCardWidth / itemAspect;
+
+  return (
+    <div
+      key={item.id}
+      className="flex-shrink-0"
+      style={{
+        width: `${itemCardWidth}px`,   // 👈 use per-item width
+        height: `${itemCardHeight}px`, // 👈 use per-item height
+      }}
+    >
               <div
   className="relative w-full h-full"
   style={{
