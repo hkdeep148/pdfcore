@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import CompressPdfClient from './CompressPdfClient';
-import CompressPdfContent from './CompressPdfContent';
 
 // ═══════════════════════════════════════════════════════════════
 // METADATA — SEO OPTIMIZED
@@ -215,9 +214,6 @@ export default function CompressPdfPage() {
 
       {/* Tool Interface (Client Component) */}
       <CompressPdfClient />
-
-      {/* SEO Content Below Tool */}
-      <CompressPdfContent />
     </>
   );
 }

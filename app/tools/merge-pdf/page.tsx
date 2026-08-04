@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import MergePdfClient from './MergePdfClient';
-import MergePdfContent from './MergePdfContent';
 
 // ═══════════════════════════════════════════════════════════════
 // METADATA — SEO OPTIMIZED
@@ -219,9 +218,6 @@ export default function MergePdfPage() {
 
       {/* Tool Interface (Client Component) */}
       <MergePdfClient />
-
-      {/* SEO Content Below Tool */}
-      <MergePdfContent />
     </>
   );
 }

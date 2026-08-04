@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import ImageToPdfClient from './ImageToPdfClient';
-import ImageToPdfContent from './ImageToPdfContent';
 
 // ═══════════════════════════════════════════════════════════════
 // METADATA — SEO OPTIMIZED
@@ -248,9 +247,6 @@ export default function ImageToPdfPage() {
 
       {/* Tool Interface (Client Component) */}
       <ImageToPdfClient />
-
-      {/* SEO Content Below Tool */}
-      <ImageToPdfContent />
     </>
   );
 }

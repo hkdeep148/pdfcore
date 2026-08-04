@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import PdfToImageClient from './PdfToImageClient';
-import PdfToImageContent from './PdfToImageContent';
 
 // ═══════════════════════════════════════════════════════════════
 // METADATA — SEO OPTIMIZED
@@ -241,12 +240,7 @@ export default function PdfToImagePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-
-      {/* Tool Interface (Client Component) */}
       <PdfToImageClient />
-
-      {/* SEO Content Below Tool */}
-      <PdfToImageContent />
     </>
   );
 }
