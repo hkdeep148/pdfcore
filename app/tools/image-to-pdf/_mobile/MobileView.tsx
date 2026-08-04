@@ -35,6 +35,72 @@ function getAspect(size: PageSize, orient: Orientation): number {
     : 1 / PAGE_ASPECT_RATIOS[size];
 }
 
+// ═══════════════════════════════════════════════════════════════
+// RotatableImage — measures container, swaps max dimensions when rotated
+// ═══════════════════════════════════════════════════════════════
+function RotatableImage({
+  src,
+  rotation,
+}: {
+  src: string;
+  rotation: number;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  const isSideways = rotation === 90 || rotation === 270;
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const el = containerRef.current;
+
+    // Initial measurement
+    const rect = el.getBoundingClientRect();
+    setSize({ w: rect.width, h: rect.height });
+
+    // Watch for size changes
+    const observer = new ResizeObserver((entries) => {
+      const r = entries[0].contentRect;
+      setSize({ w: r.width, h: r.height });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // When sideways: image's max-width equals container's height & vice versa.
+  // After rotation, image fits perfectly inside container.
+  const maxW = isSideways ? size.h : size.w;
+  const maxH = isSideways ? size.w : size.h;
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full h-full flex items-center justify-center bg-white overflow-hidden"
+    >
+      {size.w > 0 && (
+        <img
+          src={src}
+          alt=""
+          draggable={false}
+          className="select-none block"
+          style={{
+            maxWidth: `${maxW}px`,
+            maxHeight: `${maxH}px`,
+            width: 'auto',
+            height: 'auto',
+            objectFit: 'contain',
+            transform: `rotate(${rotation}deg)`,
+            transformOrigin: 'center',
+            transition: 'transform 0.3s ease',
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN VIEW
+// ═══════════════════════════════════════════════════════════════
 export default function MobileView() {
   const {
     images,
@@ -89,7 +155,6 @@ export default function MobileView() {
   // ═══════════ Per-image effective size (falls back to global) ═══════════
   const currentImageSize = currentImage?.pageSize ?? pageSize;
   const currentImageOrientation = currentImage?.orientation ?? orientation;
-  const currentAspect = getAspect(currentImageSize, currentImageOrientation);
 
   const handleRotate = () => {
     if (currentImage) rotateImage(currentImage.id, 'right');
@@ -115,7 +180,6 @@ export default function MobileView() {
   // ═══════════ Scope-aware size/orientation handlers ═══════════
   const handleSizeChange = (size: PageSize, scope: SizeScope) => {
     if (scope === 'all') {
-      // Apply to global + clear all per-image overrides
       setPageSize(size);
       images.forEach((img) => {
         if (img.pageSize !== undefined) {
@@ -123,7 +187,6 @@ export default function MobileView() {
         }
       });
     } else if (currentImage) {
-      // Apply only to current image
       updateImageSize(
         currentImage.id,
         size,
@@ -210,63 +273,12 @@ export default function MobileView() {
               onDoubleTap={() => setIsReorderMode(true)}
               onRemove={(item) => removeImage(item.image.id)}
               activePageRef={activePageRef}
-  renderPage={(item) => {
-  const isSideways =
-    item.image.rotation === 90 || item.image.rotation === 270;
-
-  const imgSize = item.image.pageSize ?? pageSize;
-  const imgOrient = item.image.orientation ?? orientation;
-  const containerAspect = getAspect(imgSize, imgOrient);
-  const imageAspect = item.image.width / item.image.height;
-
-  // After rotation, image aspect flips
-  const rotatedImageAspect = isSideways ? 1 / imageAspect : imageAspect;
-
-  // With object-contain, the image fills container in one dimension.
-  // After CSS rotate, we need extra scale to keep it fitting.
-  //
-  // The scale factor is:
-  //   - If unrotated: 1 (already fits)
-  //   - If rotated: min(containerW/rotatedW, containerH/rotatedH)
-  //
-  // Since object-contain already scales the image to fit as UNROTATED,
-  // we compute how much to shrink AFTER rotation.
-
-  let scale = 1;
-  if (isSideways) {
-    // The unrotated image (via object-contain) has some displayed size.
-    // Its width relative to container = min(1, imageAspect / containerAspect)
-    // Its height relative to container = min(1, containerAspect / imageAspect)
-
-    const unrotatedDisplayW = Math.min(1, imageAspect / containerAspect);
-    const unrotatedDisplayH = Math.min(1, containerAspect / imageAspect);
-
-    // After 90° rotation, width becomes height and vice versa.
-    // The rotated bounding box needs to fit inside container.
-    // Rotated width = unrotatedDisplayH (in container units)
-    // Rotated height = unrotatedDisplayW (in container units)
-    // We need both ≤ 1.
-
-    const rotatedW = unrotatedDisplayH;
-    const rotatedH = unrotatedDisplayW;
-
-    scale = Math.min(1, 1 / rotatedW, 1 / rotatedH);
-  }
-
-  return (
-    <img
-      src={item.image.preview}
-      alt=""
-      className="w-full h-full object-contain bg-white select-none"
-      draggable={false}
-      style={{
-        transform: `rotate(${item.image.rotation}deg) scale(${scale})`,
-        transformOrigin: 'center',
-        transition: 'transform 0.3s ease',
-      }}
-    />
-  );
-}}
+              renderPage={(item) => (
+                <RotatableImage
+                  src={item.image.preview}
+                  rotation={item.image.rotation}
+                />
+              )}
             />
           </div>
 
@@ -281,7 +293,7 @@ export default function MobileView() {
               },
               {
                 icon: Maximize2,
-                label: currentImageSize,   // 👈 shows THIS image's size
+                label: currentImageSize,
                 onClick: () => setShowSizeSheet(true),
               },
               {
