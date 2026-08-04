@@ -22,6 +22,9 @@ export type ImageItem = {
   height: number;
   rotation: 0 | 90 | 180 | 270;
   scale: number;
+   // 👇 NEW — per-image page size overrides (optional)
+  pageSize?: PageSize;
+  orientation?: Orientation;
 };
 
 // Tool categories

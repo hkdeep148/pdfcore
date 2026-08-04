@@ -64,23 +64,18 @@ export const FIT_LABELS: Record<PageFit, string> = {
 // ============ QUALITY PROFILES (Adobe-style) ============
 // Target DPI + JPEG quality per level. These are the two knobs that
 // most affect final PDF size.
-const QUALITY_PROFILES: Record<
-  ImageQuality,
-  { targetDpi: number; jpegQuality: number; maxDimensionPx: number }
-> = {
-  Low:    { targetDpi: 96,  jpegQuality: 0.60, maxDimensionPx: 1200 }, // Screen
-  Medium: { targetDpi: 150, jpegQuality: 0.75, maxDimensionPx: 1800 }, // eBook
-  High:   { targetDpi: 200, jpegQuality: 0.85, maxDimensionPx: 2400 }, // Print
-} as any;
+const QUALITY_PROFILES = {
+  Low:    { targetDpi: 96,  jpegQuality: 0.60, maxDimensionPx: 1200 },
+  Medium: { targetDpi: 150, jpegQuality: 0.75, maxDimensionPx: 1800 },
+  High:   { targetDpi: 200, jpegQuality: 0.85, maxDimensionPx: 2400 },
+} as const;
 
 // Fallback if ImageQuality has label 'High quality' etc.
 function getProfile(quality: ImageQuality) {
-  const key = (quality as string).toLowerCase().includes('low')
-    ? 'Low'
-    : (quality as string).toLowerCase().includes('med')
-    ? 'Medium'
-    : 'High';
-  return QUALITY_PROFILES[key as keyof typeof QUALITY_PROFILES];
+  const q = (quality as string).toLowerCase();
+  if (q.includes('low')) return QUALITY_PROFILES.Low;
+  if (q.includes('med')) return QUALITY_PROFILES.Medium;
+  return QUALITY_PROFILES.High;
 }
 
 // ============ HELPERS ============
@@ -126,12 +121,20 @@ function calculateOptimalPixelSize(
 
   // Apply hard cap
   if (outW > hardCapPx || outH > hardCapPx) {
-    const capRatio = Math.min(hardCapPx / outW, hardCapPx / outH);
-    outW = Math.round(outW * capRatio);
-    outH = Math.round(outH * capRatio);
-  }
+  const capRatio = Math.min(hardCapPx / outW, hardCapPx / outH);
+  outW = Math.round(outW * capRatio);
+  outH = Math.round(outH * capRatio);
+}
 
-  return { width: outW, height: outH };
+// iOS Safari canvas area limit ≈ 16 megapixels
+const IOS_SAFE_AREA = 16_000_000;
+if (outW * outH > IOS_SAFE_AREA) {
+  const areaRatio = Math.sqrt(IOS_SAFE_AREA / (outW * outH));
+  outW = Math.round(outW * areaRatio);
+  outH = Math.round(outH * areaRatio);
+}
+
+return { width: outW, height: outH };
 }
 
 /**
@@ -149,7 +152,8 @@ async function getCompressedImageBytes(
 
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
+//  Do NOT set crossOrigin for blob: URLs — it breaks iOS Safari
+    img.decoding = 'async';
 
     img.onload = () => {
       try {
@@ -167,35 +171,36 @@ async function getCompressedImageBytes(
           profile.maxDimensionPx
         );
 
-        const canvas = document.createElement('canvas');
+                const canvas = document.createElement('canvas');
         canvas.width = outW;
         canvas.height = outH;
 
-        // alpha:false gives a slight perf/size boost when we don't need transparency
         const ctx = canvas.getContext('2d', { alpha: !forceOpaque });
         if (!ctx) return reject(new Error('Canvas not supported'));
 
-        // High-quality downsampling
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
 
-        // White background for JPEG output (JPEG has no alpha)
         if (forceOpaque) {
           ctx.fillStyle = '#FFFFFF';
           ctx.fillRect(0, 0, outW, outH);
         }
 
-        // Apply rotation around center, then draw scaled
+        // Move origin to center of canvas
         ctx.translate(outW / 2, outH / 2);
-        if (item.rotation !== 0) {
-          ctx.rotate((item.rotation * Math.PI) / 180);
-        }
+        ctx.rotate((item.rotation * Math.PI) / 180);
 
-        // Draw source image scaled to fit output canvas
-        // (accounting for rotation swap)
-        const drawSrcW = isSideways ? outH : outW;
-        const drawSrcH = isSideways ? outW : outH;
-        ctx.drawImage(img, -drawSrcW / 2, -drawSrcH / 2, drawSrcW, drawSrcH);
+        // After rotation of 90/270, natural width becomes vertical
+        const naturalDrawW = isSideways ? outH : outW;
+        const naturalDrawH = isSideways ? outW : outH;
+
+        ctx.drawImage(
+          img,
+          -naturalDrawW / 2,
+          -naturalDrawH / 2,
+          naturalDrawW,
+          naturalDrawH
+        );
 
         // Prefer JPEG for best compression (matches Adobe behavior).
         // Only keep PNG when transparency is required.
@@ -252,12 +257,6 @@ export async function generatePdf(options: GeneratePdfOptions): Promise<string> 
   const { PDFDocument, rgb } = await import('pdf-lib');
   const pdfDoc = await PDFDocument.create();
 
-  let [pageW, pageH] = PAGE_DIMENSIONS[options.pageSize];
-  if (options.orientation === 'Landscape') [pageW, pageH] = [pageH, pageW];
-  const margin = MARGIN_VALUES[options.margins];
-  const contentW = pageW - margin * 2;
-  const contentH = pageH - margin * 2;
-
   // Determine if we need transparency support
   const bgHex = PAGE_BACKGROUND_HEX[options.background];
   const pageHasBackground = bgHex !== null; // White or Black
@@ -265,11 +264,22 @@ export async function generatePdf(options: GeneratePdfOptions): Promise<string> 
   // If transparent, keep PNG for images that have alpha
   const forceOpaqueGlobal = pageHasBackground;
 
+  const margin = MARGIN_VALUES[options.margins];
+
   for (let i = 0; i < options.images.length; i++) {
     const item = options.images[i];
 
     try {
       console.log(`Processing image ${i + 1}/${options.images.length}:`, item.file.name);
+
+      // 👇 Use per-image size if set, otherwise fall back to global default
+      const itemPageSize = item.pageSize ?? options.pageSize;
+      const itemOrientation = item.orientation ?? options.orientation;
+
+      let [pageW, pageH] = PAGE_DIMENSIONS[itemPageSize];
+      if (itemOrientation === 'Landscape') [pageW, pageH] = [pageH, pageW];
+      const contentW = pageW - margin * 2;
+      const contentH = pageH - margin * 2;
 
       const isSideways = item.rotation === 90 || item.rotation === 270;
       const origW = isSideways ? item.height : item.width;

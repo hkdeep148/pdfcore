@@ -67,11 +67,6 @@ export default function MobileView() {
     setShowSuccess(false);
   };
 
-  const handleBackToEdit = () => {
-    setShowSuccess(false);
-    resetWatermarked();
-  };
-
   const pages = file?.allPagePreviews && file.allPagePreviews.length > 0
     ? file.allPagePreviews
     : file ? [file.firstPagePreview] : [];
@@ -142,7 +137,6 @@ export default function MobileView() {
           onDownload={downloadWatermarkedFile}
           onPreview={previewWatermarkedPdf}
           onStartOver={handleStartOver}
-          onBack={handleBackToEdit}
           iconVariant="pdf"
           statusBadge={{ label: 'Watermarked', color: 'purple' }}
         />

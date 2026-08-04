@@ -11,15 +11,6 @@ export interface CompressionStats {
   format?: string;
 }
 
-export interface FileListItem {
-  id: string;
-  name: string;
-  thumbnailUrl?: string;
-  reduction?: number;
-  onDownload: () => void;
-  onPreview?: () => void;
-}
-
 export interface StatusBadge {
   label: string;
   color: 'green' | 'blue' | 'purple';
@@ -46,8 +37,8 @@ interface MobileSuccessScreenProps {
   onStartOver: () => void;
   onBack?: () => void;
 
-  // Multi-file support
-  files?: FileListItem[];
+  // Batch support
+  fileCount?: number;
 }
 
 // ============ COMPONENT ============
@@ -66,21 +57,23 @@ export default function MobileSuccessScreen({
   onPreview,
   onStartOver,
   onBack,
-  files,
+  fileCount = 1,
 }: MobileSuccessScreenProps) {
-  const hasMultipleFiles = files && files.length > 1;
+  const isBatch = fileCount > 1;
 
   return (
     <div className="flex flex-col h-full bg-[#F5F5FA] overflow-y-auto">
       {/* Back Button */}
       {onBack && (
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1 px-4 pt-4 pb-2 text-[13px] font-semibold text-[#4F46E5] active:scale-95 transition-all self-start"
-        >
-          <ArrowLeft size={16} strokeWidth={2.5} />
-          Back
-        </button>
+        <div className="px-4 pt-4 pb-2">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white border border-[#E8EDF5] text-[13px] font-semibold text-[#07122E] shadow-[0_1px_2px_rgba(15,23,42,0.04)] active:scale-95 hover:bg-slate-50 transition-all"
+          >
+            <ArrowLeft size={15} strokeWidth={2.5} className="text-[#07122E]" />
+            Back
+          </button>
+        </div>
       )}
 
       <div className="flex-1 flex flex-col items-center px-6 pt-8 pb-6">
@@ -101,41 +94,49 @@ export default function MobileSuccessScreen({
           {subtitle}
         </p>
 
-        {/* ═══════════ FILE LIST or SINGLE FILE ═══════════ */}
-        {hasMultipleFiles ? (
-          /* MULTI-FILE COMPACT LIST */
-          <div className="w-full mb-6 rounded-2xl bg-white border border-[#E8EDF5] overflow-hidden shadow-[0_2px_10px_-2px_rgba(15,23,42,0.05)]">
-            <div className="px-4 py-2.5 bg-[#F8FAFF] border-b border-[#E8EDF5]">
-              <p className="text-[10.5px] font-bold text-[#6B7280] uppercase tracking-wider">
-                Files ({files!.length})
-              </p>
+        {/* ═══════════ File Card (Single or Batch) ═══════════ */}
+        <div className="w-full mb-6 rounded-2xl bg-white border border-[#E8EDF5] p-3.5 shadow-[0_2px_10px_-2px_rgba(15,23,42,0.05)]">
+          <div className="flex items-center gap-3">
+            {/* Thumbnail / Batch Icon */}
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#EEF2FF] to-[#F5F3FF] overflow-hidden shrink-0 border border-[#E0E7FF] flex items-center justify-center relative">
+              {isBatch ? (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#4F46E5] to-[#6D5DF6]">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="28"
+                    height="28"
+                    className="text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="4 14 10 14 10 20" />
+                    <polyline points="20 10 14 10 14 4" />
+                    <line x1="14" y1="10" x2="21" y2="3" />
+                    <line x1="3" y1="21" x2="10" y2="14" />
+                  </svg>
+                </div>
+              ) : previewImage ? (
+                <img src={previewImage} alt={filename} className="w-full h-full object-cover" />
+              ) : (
+                <FileIcon variant={iconVariant} />
+              )}
             </div>
-            <div className="divide-y divide-[#F1F5F9] max-h-[240px] overflow-y-auto">
-              {files!.map((file) => (
-                <FileRow key={file.id} file={file} />
-              ))}
-            </div>
-          </div>
-        ) : (
-          /* SINGLE FILE */
-          <div className="w-full mb-6 rounded-2xl bg-white border border-[#E8EDF5] p-3.5 shadow-[0_2px_10px_-2px_rgba(15,23,42,0.05)]">
-            <div className="flex items-center gap-3">
-              {/* Thumbnail */}
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] overflow-hidden shrink-0 border border-slate-100 flex items-center justify-center">
-                {previewImage ? (
-                  <img src={previewImage} alt={filename} className="w-full h-full object-cover" />
-                ) : (
-                  <FileIcon variant={iconVariant} />
-                )}
-              </div>
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <p className="text-[13.5px] font-bold text-[#07122E] truncate mb-1">
-                  {filename}
-                </p>
 
-                {/* File metadata (size + pages) — for PDF tools */}
-                {(fileSize || pageCount !== undefined) && (
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-bold text-[#07122E] truncate mb-1">
+                {isBatch ? `${fileCount} files bundled` : filename}
+              </p>
+
+              {isBatch ? (
+                <p className="text-[11px] text-[#6B7280] font-semibold mb-1">
+                  Packaged as ZIP archive
+                </p>
+              ) : (
+                (fileSize || pageCount !== undefined) && (
                   <div className="flex items-center gap-1.5 text-[11px] text-[#6B7280] font-semibold mb-1">
                     {fileSize && <span>{fileSize}</span>}
                     {fileSize && pageCount !== undefined && (
@@ -145,24 +146,24 @@ export default function MobileSuccessScreen({
                       <span>{pageCount} {pageCount === 1 ? 'page' : 'pages'}</span>
                     )}
                   </div>
-                )}
+                )
+              )}
 
-                {statusBadge && (
-                  <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-extrabold uppercase tracking-wider ${
-                    statusBadge.color === 'green'
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : statusBadge.color === 'blue'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'bg-purple-50 text-purple-700'
-                  }`}>
-                    <Check size={10} strokeWidth={3} />
-                    {statusBadge.label}
-                  </div>
-                )}
-              </div>
+              {statusBadge && (
+                <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10.5px] font-extrabold uppercase tracking-wider ${
+                  statusBadge.color === 'green'
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : statusBadge.color === 'blue'
+                    ? 'bg-blue-50 text-blue-700'
+                    : 'bg-purple-50 text-purple-700'
+                }`}>
+                  <Check size={10} strokeWidth={3} />
+                  {statusBadge.label}
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
 
         {/* ═══════════ Compression Stats ═══════════ */}
         {compressionStats && (
@@ -212,8 +213,8 @@ export default function MobileSuccessScreen({
             {downloadLabel}
           </button>
 
-          {/* Preview (only single-file mode) */}
-          {!hasMultipleFiles && onPreview && (
+          {/* Preview (single file only) */}
+          {!isBatch && onPreview && (
             <button
               onClick={onPreview}
               className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white border-2 border-[#E8EDF5] text-[#4F46E5] text-[13px] font-bold active:scale-95 transition-all"
@@ -238,55 +239,6 @@ export default function MobileSuccessScreen({
 }
 
 // ============ SUB-COMPONENTS ============
-
-function FileRow({ file }: { file: FileListItem }) {
-  return (
-    <div className="flex items-center gap-3 px-3 py-2.5 active:bg-slate-50 transition-colors">
-      {/* Thumbnail */}
-      <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-[#F8FAFC] to-[#F1F5F9] overflow-hidden shrink-0 border border-slate-100">
-        {file.thumbnailUrl ? (
-          <img src={file.thumbnailUrl} alt={file.name} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <FileIcon variant="image" small />
-          </div>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className="text-[12.5px] font-bold text-[#07122E] truncate">
-          {file.name}
-        </p>
-        {file.reduction !== undefined && file.reduction > 0 && (
-          <div className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[9.5px] font-extrabold mt-0.5">
-            -{file.reduction}%
-          </div>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-1 shrink-0">
-        {file.onPreview && (
-          <button
-            onClick={file.onPreview}
-            className="w-9 h-9 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center active:scale-90 transition-all"
-            aria-label="Preview"
-          >
-            <Eye size={15} strokeWidth={2.5} />
-          </button>
-        )}
-        <button
-          onClick={file.onDownload}
-          className="w-9 h-9 rounded-lg bg-[#EEF2FF] text-[#4F46E5] flex items-center justify-center active:scale-90 transition-all"
-          aria-label="Download"
-        >
-          <Download size={15} strokeWidth={2.5} />
-        </button>
-      </div>
-    </div>
-  );
-}
 
 function StatRow({
   label,

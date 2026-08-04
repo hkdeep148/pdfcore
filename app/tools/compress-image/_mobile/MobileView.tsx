@@ -145,41 +145,29 @@ if (processing || isTransitioningToSuccess) {
       {/* Success Screen */}
       {showSuccess && hasCompleted && files[0]?.compressed && files[0]?.compressedSize ? (
         <MobileSuccessScreen
-          title={completedCount === 1 ? 'Image Compressed!' : `${completedCount} Images Compressed!`}
-          subtitle={completedCount === 1 ? 'Your image is ready to download' : 'Your images are ready to download'}
-          filename={files[0].original.name}
-          iconVariant="image"
-          previewImage={files[0].compressedUrl}
-          compressionStats={{
-            originalSize: formatBytes(totalOriginalSize),
-            compressedSize: formatBytes(totalCompressedSize),
-            savedPercentage: totalReduction,
-            savedBytes: formatBytes(totalOriginalSize - totalCompressedSize),
-            format: files[0].compressed?.type.split('/')[1]?.toUpperCase(),
-          }}
-          downloadLabel={completedCount === 1 ? 'Download Image' : `Download All (${completedCount}) as ZIP`}
-          statusBadge={{ label: 'Compressed', color: 'green' }}
-          onDownload={handleDownloadAll}
-          onPreview={
-            files[0].compressedUrl
-              ? () => window.open(files[0].compressedUrl, '_blank')
-              : undefined
-          }
-          onStartOver={handleStartOver}
-          onBack={() => setShowSuccess(false)}
-          files={files
-            .filter((f) => f.status === 'done' && f.compressedUrl)
-            .map((f) => ({
-              id: f.id,
-              name: f.original.name,
-              thumbnailUrl: f.compressedUrl,
-              reduction: f.reduction,
-              onDownload: () => handleDownloadSingle(f),
-              onPreview: f.compressedUrl
-                ? () => window.open(f.compressedUrl, '_blank')
-                : undefined,
-            }))}
-        />
+  title={completedCount === 1 ? 'Image Compressed!' : `${completedCount} Images Compressed!`}
+  subtitle={completedCount === 1 ? 'Your image is ready to download' : 'Your images are ready to download'}
+  filename={files[0].original.name}
+  fileCount={files.length}
+  iconVariant="image"
+  previewImage={files[0].compressedUrl}
+  compressionStats={{
+    originalSize: formatBytes(totalOriginalSize),
+    compressedSize: formatBytes(totalCompressedSize),
+    savedPercentage: totalReduction,
+    savedBytes: formatBytes(totalOriginalSize - totalCompressedSize),
+    format: files[0].compressed?.type.split('/')[1]?.toUpperCase(),
+  }}
+  downloadLabel={completedCount === 1 ? 'Download Image' : `Download All (${completedCount}) as ZIP`}
+  statusBadge={{ label: 'Compressed', color: 'green' }}
+  onDownload={handleDownloadAll}
+  onPreview={
+    files[0].compressedUrl
+      ? () => window.open(files[0].compressedUrl, '_blank')
+      : undefined
+  }
+  onStartOver={handleStartOver}
+/>
       ) : files.length === 0 ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
       ) : (

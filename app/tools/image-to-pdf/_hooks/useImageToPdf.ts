@@ -71,23 +71,28 @@ export function useImageToPdf() {
     setIsReady(false);
 
     validFiles.forEach((file) => {
-      const preview = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => {
-        const newItem: ImageItem = {
-          id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
-          file,
-          preview,
-          sizeMB: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-          width: img.naturalWidth,
-          height: img.naturalHeight,
-          rotation: 0,
-          scale: 1,
-        };
-        setImages((prev) => [...prev, newItem]);
-      };
-      img.src = preview;
-    });
+  const preview = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    const newItem: ImageItem = {
+      id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+      file,
+      preview,
+      sizeMB: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+      width: img.naturalWidth,
+      height: img.naturalHeight,
+      rotation: 0,
+      scale: 1,
+    };
+    setImages((prev) => [...prev, newItem]);
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(preview);
+    console.error(`Failed to load image: ${file.name}`);
+    toast.error(`Could not read "${file.name}"`);
+  };
+  img.src = preview;
+});
   }, [toast]);
 
   const removeImage = useCallback((id: string) => {
@@ -112,6 +117,20 @@ export function useImageToPdf() {
     );
     setIsReady(false);
   }, []);
+
+const updateImageSize = useCallback(
+  (id: string, pageSize?: PageSize, orientation?: Orientation) => {
+    setImages((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, pageSize, orientation }
+          : item
+      )
+    );
+    setIsReady(false);
+  },
+  []
+);
 
   const clearAll = useCallback(() => {
     images.forEach((i) => URL.revokeObjectURL(i.preview));
@@ -219,6 +238,7 @@ export function useImageToPdf() {
     addImages,
     removeImage,
     rotateImage,
+    updateImageSize,
     clearAll,
     reorderImages,
     createPdf,

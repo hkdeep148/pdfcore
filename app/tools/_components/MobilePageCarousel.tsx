@@ -182,38 +182,37 @@ export default function MobilePageCarousel<T extends CarouselItem>({
               }}
             >
               <div
-                className="relative w-full h-full"
-                style={{
-                  transform: `scale(${cardScale})`,
-                  opacity: cardOpacity,
-                  transition: 'transform 0.4s ease, opacity 0.4s ease',
-                }}
-              >
-                {/* Outer Card - White Frame */}
-                <div
-                  className={`bg-white rounded-[20px] overflow-hidden flex items-center justify-center p-4 w-full h-full ${
-                    isActive
-                      ? 'shadow-[0_8px_30px_rgba(0,0,0,0.12)]'
-                      : 'shadow-[0_4px_20px_rgba(0,0,0,0.06)]'
-                  }`}
-                >
-                  {/* Inner Page Container */}
-                  <div
-                    ref={isActive ? activePageRef : undefined}
-                    className="bg-white overflow-visible rounded-[8px] border border-[#EEEEEE] relative"
-                    style={{
-                      height: '100%',
-                      aspectRatio: `${itemAspect}`,
-                      maxWidth: '100%',
-                    }}
-                  >
-                    {/* Main page content (slot) */}
-                    {renderPage(item, isActive)}
+  className="relative w-full h-full"
+  style={{
+    transform: `scale(${cardScale})`,
+    opacity: cardOpacity,
+    transition: 'transform 0.4s ease, opacity 0.4s ease',
+  }}
+>
+  {/* Page Container — A4 paper card with margin */}
+<div
+  ref={isActive ? activePageRef : undefined}
+  className={`
+    relative w-full h-full bg-white overflow-hidden
+    rounded-[10px] p-4
+    ${isActive
+      ? 'shadow-[0_10px_35px_-8px_rgba(15,23,42,0.18),0_2px_6px_-2px_rgba(15,23,42,0.08)] ring-1 ring-black/[0.04]'
+      : 'shadow-[0_4px_18px_-6px_rgba(15,23,42,0.1)] ring-1 ring-black/[0.03]'
+    }
+  `}
+  style={{
+    aspectRatio: `${itemAspect}`,
+  }}
+>
+  {/* Inner content area (with margin from paper edge) */}
+  <div className="relative w-full h-full">
+    {/* Main page content (slot) */}
+    {renderPage(item, isActive)}
 
-                    {/* Overlay slot (e.g., signatures) */}
-                    {renderOverlay && renderOverlay(item, isActive)}
-                  </div>
-                </div>
+    {/* Overlay slot (e.g., signatures) */}
+    {renderOverlay && renderOverlay(item, isActive)}
+  </div>
+</div>
 
                 {/* Red Minus Remove Button */}
                 {isActive && onRemove && (
