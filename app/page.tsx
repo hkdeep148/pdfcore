@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import HomeClient from './HomeClient';
-import HomeSeoContent from './HomeSeoContent';
 
 // ═══════════════════════════════════════════════════════════════
 // METADATA — SEO OPTIMIZED
@@ -282,9 +281,6 @@ export default function HomePage() {
 
       {/* Interactive Homepage (Client Component) */}
       <HomeClient />
-
-      {/* SEO Content Below */}
-      <HomeSeoContent />
     </>
   );
 }
