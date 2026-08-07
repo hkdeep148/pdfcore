@@ -1,13 +1,16 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { CirclePlus, LayoutGrid, RotateCw, Trash2, Maximize2 } from 'lucide-react';
+import {
+  CirclePlus, LayoutGrid, RotateCw, Trash2, Maximize2,
+  FileText, Image as ImageIcon,
+} from 'lucide-react';
 import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileToolHeader from '../../_components/MobileToolHeader';
 import MobileBottomToolbar from '../../_components/MobileBottomToolbar';
 import MobileActionButton from '../../_components/MobileActionButton';
-import MobileSuccessScreen from '../../_components/MobileSuccessScreen';
+import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import { getToolByPath } from '../../_config/tools';
 import { useImageToPdfContext } from '../_context/ImageToPdfContext';
 import ReorderMode from './ReorderMode';
@@ -28,7 +31,6 @@ const IMAGE_TO_PDF_SIZES: PageSizeOption<PageSize>[] = [
   { id: 'Legal',  name: 'Legal',  dimensions: '8.5 × 14 in',  desc: 'US legal' },
 ];
 
-// Helper: compute aspect ratio for a given size + orientation
 function getAspect(size: PageSize, orient: Orientation): number {
   return orient === 'Portrait'
     ? PAGE_ASPECT_RATIOS[size]
@@ -36,7 +38,7 @@ function getAspect(size: PageSize, orient: Orientation): number {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// RotatableImage — measures container, swaps max dimensions when rotated
+// RotatableImage
 // ═══════════════════════════════════════════════════════════════
 function RotatableImage({
   src,
@@ -53,11 +55,9 @@ function RotatableImage({
     if (!containerRef.current) return;
     const el = containerRef.current;
 
-    // Initial measurement
     const rect = el.getBoundingClientRect();
     setSize({ w: rect.width, h: rect.height });
 
-    // Watch for size changes
     const observer = new ResizeObserver((entries) => {
       const r = entries[0].contentRect;
       setSize({ w: r.width, h: r.height });
@@ -66,8 +66,6 @@ function RotatableImage({
     return () => observer.disconnect();
   }, []);
 
-  // When sideways: image's max-width equals container's height & vice versa.
-  // After rotation, image fits perfectly inside container.
   const maxW = isSideways ? size.h : size.w;
   const maxH = isSideways ? size.w : size.h;
 
@@ -152,7 +150,6 @@ export default function MobileView() {
   const hasImages = images.length > 0;
   const currentImage = images[currentPageIndex];
 
-  // ═══════════ Per-image effective size (falls back to global) ═══════════
   const currentImageSize = currentImage?.pageSize ?? pageSize;
   const currentImageOrientation = currentImage?.orientation ?? orientation;
 
@@ -177,7 +174,6 @@ export default function MobileView() {
     setCurrentPageIndex(0);
   };
 
-  // ═══════════ Scope-aware size/orientation handlers ═══════════
   const handleSizeChange = (size: PageSize, scope: SizeScope) => {
     if (scope === 'all') {
       setPageSize(size);
@@ -212,6 +208,71 @@ export default function MobileView() {
     }
   };
 
+  // ═══════════════════════════════════════════════════════════════
+  // ⭐ SUCCESS SCREEN (renders OUTSIDE ToolShellMobile)
+  // ═══════════════════════════════════════════════════════════════
+  if (showSuccess && isReady) {
+    return (
+      <MobileSuccessScreen
+        toolIcon={tool.icon}
+        toolName="Image to PDF"
+        toolColor="#8B3DFF"
+        onBack={handleStartOver}
+        title="PDF Created!"
+        subtitle={
+          images.length === 1
+            ? 'Your image has been converted to PDF.'
+            : `${images.length} images have been converted to PDF.`
+        }
+        files={[{
+          id: 'created-pdf',
+          name: `${pdfFilename}.pdf`,
+          size: lastPdfSize || '—',
+          pages: images.length,
+        }]}
+        onPreview={previewPdf}
+        summaryTitle="Conversion Summary"
+        summaryRows={[
+          {
+            icon: <ImageIcon size={13} />,
+            iconBg: '#F3E8FF',
+            iconColor: '#8B3DFF',
+            label: 'Total Images',
+            value: `${images.length}`,
+          },
+          {
+            icon: <FileText size={13} />,
+            iconBg: '#DBEAFE',
+            iconColor: '#3B82F6',
+            label: 'Page Size',
+            value: `${pageSize} • ${orientation}`,
+          },
+          {
+            icon: <FileText size={13} />,
+            iconBg: '#D1FAE5',
+            iconColor: '#10B981',
+            label: 'File Size',
+            value: lastPdfSize || '—',
+            valueColor: '#10B981',
+          },
+          {
+            icon: <FileText size={13} />,
+            iconBg: '#FEF3C7',
+            iconColor: '#F59E0B',
+            label: 'Format',
+            value: 'PDF',
+          },
+        ]}
+        downloadLabel="Download PDF"
+        onDownload={downloadPdf}
+        onStartOver={handleStartOver}
+      />
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // ⭐ NORMAL VIEW (inside ToolShellMobile)
+  // ═══════════════════════════════════════════════════════════════
   return (
     <ToolShellMobile fixedHeight={hasImages && !isReorderMode}>
       <input
@@ -235,18 +296,7 @@ export default function MobileView() {
         </div>
       )}
 
-      {showSuccess && isReady ? (
-        <MobileSuccessScreen
-          title="PDF Created!"
-          subtitle="Your images have been converted to PDF"
-          filename={`${pdfFilename}.pdf`}
-          fileSize={lastPdfSize || undefined}
-          pageCount={images.length}
-          onDownload={downloadPdf}
-          onPreview={previewPdf}
-          onStartOver={handleStartOver}
-        />
-      ) : !hasImages ? (
+      {!hasImages ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
       ) : isReorderMode ? (
         <ReorderMode onDone={() => setIsReorderMode(false)} />
@@ -322,7 +372,7 @@ export default function MobileView() {
         </div>
       )}
 
-      {/* Page Size Sheet — with scope toggle */}
+      {/* Page Size Sheet */}
       <PageSizeSheet<PageSize>
         open={showSizeSheet}
         onClose={() => setShowSizeSheet(false)}

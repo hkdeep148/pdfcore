@@ -4,22 +4,23 @@ import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import ToolBottomBar from '../../_components/ToolBottomBar';
 import ToolActionButton from '../../_components/ToolActionButton';
 import UploadZone from '../../_components/UploadZone';
+import SuccessScreenV2 from '../../_components/SuccessScreen/SuccessScreenV2';
 import { useUnlockPdfContext } from '../_context/UnlockPdfContext';
 import PasswordCard from './PasswordCard';
 import AddMorePdfRow from './AddMorePdfRow';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
+import { buildUnlockPdfV2Config } from '../../_config/successScreenConfigs';
 
 export default function DesktopView() {
   const {
     items, errorMessage, setErrorMessage,
-    unlockedCount, needsPasswordCount,
+    unlockedCount, needsPasswordCount, allUnlocked,
     addPdfs, updatePassword, unlockOne, downloadOne, downloadAll,
     removePdf, clearAll,
   } = useUnlockPdfContext();
 
   useToolFileReceiver((files: File[]) => addPdfs(files));
 
-  // ⭐ Smart download logic
   const isSingleFile = items.length === 1;
 
   const handleSmartDownload = () => {
@@ -30,15 +31,55 @@ export default function DesktopView() {
     }
   };
 
-  // ⭐ Dynamic label based on file count
-  const downloadLabel = isSingleFile
-    ? 'Download PDF'
-    : unlockedCount > 0
-    ? `Download All (${unlockedCount})`
-    : 'Download All';
+  // ⭐ Helper: format bytes
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '—';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
 
-  const downloadSubtitle = isSingleFile ? 'Get unlocked PDF' : 'Get unlocked PDFs';
+  // ═══════════════════════════════════════════════════════════════
+  // 1️⃣ SUCCESS SCREEN (all files unlocked)
+  // ═══════════════════════════════════════════════════════════════
+if (allUnlocked) {
+  const unlockedItems = items.filter((it) => it.status === 'unlocked');
 
+  const config = buildUnlockPdfV2Config({
+    files: unlockedItems.map((it) => ({
+      id: it.id,
+      name: it.name.replace(/\.pdf$/i, '-unlocked.pdf'),
+      size: it.unlockedBlob ? formatBytes(it.unlockedBlob.size) : it.sizeMB,
+      onDownload: () => downloadOne(it.id),
+      // ⭐ ADD: Preview opens unlocked PDF in new tab
+      onPreview: it.unlockedBlob
+        ? () => {
+            const url = URL.createObjectURL(it.unlockedBlob!);
+            window.open(url, '_blank');
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+          }
+        : undefined,
+    })),
+    onDownloadAll: handleSmartDownload,
+    onStartOver: clearAll,
+    onDelete: clearAll,
+  });
+
+  // ⭐ ADD: Pass PDF preview URL for gallery viewer
+  const firstUnlocked = unlockedItems[0];
+  const configWithPdf = {
+    ...config,
+    pdfPreviewUrl: firstUnlocked?.unlockedBlob
+      ? URL.createObjectURL(firstUnlocked.unlockedBlob)
+      : null,
+  };
+
+  return <SuccessScreenV2 config={configWithPdf} />;
+}
+
+  // ═══════════════════════════════════════════════════════════════
+  // 2️⃣ RIGHT PANEL
+  // ═══════════════════════════════════════════════════════════════
   const rightPanel = (
     <>
       <div className="mb-4">
@@ -83,12 +124,14 @@ export default function DesktopView() {
         </svg>
         <div className="text-[12px] text-[#166534] leading-relaxed">
           <strong>100% Private:</strong> Your PDFs are unlocked in your browser and never uploaded to any server.
-          Unlocked files preserve print quality but text becomes images (for maximum security & privacy).
         </div>
       </div>
     </>
   );
 
+  // ═══════════════════════════════════════════════════════════════
+  // 3️⃣ BOTTOM TOOLBAR
+  // ═══════════════════════════════════════════════════════════════
   const bottomBar = (
     <ToolBottomBar
       actions={[
@@ -130,9 +173,18 @@ export default function DesktopView() {
     />
   );
 
+  // ═══════════════════════════════════════════════════════════════
+  // 4️⃣ ACTION BUTTON
+  // ═══════════════════════════════════════════════════════════════
+  const downloadLabel = isSingleFile
+    ? 'Download PDF'
+    : unlockedCount > 0
+      ? `Download All (${unlockedCount})`
+      : 'Download All';
+
   const actionButton = (
     <ToolActionButton
-      onClick={handleSmartDownload}          // ⭐ CHANGED (was downloadAll)
+      onClick={handleSmartDownload}
       disabled={unlockedCount === 0}
       icon={
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -141,11 +193,14 @@ export default function DesktopView() {
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
       }
-      label={downloadLabel}                  // ⭐ CHANGED (dynamic label)
-      subtitle={downloadSubtitle}            // ⭐ CHANGED (dynamic subtitle)
+      label={downloadLabel}
+      subtitle={isSingleFile ? 'Get unlocked PDF' : 'Get unlocked PDFs'}
     />
   );
 
+  // ═══════════════════════════════════════════════════════════════
+  // 5️⃣ NORMAL TOOL SHELL
+  // ═══════════════════════════════════════════════════════════════
   return (
     <ToolShellDesktop
       title="Unlock PDF"
@@ -193,8 +248,6 @@ export default function DesktopView() {
               onRemove={removePdf}
             />
           ))}
-
-          {/* Compact inline "Add more" row */}
           <AddMorePdfRow onFiles={addPdfs} />
         </div>
       )}

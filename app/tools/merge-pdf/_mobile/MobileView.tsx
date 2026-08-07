@@ -1,13 +1,13 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { CirclePlus, LayoutList, Trash2, ArrowUpDown } from 'lucide-react';
+import { CirclePlus, Trash2, ArrowUpDown, FileText, Layers } from 'lucide-react';
 import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileToolHeader from '../../_components/MobileToolHeader';
 import MobileBottomToolbar from '../../_components/MobileBottomToolbar';
 import MobileActionButton from '../../_components/MobileActionButton';
-import MobileSuccessScreen from '../../_components/MobileSuccessScreen';
+import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import ProcessingOverlay from '../../_components/ProcessingOverlay';
 import { getToolByPath } from '../../_config/tools';
 import { useMergePdfContext } from '../_context/MergePdfContext';
@@ -21,8 +21,6 @@ export default function MobileView() {
     isLoadingPdf,
     loadProgress,
     isProcessing,
-    processStage,
-    processProgress,
     errorMessage,
     setErrorMessage,
     pdfFilename,
@@ -47,23 +45,13 @@ export default function MobileView() {
 
   const openFilePicker = () => fileInputRef.current?.click();
 
-  // 🎊 Handle merge & show success screen
   const handleMerge = async () => {
     await performMerge();
-    // performMerge sets mergeResult when done; we wait for it via effect
   };
-
-  // Show success screen when mergeResult appears
-  const shouldShowSuccess = showSuccess || (mergeResult !== null && !isProcessing);
 
   const handleStartOver = () => {
     clearAll();
     setShowSuccess(false);
-  };
-
-  const handleBackToEdit = () => {
-    setShowSuccess(false);
-    resetMerge();
   };
 
   // Auto-show success when merge completes
@@ -71,8 +59,70 @@ export default function MobileView() {
     setShowSuccess(true);
   }
 
+  const shouldShowSuccess = showSuccess || (mergeResult !== null && !isProcessing);
   const hasItems = items.length > 0;
 
+  // ═══════════════════════════════════════════════════════════════
+  // ⭐ SUCCESS SCREEN (renders OUTSIDE ToolShellMobile)
+  // ═══════════════════════════════════════════════════════════════
+  if (shouldShowSuccess && mergeResult) {
+    return (
+      <MobileSuccessScreen
+        toolIcon={tool.icon}
+        toolName="Merge PDF"
+        toolColor="#2563EB"
+        onBack={handleStartOver}
+        title="Merge Successful!"
+        subtitle={`${mergeResult.filesCount} PDFs have been merged into one document.`}
+        files={[{
+          id: 'merged-pdf',
+          name: `${pdfFilename}.pdf`,
+          size: mergeResult.mergedSizeMB,
+          pages: mergeResult.totalPages,
+        }]}
+        onPreview={previewMerged}
+        summaryTitle="Merge Summary"
+        summaryRows={[
+          {
+            icon: <Layers size={13} />,
+            iconBg: '#DBEAFE',
+            iconColor: '#2563EB',
+            label: 'Files Merged',
+            value: `${mergeResult.filesCount} PDFs`,
+          },
+          {
+            icon: <FileText size={13} />,
+            iconBg: '#EDE9FE',
+            iconColor: '#8B5CF6',
+            label: 'Total Pages',
+            value: `${mergeResult.totalPages}`,
+          },
+          {
+            icon: <FileText size={13} />,
+            iconBg: '#D1FAE5',
+            iconColor: '#10B981',
+            label: 'File Size',
+            value: mergeResult.mergedSizeMB,
+            valueColor: '#10B981',
+          },
+          {
+            icon: <FileText size={13} />,
+            iconBg: '#FEF3C7',
+            iconColor: '#F59E0B',
+            label: 'Format',
+            value: 'PDF',
+          },
+        ]}
+        downloadLabel="Download Merged PDF"
+        onDownload={downloadMerged}
+        onStartOver={handleStartOver}
+      />
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // ⭐ NORMAL VIEW (inside ToolShellMobile)
+  // ═══════════════════════════════════════════════════════════════
   return (
     <>
       <ToolShellMobile fixedHeight={hasItems}>
@@ -115,30 +165,18 @@ export default function MobileView() {
           </div>
         )}
 
-        {/* 🎊 SUCCESS SCREEN */}
-        {shouldShowSuccess && mergeResult ? (
-          <MobileSuccessScreen
-            title="PDFs Merged!"
-            subtitle={`${mergeResult.filesCount} PDFs combined into one`}
-            filename={`${pdfFilename}.pdf`}
-            fileSize={mergeResult.mergedSizeMB}
-            pageCount={mergeResult.totalPages}
-            onDownload={downloadMerged}
-            onPreview={previewMerged}
-            onStartOver={handleStartOver}
-            onBack={handleBackToEdit}
-          />
-        ) : !hasItems && !isLoadingPdf ? (
+        {/* Empty state or file list */}
+        {!hasItems && !isLoadingPdf ? (
           <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
         ) : (
           <div className="flex flex-col h-full bg-[#F4F5F7]">
-            {/* Shared Header */}
+            {/* Header */}
             <MobileToolHeader
               filename={pdfFilename}
               onFilenameChange={setPdfFilename}
             />
 
-            {/* File count / stats banner */}
+            {/* Stats banner */}
             <div className="mx-3 mb-2 px-3 py-2 bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl flex items-center justify-around shrink-0">
               <div className="text-center">
                 <div className="text-[14px] font-bold text-[#2563EB]">{items.length}</div>
@@ -156,7 +194,7 @@ export default function MobileView() {
               <PdfMobileList />
             </div>
 
-            {/* Shared Bottom Toolbar */}
+            {/* Bottom Toolbar */}
             <MobileBottomToolbar
               actions={[
                 {
@@ -167,10 +205,7 @@ export default function MobileView() {
                 {
                   icon: ArrowUpDown,
                   label: 'Reorder',
-                  onClick: () => {
-                    // Reorder is done via drag handles in the list itself
-                    // This button can show a hint or be a no-op
-                  },
+                  onClick: () => {},
                   disabled: items.length < 2,
                 },
                 {
@@ -183,10 +218,10 @@ export default function MobileView() {
               ]}
             />
 
-            {/* Shared CTA Button */}
+            {/* CTA Button */}
             <MobileActionButton
               label={`Merge ${items.length > 0 ? items.length : ''} PDF${items.length !== 1 ? 's' : ''}`}
-              loadingLabel={processStage === 'compressing' ? 'Compressing...' : 'Merging...'}
+              loadingLabel="Merging..."
               loading={isProcessing}
               disabled={items.length < 2}
               onClick={handleMerge}
@@ -199,8 +234,8 @@ export default function MobileView() {
       {/* Processing Overlay */}
       <ProcessingOverlay
         isVisible={isProcessing}
-        stage={processStage}
-        progress={processProgress}
+        stage="merging"
+        progress={50}
       />
     </>
   );

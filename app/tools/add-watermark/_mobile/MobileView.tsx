@@ -2,10 +2,11 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FileText, Droplet } from 'lucide-react';
 import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileToolHeader from '../../_components/MobileToolHeader';
-import MobileSuccessScreen from '../../_components/MobileSuccessScreen';
+import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import { getToolByPath } from '../../_config/tools';
 import { useAddWatermarkContext } from '../_context/AddWatermarkContext';
 import { FONT_SIZES, SIZE_LABELS, POSITION_LABELS } from '../_utils/watermarker';
@@ -125,6 +126,10 @@ export default function MobileView() {
       {/* 🎊 SUCCESS SCREEN */}
       {showSuccess && watermarkedPdfUrl ? (
         <MobileSuccessScreen
+          toolIcon={tool.icon}
+          toolName="Add Watermark"
+          toolColor="#4F46E5"
+          onBack={handleStartOver}
           title="Watermark Added!"
           subtitle={
             hasWatermarkText
@@ -137,8 +142,38 @@ export default function MobileView() {
           onDownload={downloadWatermarkedFile}
           onPreview={previewWatermarkedPdf}
           onStartOver={handleStartOver}
-          iconVariant="pdf"
-          statusBadge={{ label: 'Watermarked', color: 'purple' }}
+          summaryTitle="Watermark Summary"
+          summaryRows={[
+            {
+              icon: <Droplet size={13} />,
+              iconBg: '#EEF2FF',
+              iconColor: '#4F46E5',
+              label: 'Text',
+              value: hasWatermarkText ? `"${settings.text.substring(0, 15)}${settings.text.length > 15 ? '...' : ''}"` : 'N/A',
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#EDE9FE',
+              iconColor: '#8B5CF6',
+              label: 'Pages Watermarked',
+              value: `${watermarkedCount} of ${file?.totalPages}`,
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#D1FAE5',
+              iconColor: '#10B981',
+              label: 'File Size',
+              value: watermarkedPdfSize || '—',
+              valueColor: '#10B981',
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#FEF3C7',
+              iconColor: '#F59E0B',
+              label: 'Format',
+              value: 'PDF',
+            },
+          ]}
         />
       ) : !file && !isLoadingPdf ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />

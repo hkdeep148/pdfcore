@@ -6,22 +6,55 @@ import ToolActionButton from '../../_components/ToolActionButton';
 import UploadZone from '../../_components/UploadZone';
 import PageGrid from '../../_components/PageGrid';
 import AddMoreCard from '../../_components/AddMoreCard';
+import SuccessScreenV2 from '../../_components/SuccessScreen/SuccessScreenV2';
+import DesktopProcessingScreen from '../../_components/DesktopProcessingScreen';
 import { useImageToPdfContext } from '../_context/ImageToPdfContext';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
+import { useToolLoadingScreen } from '../../_hooks/useToolLoadingScreen';
+import { buildImageToPdfV2Config } from '../../_config/successScreenConfigs';
 import type { ImageItem } from '../../_types';
 import PageCard from './PageCard';
 import OptionsPanel from './OptionsPanel';
 
+// ⭐ Helper: format bytes to readable size
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '—';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
 export default function DesktopView() {
   const {
     images, isConverting, errorMessage, setErrorMessage,
-    addImages, removeImage, reorderImages, clearAll, downloadPdf,
+    addImages, removeImage, reorderImages, clearAll,
+    createPdf,   // ⭐ NEW: Create only (no download)
+    downloadPdf, // ⭐ Still needed for success screen download
+    previewPdf,
+    pdfBlob, pdfUrl, pdfName, pageSize, orientation,
     currentPageRatio, marginPercent, pageFit, pageBackground,
     selectedId, setSelectedId,
   } = useImageToPdfContext();
 
-  // ⭐ Central handler — replaces manual useEffect + useRef + usePendingFile
-  useToolFileReceiver((files) => addImages(files));
+  useToolFileReceiver((files: File[]) => addImages(files));
+
+  // ⭐ Done state
+  const isDone = !!pdfBlob && !isConverting;
+
+  // ⭐ Loading screen hook
+  const showLoading = useToolLoadingScreen(isConverting, isDone, 2000);
+
+  // ⭐ Download handler (from success screen)
+  const handleDownloadPdf = () => {
+    if (!pdfUrl || !pdfName) return;
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.download = pdfName;
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // ============ BOTTOM TOOLBAR ============
   const bottomBar = (
@@ -81,7 +114,7 @@ export default function DesktopView() {
   // ============ MAIN ACTION BUTTON ============
   const actionButton = (
     <ToolActionButton
-      onClick={downloadPdf}
+      onClick={createPdf}   // ⭐ CHANGED: was downloadPdf, now createPdf
       disabled={images.length === 0}
       isLoading={isConverting}
       loadingLabel="Converting…"
@@ -100,6 +133,53 @@ export default function DesktopView() {
     />
   );
 
+  // ═══════════ ⭐ LOADING SCREEN ═══════════
+  if (showLoading) {
+    return (
+      <DesktopProcessingScreen
+        title="Creating your PDF"
+        subtitle={`Converting ${images.length > 0 ? images.length + ' images' : 'images'} to PDF...`}
+        fileCount={images.length || 1}
+        gradientFrom="#10B981"
+        gradientTo="#059669"
+        infoText="Your files are processed securely in your browser"
+        progressDuration={1.8}
+        icon={
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+        }
+      />
+    );
+  }
+
+// ═══════════ ⭐ SUCCESS SCREEN (V2 Design) ═══════════
+if (isDone && pdfBlob) {
+  const config = buildImageToPdfV2Config({
+    fileName: pdfName || 'images.pdf',
+    pdfSize: formatBytes(pdfBlob.size),
+    totalImages: images.length,
+    pageSize: pageSize || 'A4',
+    orientation: orientation,
+    onDownload: handleDownloadPdf,
+    onStartOver: clearAll,
+    onDelete: clearAll,
+    onPreview: previewPdf,
+  });
+
+  // ⭐ ADD: Pass PDF data for gallery preview
+  const configWithPdf = {
+    ...config,
+    pdfBlob: pdfBlob,
+    pdfPreviewUrl: pdfUrl,
+  };
+
+  return <SuccessScreenV2 config={configWithPdf} />;
+}
+
+  // ═══════════ Otherwise show normal tool shell ═══════════
   return (
     <ToolShellDesktop
       title="Image to PDF"

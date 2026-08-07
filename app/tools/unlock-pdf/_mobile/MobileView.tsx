@@ -4,13 +4,14 @@ import { useRef, useState, useEffect } from 'react';
 import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileToolHeader from '../../_components/MobileToolHeader';
-import MobileSuccessScreen from '../../_components/MobileSuccessScreen';
+import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import { downloadFile } from '../../_utils/browser';
 import { getToolByPath } from '../../_config/tools';
 import { useUnlockPdfContext } from '../_context/UnlockPdfContext';
 import MobilePasswordCard from './MobilePasswordCard';
 import UnlockSummary from './UnlockSummary';
 import UnlockBottomBar from './UnlockBottomBar';
+import { FileText, Unlock } from 'lucide-react';
 
 export default function MobileView() {
   const {
@@ -100,6 +101,10 @@ export default function MobileView() {
       {/* 🎊 SUCCESS SCREEN - only for single unlocked file */}
       {showSuccess && successFile ? (
         <MobileSuccessScreen
+          toolIcon={tool.icon}
+          toolName="Unlock PDF"
+          toolColor="#06B6D4"
+          onBack={handleBackToEdit}
           title="PDF Unlocked!"
           subtitle="Password removed. Ready to download."
           filename={successFile.name.replace(/\.pdf$/i, '-unlocked.pdf')}
@@ -107,9 +112,31 @@ export default function MobileView() {
           onDownload={handleDownload}
           onPreview={handlePreview}
           onStartOver={handleStartOver}
-          onBack={handleBackToEdit}
-          iconVariant="unlocked"
-          statusBadge={{ label: 'Unlocked', color: 'green' }}
+          summaryTitle="Unlock Summary"
+          summaryRows={[
+            {
+              icon: <Unlock size={13} />,
+              iconBg: '#CFFAFE',
+              iconColor: '#06B6D4',
+              label: 'Status',
+              value: 'Unlocked',
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#D1FAE5',
+              iconColor: '#10B981',
+              label: 'File Size',
+              value: successFile.sizeMB || '—',
+              valueColor: '#10B981',
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#FEF3C7',
+              iconColor: '#F59E0B',
+              label: 'Format',
+              value: 'PDF',
+            },
+          ]}
         />
       ) : !hasItems ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />

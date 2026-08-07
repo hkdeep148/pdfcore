@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { Pencil, Calendar, Stamp, Undo2 } from 'lucide-react';
+import { Pencil, Calendar, Stamp, Undo2, FileText } from 'lucide-react';
 import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileToolHeader from '../../_components/MobileToolHeader';
@@ -12,7 +12,7 @@ import MobileActionButton, {
 import MobilePageCarousel, {
   CarouselItem,
 } from '../../_components/MobilePageCarousel';
-import MobileSuccessScreen from '../../_components/MobileSuccessScreen';
+import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import { getToolByPath } from '../../_config/tools';
 import { useSignPdfContext } from '../_context/SignPdfContext';
 import SignatureOverlay, { PreviewSig } from './SignatureOverlay';
@@ -235,6 +235,10 @@ export default function MobileView() {
       {/* 🎊 SUCCESS SCREEN */}
       {showSuccess && signedPdfUrl ? (
         <MobileSuccessScreen
+          toolIcon={tool.icon}
+          toolName="Sign PDF"
+          toolColor="#7C3AED"
+          onBack={handleBackToEdit}
           title="PDF Signed!"
           subtitle="Your document has been signed successfully"
           filename={`${filename}.pdf`}
@@ -243,7 +247,38 @@ export default function MobileView() {
           onDownload={downloadSignedFile}
           onPreview={previewSignedPdf}
           onStartOver={handleStartOver}
-          onBack={handleBackToEdit}
+          summaryTitle="Signing Summary"
+          summaryRows={[
+            {
+              icon: <Pencil size={13} />,
+              iconBg: '#EDE9FE',
+              iconColor: '#7C3AED',
+              label: 'Signatures Placed',
+              value: `${placedSignatures.length}`,
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#DBEAFE',
+              iconColor: '#2563EB',
+              label: 'Total Pages',
+              value: `${file?.totalPages}`,
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#D1FAE5',
+              iconColor: '#10B981',
+              label: 'File Size',
+              value: signedPdfSize || '—',
+              valueColor: '#10B981',
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#FEF3C7',
+              iconColor: '#F59E0B',
+              label: 'Format',
+              value: 'PDF',
+            },
+          ]}
         />
       ) : !hasFile && !isLoadingPdf ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={() => fileInputRef.current?.click()} />

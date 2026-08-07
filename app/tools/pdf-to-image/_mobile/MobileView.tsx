@@ -1,10 +1,11 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { FileText, Image as ImageIcon } from 'lucide-react';
 import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileToolHeader from '../../_components/MobileToolHeader';
-import MobileSuccessScreen from '../../_components/MobileSuccessScreen';
+import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import { getToolByPath } from '../../_config/tools';
 import { usePdfToImageContext } from '../_context/PdfToImageContext';
 import PageGrid from './PageGrid';
@@ -99,24 +100,57 @@ export default function MobileView() {
       {/* 🎊 SUCCESS SCREEN */}
       {showSuccess && conversionResult ? (
         <MobileSuccessScreen
+          toolIcon={tool.icon}
+          toolName="PDF to Image"
+          toolColor="#EC4899"
+          onBack={handleStartOver}
           title={conversionResult.isZip ? 'Images Ready!' : 'Image Ready!'}
           subtitle={
             conversionResult.isZip
               ? `${conversionResult.outputCount} pages converted to ${conversionResult.format.toUpperCase()}`
               : `Converted to ${conversionResult.format.toUpperCase()}`
           }
-          filename={conversionResult.filename}
-          fileSize={conversionResult.fileSize}
-          pageCount={conversionResult.outputCount}
-          onDownload={downloadConvertedFile}
+          files={[{
+            id: 'converted-image',
+            name: conversionResult.filename,
+            size: conversionResult.fileSize,
+            pages: conversionResult.outputCount,
+          }]}
           onPreview={conversionResult.isZip ? undefined : previewConvertedFile}
+          onDownload={downloadConvertedFile}
           onStartOver={handleStartOver}
-          onBack={handleBackToEdit}
-          iconVariant="pdf"
-          statusBadge={{
-            label: conversionResult.format.toUpperCase(),
-            color: 'blue',
-          }}
+          summaryTitle="Conversion Summary"
+          summaryRows={[
+            {
+              icon: <ImageIcon size={13} />,
+              iconBg: '#FCE7F3',
+              iconColor: '#EC4899',
+              label: 'Images Created',
+              value: `${conversionResult.outputCount}`,
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#DBEAFE',
+              iconColor: '#2563EB',
+              label: 'Format',
+              value: conversionResult.format.toUpperCase(),
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#D1FAE5',
+              iconColor: '#10B981',
+              label: 'Total Size',
+              value: conversionResult.fileSize || '—',
+              valueColor: '#10B981',
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#FEF3C7',
+              iconColor: '#F59E0B',
+              label: 'Output',
+              value: conversionResult.isZip ? 'ZIP' : conversionResult.format.toUpperCase(),
+            },
+          ]}
         />
       ) : !hasPages && !isLoadingPdf ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />

@@ -6,11 +6,15 @@ import { AddWatermarkProvider } from './_context/AddWatermarkContext';
 const DesktopView = dynamic(() => import('./_desktop/DesktopView'), { ssr: false });
 const MobileView = dynamic(() => import('./_mobile/MobileView'), { ssr: false });
 
-export default function AddWatermarkPage() {
+export default function ToolPage() {
   return (
     <AddWatermarkProvider>
-      <DesktopView />
-      <MobileView />
+      <div className="hidden lg:contents">
+        <DesktopView />
+      </div>
+      <div className="lg:hidden contents">
+        <MobileView />
+      </div>
     </AddWatermarkProvider>
   );
 }

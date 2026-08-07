@@ -1,18 +1,22 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import ImageGalleryViewer, { GalleryImage } from '../ImageGalleryViewer';
 import { Upload, Trash2 } from 'lucide-react';
 import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import DesktopUploadPage from '../../_components/DesktopUploadPage';
 import ComparisonSlider from '../ComparisonSlider';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
-import DesktopSuccessModal from '../../_components/DesktopSuccessModal';
+import SuccessScreenV2 from '../../_components/SuccessScreen/SuccessScreenV2';
 import DesktopLoadingScreen from '../../_components/DesktopLoadingScreen';
+import DesktopProcessingScreen from '../../_components/DesktopProcessingScreen';
+import { useToolLoadingScreen } from '../../_hooks/useToolLoadingScreen';
 import {
   useCompressImageContext,
   formatBytes,
   type FileStatus,
 } from '../_context/CompressImageContext';
+import { buildCompressImageV2Config } from '../../_config/successScreenConfigs';
 
 import SettingsPanel from './SettingsPanel';
 import ActionButton from './ActionButton';
@@ -26,6 +30,7 @@ export default function DesktopView() {
     handleClearAll,
     handleRemoveFile,
     handleDownloadSingle,
+    handleDownloadAll,
     // Processing
     isLoading,
     loadingFadeOut,
@@ -33,11 +38,7 @@ export default function DesktopView() {
     // UI
     comparingFile,
     setComparingFile,
-    // Success Modal
-    successModalOpen,
-    setSuccessModalOpen,
-    lastDownloadCount,
-    // Derived — for modal
+    // Derived — for success screen
     completedCount,
     totalOriginalSize,
     totalCompressedSize,
@@ -46,8 +47,9 @@ export default function DesktopView() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Receive files from Smart Suggestions
   useToolFileReceiver((received: File[]) => handleFiles(received));
+
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files;
@@ -55,7 +57,28 @@ export default function DesktopView() {
     e.target.value = '';
   };
 
-  // ============ LOADING SCREEN ============
+  // ⭐ Check if all files are done processing
+  const allDone = files.length > 0 && files.every((f) => f.status === 'done');
+  const anyProcessing = files.some((f) => f.status === 'compressing');
+
+  // ⭐ Loading screen hook
+  const showProcessing = useToolLoadingScreen(anyProcessing, allDone, 1800);
+
+  // ⭐ Detect format from first completed file (using 'compressed' — not compressedBlob)
+  const detectFormat = (): string => {
+    const firstDone = files.find(
+      (f): f is FileStatus & { compressed: Blob } =>
+        f.status === 'done' && !!f.compressed
+    );
+    if (!firstDone) return 'IMG';
+    const type = firstDone.compressed.type;
+    if (type.includes('jpeg') || type.includes('jpg')) return 'JPG';
+    if (type.includes('png')) return 'PNG';
+    if (type.includes('webp')) return 'WEBP';
+    return 'IMG';
+  };
+
+  // ============ LOADING SCREEN (initial page load) ============
   if (isLoading) {
     return (
       <DesktopLoadingScreen
@@ -83,6 +106,95 @@ export default function DesktopView() {
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // 🎨 PROCESSING SCREEN (while compressing)
+  // ═══════════════════════════════════════════════════════════════
+  if (showProcessing) {
+    return (
+      <DesktopProcessingScreen
+        title={files.length === 1 ? 'Compressing image' : 'Compressing images'}
+        subtitle={`Optimizing ${files.length} ${files.length === 1 ? 'image' : 'images'}...`}
+        fileCount={files.length}
+        gradientFrom="#0EA5E9"
+        gradientTo="#3B82F6"
+        infoText="Your files are processed securely in your browser"
+        progressDuration={1.8}
+        icon={
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+        }
+      />
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 🎊 SUCCESS SCREEN (V2 — all files compressed)
+  // ═══════════════════════════════════════════════════════════════
+  if (allDone) {
+    const doneFiles = files.filter((f) => f.status === 'done');
+
+// ⭐ Prepare gallery images
+const galleryImages: GalleryImage[] = doneFiles.map((f) => ({
+  id: f.original.name + f.original.size,
+  name: f.original.name,
+  url: f.compressedUrl || f.originalUrl,
+  originalUrl: f.originalUrl,
+  originalSize: formatBytes(f.originalSize),
+  compressedSize: formatBytes(f.compressedSize || 0),
+  reductionPercent: f.reduction || 0,
+  onDownload: () => handleDownloadSingle(f),
+}));
+
+const config = buildCompressImageV2Config({
+  totalOriginalSize: formatBytes(totalOriginalSize),
+  totalCompressedSize: formatBytes(totalCompressedSize),
+  totalReductionPercent: totalReduction,
+  format: detectFormat(),
+  files: doneFiles.map((f) => ({
+    id: f.original.name + f.original.size,
+    name: f.original.name,
+    originalSize: formatBytes(f.originalSize),
+    compressedSize: formatBytes(f.compressedSize || 0),
+    reductionPercent: f.reduction || 0,
+    onDownload: () => handleDownloadSingle(f),
+    onCompare: () => setComparingFile(f),
+  })),
+  onDownloadAll: handleDownloadAll,
+  onStartOver: handleClearAll,
+  onDelete: handleClearAll,
+  onViewImages: () => setGalleryOpen(true), // ⭐ NEW
+});
+
+return (
+  <>
+    <SuccessScreenV2 config={config} />
+
+    {/* ⭐ NEW: Image Gallery Viewer */}
+    <ImageGalleryViewer
+      isOpen={galleryOpen}
+      images={galleryImages}
+      onClose={() => setGalleryOpen(false)}
+    />
+
+    {/* Comparison Slider Modal — for compare button */}
+    {comparingFile && comparingFile.compressedUrl && comparingFile.compressedSize && (
+      <ComparisonSlider
+        originalUrl={comparingFile.originalUrl}
+        compressedUrl={comparingFile.compressedUrl}
+        originalSize={comparingFile.originalSize}
+        compressedSize={comparingFile.compressedSize}
+        reduction={comparingFile.reduction || 0}
+        filename={comparingFile.original.name}
+        onClose={() => setComparingFile(null)}
+      />
+    )}
+  </>
+);
+  }
+
   // ============ HEADER ACTION ============
   const headerAction = (
     <div className="flex items-center gap-2">
@@ -104,7 +216,7 @@ export default function DesktopView() {
     </div>
   );
 
-  // ============ TOOL SCREEN ============
+  // ============ TOOL SCREEN (file list during processing) ============
   return (
     <div className="animate-tool-enter">
       <ToolShellDesktop
@@ -120,7 +232,6 @@ export default function DesktopView() {
         headerAction={headerAction}
         breadcrumbCategory="Optimize"
       >
-        {/* Hidden file input — used by Add more button */}
         <input
           ref={fileInputRef}
           type="file"
@@ -130,7 +241,6 @@ export default function DesktopView() {
           multiple
         />
 
-        {/* File List — slides in from LEFT */}
         <div className="animate-panel-left">
           <FileListPanel
             onCompare={(file: FileStatus) => setComparingFile(file)}
@@ -139,7 +249,6 @@ export default function DesktopView() {
           />
         </div>
 
-        {/* Comparison Slider Modal */}
         {comparingFile && comparingFile.compressedUrl && comparingFile.compressedSize && (
           <ComparisonSlider
             originalUrl={comparingFile.originalUrl}
@@ -151,30 +260,6 @@ export default function DesktopView() {
             onClose={() => setComparingFile(null)}
           />
         )}
-
-        {/* ⭐ Success Modal — shown after download */}
-        <DesktopSuccessModal
-  isOpen={successModalOpen}
-  onClose={() => setSuccessModalOpen(false)}
-  onStartOver={handleClearAll}
-  title={
-    lastDownloadCount === 1
-      ? 'Download Complete!'
-      : `${lastDownloadCount} Images Downloaded!`
-  }
-  subtitle={
-    lastDownloadCount === 1
-      ? 'Your compressed image has been saved'
-      : `${lastDownloadCount} compressed images have been saved`
-  }
-  stats={[
-    { label: 'Original', value: formatBytes(totalOriginalSize) },
-    { label: 'Compressed', value: formatBytes(totalCompressedSize), accent: true },
-  ]}
-  savingsBadge={`-${totalReduction}%`}
-  startOverLabel="Compress More"
-  doneLabel="Done"
-/>
       </ToolShellDesktop>
     </div>
   );

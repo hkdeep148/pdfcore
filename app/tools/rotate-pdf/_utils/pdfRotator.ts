@@ -50,7 +50,8 @@ export async function loadPdfPages(file: File): Promise<{
 
     pages.push({
       id: `${pdfId}-page-${i}`,
-      pdfId,
+      fileId: pdfId,      // ⭐ ADDED: Required by PdfPageItem type
+      pdfId,              // ⭐ Kept for backwards compatibility
       pageIndex: i - 1,
       preview,
       rotation: 0,

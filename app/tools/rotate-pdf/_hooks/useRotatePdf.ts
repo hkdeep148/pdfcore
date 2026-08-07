@@ -18,9 +18,18 @@ export function useRotatePdf() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [pdfFilename, setPdfFilename] = useState('rotated-' + new Date().toISOString().slice(0, 10));
 
-  // 🆕 Rotated PDF output state
+  // 🆕 Rotated PDF output state (SINGLE file - kept for backwards compatibility)
   const [rotatedPdfUrl, setRotatedPdfUrl] = useState<string | null>(null);
   const [rotatedPdfSize, setRotatedPdfSize] = useState<string | null>(null);
+
+  // ⭐ NEW: Multiple rotated files (one per input PDF)
+  const [rotatedFiles, setRotatedFiles] = useState<Array<{
+    id: string;
+    name: string;
+    url: string;
+    size: string;
+    blob: Blob;
+  }>>([]);
 
   const formatBytes = (bytes: number): string => {
     if (bytes === 0) return '0 B';
@@ -59,14 +68,19 @@ export function useRotatePdf() {
     }
   }, [toast]);
 
-  // Helper: clear stale result when pages change
+  // Helper: clear stale results when pages change
   const clearStaleResult = useCallback(() => {
     if (rotatedPdfUrl) {
       URL.revokeObjectURL(rotatedPdfUrl);
       setRotatedPdfUrl(null);
       setRotatedPdfSize(null);
     }
-  }, [rotatedPdfUrl]);
+    // ⭐ Also clear multi-file results
+    rotatedFiles.forEach((f) => URL.revokeObjectURL(f.url));
+    if (rotatedFiles.length > 0) {
+      setRotatedFiles([]);
+    }
+  }, [rotatedPdfUrl, rotatedFiles]);
 
   const removePage = useCallback((id: string) => {
     setPages((prev) => prev.filter((p) => p.id !== id));
@@ -125,45 +139,80 @@ export function useRotatePdf() {
 
   const clearAll = useCallback(() => {
     if (rotatedPdfUrl) URL.revokeObjectURL(rotatedPdfUrl);
+    // ⭐ Cleanup all multi-file URLs
+    rotatedFiles.forEach((f) => URL.revokeObjectURL(f.url));
     setFiles([]);
     setPages([]);
     setSelectedIds(new Set());
     setErrorMessage(null);
     setRotatedPdfUrl(null);
     setRotatedPdfSize(null);
-  }, [rotatedPdfUrl]);
+    setRotatedFiles([]); // ⭐ Reset multi-file state
+  }, [rotatedPdfUrl, rotatedFiles]);
 
-  // ============ 🆕 ROTATE & PREPARE (no auto-download) ============
+  // ============ 🆕 ROTATE & PREPARE (multiple files supported) ============
   const rotateAndPrepare = useCallback(async (): Promise<string | null> => {
     if (pages.length === 0) return null;
     setIsProcessing(true);
     setErrorMessage(null);
 
-    // Clear previous result
-    if (rotatedPdfUrl) {
-      URL.revokeObjectURL(rotatedPdfUrl);
-      setRotatedPdfUrl(null);
-    }
+    // Clear previous results
+    if (rotatedPdfUrl) URL.revokeObjectURL(rotatedPdfUrl);
+    rotatedFiles.forEach((f) => URL.revokeObjectURL(f.url));
+    setRotatedPdfUrl(null);
+    setRotatedFiles([]);
 
     try {
-      const url = await generateRotatedPdf(files, pages);
-      setRotatedPdfUrl(url);
+      const results: Array<{
+        id: string;
+        name: string;
+        url: string;
+        size: string;
+        blob: Blob;
+      }> = [];
 
-      // Calculate size
-      try {
+      // ⭐ Generate one PDF per input file
+      for (const file of files) {
+        // ✅ FIXED: Use pdfId (not fileId) to link pages to their source file
+        const filePages = pages.filter((p) => p.pdfId === file.id);
+        if (filePages.length === 0) continue;
+
+        // Generate rotated PDF for this file
+        const url = await generateRotatedPdf([file], filePages);
+
+        // Get blob & size
         const res = await fetch(url);
         const blob = await res.blob();
         const sizeKB = blob.size / 1024;
-        setRotatedPdfSize(
+        const sizeStr =
           sizeKB > 1024
             ? `${(sizeKB / 1024).toFixed(2)} MB`
-            : `${Math.round(sizeKB)} KB`
-        );
-      } catch {
-        setRotatedPdfSize(null);
+            : `${Math.round(sizeKB)} KB`;
+
+        // Original filename with -rotated suffix
+        const rotatedName = file.name.replace(/\.pdf$/i, '-rotated.pdf');
+
+        results.push({
+          id: file.id,
+          name: rotatedName,
+          url,
+          size: sizeStr,
+          blob,
+        });
       }
 
-      return url;
+      setRotatedFiles(results);
+
+      // For backwards compatibility, set single URL if only one file
+      if (results.length === 1) {
+        setRotatedPdfUrl(results[0].url);
+        setRotatedPdfSize(results[0].size);
+      } else if (results.length > 0) {
+        // For multiple, use first file's URL as reference
+        setRotatedPdfUrl(results[0].url);
+      }
+
+      return results[0]?.url || null;
     } catch (err) {
       console.error(err);
       setErrorMessage('Failed to generate PDF. Please try again.');
@@ -172,27 +221,76 @@ export function useRotatePdf() {
     } finally {
       setIsProcessing(false);
     }
-  }, [files, pages, rotatedPdfUrl, toast]);
+  }, [files, pages, rotatedPdfUrl, rotatedFiles, toast]);
 
-  // 🆕 Download the rotated file
+  // 🆕 Download the rotated file (single file - backwards compatible)
   const downloadRotatedFile = useCallback(() => {
     if (!rotatedPdfUrl) return;
     downloadFile(rotatedPdfUrl, `${pdfFilename || 'rotated'}.pdf`);
   }, [rotatedPdfUrl, pdfFilename]);
 
-  // 🆕 Preview in new tab
+  // 🆕 Preview in new tab (single file - backwards compatible)
   const previewRotatedPdf = useCallback(() => {
     if (rotatedPdfUrl) window.open(rotatedPdfUrl, '_blank');
   }, [rotatedPdfUrl]);
 
+  // ⭐ NEW: Download individual rotated file by ID
+  const downloadRotatedFileById = useCallback((fileId: string) => {
+    const file = rotatedFiles.find((f) => f.id === fileId);
+    if (!file) return;
+    downloadFile(file.url, file.name);
+  }, [rotatedFiles]);
+
+  // ⭐ NEW: Preview individual file by ID
+  const previewRotatedFileById = useCallback((fileId: string) => {
+    const file = rotatedFiles.find((f) => f.id === fileId);
+    if (file) window.open(file.url, '_blank');
+  }, [rotatedFiles]);
+
+  // ⭐ NEW: Download all files as ZIP (or single file directly)
+  const downloadAllAsZip = useCallback(async () => {
+    if (rotatedFiles.length === 0) return;
+
+    // If only 1 file, download it directly (no ZIP needed)
+    if (rotatedFiles.length === 1) {
+      downloadRotatedFileById(rotatedFiles[0].id);
+      return;
+    }
+
+    try {
+      // Dynamic import to keep bundle size small
+      const JSZip = (await import('jszip')).default;
+      const zip = new JSZip();
+
+      // Add each file to the ZIP
+      rotatedFiles.forEach((file) => {
+        zip.file(file.name, file.blob);
+      });
+
+      // Generate ZIP
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipUrl = URL.createObjectURL(zipBlob);
+      const zipName = `rotated-pdfs-${new Date().toISOString().slice(0, 10)}.zip`;
+
+      // Download
+      downloadFile(zipUrl, zipName);
+
+      // Cleanup after download
+      setTimeout(() => URL.revokeObjectURL(zipUrl), 1000);
+    } catch (err) {
+      console.error('Failed to create ZIP:', err);
+      toast.error('Failed to create ZIP file');
+    }
+  }, [rotatedFiles, downloadRotatedFileById, toast]);
+
   // 🆕 Reset for re-rotating
   const resetRotated = useCallback(() => {
-    if (rotatedPdfUrl) {
-      URL.revokeObjectURL(rotatedPdfUrl);
-      setRotatedPdfUrl(null);
-      setRotatedPdfSize(null);
-    }
-  }, [rotatedPdfUrl]);
+    if (rotatedPdfUrl) URL.revokeObjectURL(rotatedPdfUrl);
+    rotatedFiles.forEach((f) => URL.revokeObjectURL(f.url));
+    setRotatedPdfUrl(null);
+    setRotatedPdfSize(null);
+    setRotatedFiles([]);
+  }, [rotatedPdfUrl, rotatedFiles]);
 
   // Computed
   const rotatedCount = pages.filter((p) => p.rotation !== 0).length;
@@ -209,8 +307,9 @@ export function useRotatePdf() {
     // State
     files, pages, selectedIds, isProcessing, isLoadingPdf, loadProgress,
     errorMessage, pdfFilename,
-    rotatedPdfUrl,           // 🆕
-    rotatedPdfSize,          // 🆕
+    rotatedPdfUrl,             // 🆕 Single-file (backwards compat)
+    rotatedPdfSize,            // 🆕 Single-file (backwards compat)
+    rotatedFiles,              // ⭐ NEW: Multi-file array
     // Computed
     rotatedCount, hasRotations,
     // Setters
@@ -218,10 +317,13 @@ export function useRotatePdf() {
     // Actions
     addPdfs, removePage, rotatePage, rotateSelected, rotateAll,
     resetAllRotations, toggleSelect, selectAll, clearSelection, clearAll,
-    rotateAndPrepare,        // 🆕 replaces downloadPdf
-    downloadRotatedFile,     // 🆕
-    previewRotatedPdf,       // 🆕
-    resetRotated,            // 🆕
+    rotateAndPrepare,          // 🆕 Now supports multiple files
+    downloadRotatedFile,       // 🆕 Single file download (backwards compat)
+    downloadRotatedFileById,   // ⭐ NEW: Download specific file by ID
+    previewRotatedPdf,         // 🆕 Single file preview (backwards compat)
+    previewRotatedFileById,    // ⭐ NEW: Preview specific file by ID
+    downloadAllAsZip,          // ⭐ NEW: Download all as ZIP
+    resetRotated,              // 🆕
   };
 }
 

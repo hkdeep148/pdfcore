@@ -1,56 +1,159 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState } from 'react';
 import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import ToolBottomBar from '../../_components/ToolBottomBar';
 import ToolActionButton from '../../_components/ToolActionButton';
 import UploadZone from '../../_components/UploadZone';
+import SuccessScreenV2 from '../../_components/SuccessScreen/SuccessScreenV2';
+import DesktopProcessingScreen from '../../_components/DesktopProcessingScreen';
+import ImageGalleryViewer from '../../compress-image/ImageGalleryViewer';
+import type { GalleryImage } from '../../compress-image/ImageGalleryViewer';
 import { usePdfToImageContext } from '../_context/PdfToImageContext';
 import PageThumbnail from './PageThumbnail';
 import OptionsPanel from './OptionsPanel';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
+import { useToolLoadingScreen } from '../../_hooks/useToolLoadingScreen';
+import { buildPdfToImagesV2Config } from '../../_config/successScreenConfigs';
 
 export default function DesktopView() {
   const {
     pages, selectedIds, isLoadingPdf, loadProgress,
-    isProcessing, processProgress, errorMessage, setErrorMessage,
+    isProcessing, errorMessage, setErrorMessage,
     addPdfs, removePage, toggleSelect, clearAll,
     downloadOne,
     convertAndPrepare,
     conversionResult,
-    downloadingPageId, 
+    convertedImages,
+    downloadConvertedFile,
+    format, resolution,
+    downloadingPageId,
   } = usePdfToImageContext();
 
   useToolFileReceiver((files: File[]) => addPdfs(files));
 
-  // ⭐ Auto-download flag
-  const shouldDownloadRef = useRef(false);
+  // ⭐ Gallery viewer state
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
-  // ⭐ Watch for conversion result → auto-download
-  useEffect(() => {
-    if (conversionResult && shouldDownloadRef.current) {
-      shouldDownloadRef.current = false;
-      console.log('⬇️ Auto-downloading:', conversionResult.filename);
+  // ⭐ Done state
+  const isDone = !!conversionResult && !isProcessing;
 
-      // Direct download using the fresh state
-      const link = document.createElement('a');
-      link.href = conversionResult.blobUrl;
-      link.download = conversionResult.filename;
-      link.rel = 'noopener';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  }, [conversionResult]);
+  // ⭐ Loading screen hook
+  const showLoading = useToolLoadingScreen(isProcessing, isDone, 1800);
 
-  const handleDesktopDownload = async () => {
-    shouldDownloadRef.current = true;
-    const url = await convertAndPrepare();
-    if (!url) {
-      shouldDownloadRef.current = false;
-    }
+  // ⭐ Handle convert (no auto-download)
+  const handleConvert = async () => {
+    await convertAndPrepare();
   };
 
+  // Helper: format resolution for display
+  const formatResolution = (): string => {
+    const map: Record<string, string> = {
+      low: 'Standard',
+      medium: 'High',
+      high: 'Best Quality',
+    };
+    return map[resolution] || resolution;
+  };
+
+  // Helper: format bytes
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '—';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // 1️⃣ LOADING SCREEN
+  // ═══════════════════════════════════════════════════════════════
+  if (showLoading) {
+    return (
+      <DesktopProcessingScreen
+        title="Converting to images"
+        subtitle={`Rendering ${selectedIds.size} ${selectedIds.size === 1 ? 'page' : 'pages'} as ${format.toUpperCase()}...`}
+        fileCount={selectedIds.size}
+        gradientFrom="#F97316"
+        gradientTo="#EF4444"
+        infoText="Your files are processed securely in your browser"
+        progressDuration={1.8}
+        icon={
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+          </svg>
+        }
+      />
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 2️⃣ SUCCESS SCREEN (V2 Design)
+  // ═══════════════════════════════════════════════════════════════
+  if (isDone && conversionResult && convertedImages.length > 0) {
+    // Prepare gallery images
+    const galleryImages: GalleryImage[] = convertedImages.map((img) => ({
+      id: img.id,
+      name: img.name,
+      url: img.url,
+      compressedSize: img.size,
+      onDownload: () => {
+        const link = document.createElement('a');
+        link.href = img.url;
+        link.download = img.name;
+        link.rel = 'noopener';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      },
+    }));
+
+    const config = buildPdfToImagesV2Config({
+      totalImages: conversionResult.outputCount,
+      totalPages: pages.length,
+      format: format,
+      resolution: formatResolution(),
+      fileSize: conversionResult.fileSize,
+      isSingleImage: conversionResult.outputCount === 1,
+      files: convertedImages.map((img) => ({
+        id: img.id,
+        name: img.name,
+        size: img.size,
+        onDownload: () => {
+          const link = document.createElement('a');
+          link.href = img.url;
+          link.download = img.name;
+          link.rel = 'noopener';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        },
+        onPreview: () => window.open(img.url, '_blank'),
+      })),
+      onDownloadAll: downloadConvertedFile,
+      onStartOver: clearAll,
+      onDelete: clearAll,
+      onViewImages: () => setGalleryOpen(true),
+    });
+
+    return (
+      <>
+        <SuccessScreenV2 config={config} />
+
+        {/* Gallery Viewer */}
+        <ImageGalleryViewer
+          isOpen={galleryOpen}
+          images={galleryImages}
+          onClose={() => setGalleryOpen(false)}
+        />
+      </>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 3️⃣ BOTTOM TOOLBAR
+  // ═══════════════════════════════════════════════════════════════
   const bottomBar = (
     <ToolBottomBar
       actions={[
@@ -103,30 +206,36 @@ export default function DesktopView() {
     />
   );
 
+  // ═══════════════════════════════════════════════════════════════
+  // 4️⃣ MAIN ACTION BUTTON
+  // ═══════════════════════════════════════════════════════════════
   const actionButton = (
     <ToolActionButton
-      onClick={handleDesktopDownload}
+      onClick={handleConvert}
       disabled={selectedIds.size === 0}
       isLoading={isProcessing}
-      loadingLabel={`Converting… ${Math.round(processProgress)}%`}
+      loadingLabel="Converting…"
       icon={
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <polyline points="21 15 16 10 5 21" />
         </svg>
       }
       label={
         selectedIds.size > 1
-          ? `Download ${selectedIds.size} as ZIP`
+          ? `Convert ${selectedIds.size} Pages`
           : selectedIds.size === 1
-          ? 'Download Image'
+          ? 'Convert Page'
           : 'Select pages'
       }
-      subtitle="Extract as images"
+      subtitle={`Extract as ${format.toUpperCase()}`}
     />
   );
 
+  // ═══════════════════════════════════════════════════════════════
+  // 5️⃣ NORMAL TOOL SHELL
+  // ═══════════════════════════════════════════════════════════════
   return (
     <ToolShellDesktop
       title="PDF to Image"
@@ -156,18 +265,6 @@ export default function DesktopView() {
           </div>
           <div className="w-full h-1.5 bg-blue-100 rounded-full overflow-hidden">
             <div className="h-full bg-[#2563EB] transition-all duration-300" style={{ width: `${loadProgress}%` }} />
-          </div>
-        </div>
-      )}
-
-      {isProcessing && processProgress > 0 && (
-        <div className="mb-4 px-4 py-3 bg-green-50 border border-green-200 rounded-xl flex-shrink-0">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-4 h-4 rounded-full border-2 border-[#10B981]/30 border-t-[#10B981] animate-spin" />
-            <span className="text-[13px] text-[#166534] font-semibold">Converting pages... {Math.round(processProgress)}%</span>
-          </div>
-          <div className="w-full h-1.5 bg-green-100 rounded-full overflow-hidden">
-            <div className="h-full bg-[#10B981] transition-all duration-300" style={{ width: `${processProgress}%` }} />
           </div>
         </div>
       )}

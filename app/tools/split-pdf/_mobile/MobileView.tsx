@@ -1,10 +1,11 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { FileText, Scissors } from 'lucide-react';
 import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileToolHeader from '../../_components/MobileToolHeader';
-import MobileSuccessScreen from '../../_components/MobileSuccessScreen';
+import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import { getToolByPath } from '../../_config/tools';
 import { useSplitPdfContext } from '../_context/SplitPdfContext';
 import PageGrid from './PageGrid';
@@ -98,6 +99,10 @@ export default function MobileView() {
       {/* 🎊 SUCCESS SCREEN */}
       {showSuccess && splitResult ? (
         <MobileSuccessScreen
+          toolIcon={tool.icon}
+          toolName="Split PDF"
+          toolColor="#DC2626"
+          onBack={handleBackToEdit}
           title={splitResult.isZip ? 'PDF Split!' : 'Page Extracted!'}
           subtitle={
             splitResult.isZip
@@ -110,7 +115,38 @@ export default function MobileView() {
           onDownload={downloadSplitFile}
           onPreview={splitResult.isZip ? undefined : previewSplitFile}
           onStartOver={handleStartOver}
-          onBack={handleBackToEdit}
+          summaryTitle="Split Summary"
+          summaryRows={[
+            {
+              icon: <Scissors size={13} />,
+              iconBg: '#FEE2E2',
+              iconColor: '#DC2626',
+              label: splitResult.isZip ? 'Files Created' : 'Pages Extracted',
+              value: `${splitResult.outputCount}`,
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#DBEAFE',
+              iconColor: '#2563EB',
+              label: 'Total Pages',
+              value: `${splitResult.totalPages}`,
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#D1FAE5',
+              iconColor: '#10B981',
+              label: 'File Size',
+              value: splitResult.fileSize || '—',
+              valueColor: '#10B981',
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#FEF3C7',
+              iconColor: '#F59E0B',
+              label: 'Format',
+              value: splitResult.isZip ? 'ZIP' : 'PDF',
+            },
+          ]}
         />
       ) : !hasFile && !isLoadingPdf ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />

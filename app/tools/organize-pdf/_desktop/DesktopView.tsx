@@ -7,9 +7,13 @@ import UploadZone from '../../_components/UploadZone';
 import PageGrid from '../../_components/PageGrid';
 import PageGridCard from '../../_components/PageGridCard';
 import AddMoreCard from '../../_components/AddMoreCard';
+import SuccessScreenV2 from '../../_components/SuccessScreen/SuccessScreenV2';
+import DesktopProcessingScreen from '../../_components/DesktopProcessingScreen';
 import { useOrganizePdfContext } from '../_context/OrganizePdfContext';
 import OrganizeOptionsPanel from './OrganizeOptionsPanel';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
+import { useToolLoadingScreen } from '../../_hooks/useToolLoadingScreen';
+import { buildOrganizePdfV2Config } from '../../_config/successScreenConfigs';
 
 export default function DesktopView() {
   const {
@@ -17,28 +21,86 @@ export default function DesktopView() {
     errorMessage, setErrorMessage,
     addPdfs, reorderPages, rotatePage, deletePage, toggleSelect,
     clearAll,
-    organizeAndPrepare,       // ⭐ CHANGED (was downloadPdf)
-    downloadOrganizedFile,    // ⭐ ADDED
-    pdfFilename,  
+    organizeAndPrepare,
+    downloadOrganizedFile,
+    previewOrganizedPdf,
+    organizedPdfUrl,
+    organizedPdfSize,
+    pdfFilename,
+    totalOriginalPages,
+    deletedCount,
+    rotatedCount,
   } = useOrganizePdfContext();
 
   useToolFileReceiver((files: File[]) => addPdfs(files));
 
-  // ⭐ NEW: Desktop handler — generate then auto-download
-  const handleDesktopSave = async () => {
-  const url = await organizeAndPrepare();
-  if (url) {
-    // ⭐ Use the returned URL directly instead of state
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${pdfFilename || 'organized'}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-};
+  // ⭐ Done state
+  const isDone = !!organizedPdfUrl && !isProcessing;
 
-  // ============ BOTTOM TOOLBAR ============
+  // ⭐ Loading screen hook
+  const showLoading = useToolLoadingScreen(isProcessing, isDone, 1800);
+
+  // ⭐ Handle save (just create, no auto-download)
+  const handleDesktopSave = async () => {
+    await organizeAndPrepare();
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // 1️⃣ LOADING SCREEN
+  // ═══════════════════════════════════════════════════════════════
+  if (showLoading) {
+    return (
+      <DesktopProcessingScreen
+        title="Organizing PDF"
+        subtitle="Building your reorganized PDF..."
+        fileCount={1}
+        gradientFrom="#8B5CF6"
+        gradientTo="#6366F1"
+        infoText="Your files are processed securely in your browser"
+        progressDuration={1.8}
+        icon={
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+        }
+      />
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 2️⃣ SUCCESS SCREEN (V2 Design)
+  // ═══════════════════════════════════════════════════════════════
+  if (isDone && organizedPdfUrl) {
+    const finalFilename = `${pdfFilename || 'organized'}.pdf`;
+
+    const config = buildOrganizePdfV2Config({
+      fileName: finalFilename,
+      fileSize: organizedPdfSize || '—',
+      totalPages: pages.length,
+      originalPageCount: totalOriginalPages,
+      deletedCount,
+      rotatedCount,
+      onDownload: downloadOrganizedFile,
+      onStartOver: clearAll,
+      onDelete: clearAll,
+      onPreview: previewOrganizedPdf,
+    });
+
+    // ⭐ Add PDF data for gallery preview
+    const configWithPdf = {
+      ...config,
+      pdfPreviewUrl: organizedPdfUrl,
+    };
+
+    return <SuccessScreenV2 config={configWithPdf} />;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 3️⃣ BOTTOM TOOLBAR
+  // ═══════════════════════════════════════════════════════════════
   const bottomBar = (
     <ToolBottomBar
       actions={[
@@ -93,25 +155,31 @@ export default function DesktopView() {
     />
   );
 
-  // ============ MAIN ACTION BUTTON ============
+  // ═══════════════════════════════════════════════════════════════
+  // 4️⃣ MAIN ACTION BUTTON
+  // ═══════════════════════════════════════════════════════════════
   const actionButton = (
     <ToolActionButton
-      onClick={handleDesktopSave}                // ⭐ CHANGED (was downloadPdf)
+      onClick={handleDesktopSave}
       disabled={pages.length === 0}
       isLoading={isProcessing}
       loadingLabel="Building PDF…"
       icon={
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
         </svg>
       }
-      label={`Save PDF (${pages.length})`}
-      subtitle="Download organized PDF"
+      label={`Organize (${pages.length})`}
+      subtitle="Save organized PDF"
     />
   );
 
+  // ═══════════════════════════════════════════════════════════════
+  // 5️⃣ NORMAL TOOL SHELL
+  // ═══════════════════════════════════════════════════════════════
   return (
     <ToolShellDesktop
       title="Organize PDF"

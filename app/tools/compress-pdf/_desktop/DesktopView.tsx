@@ -6,24 +6,36 @@ import ToolActionButton from '../../_components/ToolActionButton';
 import UploadZone from '../../_components/UploadZone';
 import PageGrid from '../../_components/PageGrid';
 import AddMoreCard from '../../_components/AddMoreCard';
+import SuccessScreenV2 from '../../_components/SuccessScreen/SuccessScreenV2';  // ⭐ NEW
+import DesktopProcessingScreen from '../../_components/DesktopProcessingScreen';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
+import { useToolLoadingScreen } from '../../_hooks/useToolLoadingScreen';
 import { useCompressPdfContext } from '../_context/CompressPdfContext';
+import { formatBytes } from '../_utils/pdfCompressor';
 import PdfCard from './PdfCard';
 import OptionsPanel from './OptionsPanel';
+import { buildCompressPdfV2Config } from '../../_config/successScreenConfigs';  // ⭐ NEW
 
 export default function DesktopView() {
   const {
     items, isProcessing, errorMessage, setErrorMessage,
     addPdfs, removePdf, clearAll, compressAll, downloadOne, downloadAll,
+    totalOriginalBytes,
+    totalCompressedBytes,
+    totalSavedPercent,
   } = useCompressPdfContext();
+
+  const noChangeInSize = totalSavedPercent === 0 ||
+                       (totalSavedPercent > 0 && totalSavedPercent < 5);
 
   useToolFileReceiver((files: File[]) => addPdfs(files));
 
   const allCompressed = items.length > 0 && items.every((it) => it.status === 'done');
   const someCompressed = items.some((it) => it.status === 'done');
-  const isSingleFile = items.length === 1;                              // ⭐ NEW
+  const isSingleFile = items.length === 1;
 
-  // ⭐ Smart download handler — single file → downloadOne, multiple → downloadAll
+  const showLoading = useToolLoadingScreen(isProcessing, allCompressed, 2000);
+
   const handleSmartDownload = () => {
     if (isSingleFile && items[0]) {
       downloadOne(items[0].id);
@@ -32,9 +44,13 @@ export default function DesktopView() {
     }
   };
 
-  // ⭐ Dynamic labels based on file count
-  const downloadLabel = isSingleFile ? 'Download PDF' : `Download All (${items.length})`;
-  const downloadSubtitle = isSingleFile ? 'Get compressed file' : 'Get all compressed files';
+  const handlePreview = (id: string) => {
+    const item = items.find((it) => it.id === id);
+    if (!item?.compressedBlob) return;
+    const url = URL.createObjectURL(item.compressedBlob);
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  };
 
   // ============ BOTTOM TOOLBAR ============
   const bottomBar = (
@@ -70,9 +86,9 @@ export default function DesktopView() {
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
           ),
-          label: isSingleFile ? 'Download' : 'Download All',       // ⭐ UPDATED
+          label: isSingleFile ? 'Download' : 'Download All',
           shortcut: 'Ctrl + S',
-          onClick: handleSmartDownload,                             // ⭐ UPDATED
+          onClick: handleSmartDownload,
           disabled: !someCompressed || isProcessing,
         },
         {
@@ -93,20 +109,7 @@ export default function DesktopView() {
   );
 
   // ============ MAIN ACTION BUTTON ============
-  const actionButton = allCompressed ? (
-    <ToolActionButton
-      onClick={handleSmartDownload}                                 // ⭐ UPDATED
-      icon={
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-      }
-      label={downloadLabel}                                         // ⭐ UPDATED
-      subtitle={downloadSubtitle}                                   // ⭐ UPDATED
-    />
-  ) : (
+  const actionButton = (
     <ToolActionButton
       onClick={compressAll}
       disabled={items.length === 0}
@@ -125,6 +128,63 @@ export default function DesktopView() {
     />
   );
 
+  // ═══════════ ⭐ LOADING SCREEN ═══════════
+  if (showLoading) {
+    return (
+      <DesktopProcessingScreen
+        title={isSingleFile ? 'Compressing your PDF' : 'Compressing your PDFs'}
+        subtitle="Optimizing file size..."
+        subtitleMultiple={`Optimizing ${items.length} PDF files...`}
+        fileCount={items.length}
+        gradientFrom="#6366F1"
+        gradientTo="#8B5CF6"
+        infoText="Your files are processed securely in your browser"
+        progressDuration={1.8}
+      />
+    );
+  }
+
+// ═══════════ ⭐ SUCCESS SCREEN (V2 - Multi-file support) ═══════════
+if (allCompressed) {
+  const savedBytes = totalOriginalBytes - totalCompressedBytes;
+  const doneFiles = items.filter((it) => it.status === 'done');
+  const firstFile = doneFiles[0];
+
+  const config = buildCompressPdfV2Config({
+    originalSize: formatBytes(totalOriginalBytes),
+    compressedSize: formatBytes(totalCompressedBytes),
+    sizeReducedBytes: formatBytes(savedBytes),
+    reductionPercent: totalSavedPercent,
+
+    files: doneFiles.map((it) => ({
+      id: it.id,
+      name: it.name,
+      size: it.compressedSizeMB || formatBytes(it.compressedBlob?.size || 0),
+      onDownload: () => downloadOne(it.id),
+      onPreview: () => handlePreview(it.id),
+    })),
+
+    onDownload: isSingleFile && items[0]
+      ? () => downloadOne(items[0].id)
+      : downloadAll,
+
+    onStartOver: clearAll,
+    onDelete: clearAll,
+  });
+
+  // ⭐ Add PDF data for gallery preview
+  const configWithPdf = {
+    ...config,
+    pdfBlob: firstFile?.compressedBlob || null,
+    pdfPreviewUrl: firstFile?.compressedBlob
+      ? URL.createObjectURL(firstFile.compressedBlob)
+      : null,
+  };
+
+  return <SuccessScreenV2 config={configWithPdf} />;
+}
+
+  // ═══════════ Otherwise show normal tool shell ═══════════
   return (
     <ToolShellDesktop
       title="Compress PDF"
@@ -150,9 +210,10 @@ export default function DesktopView() {
         <UploadZone
           onFiles={addPdfs}
           accept="application/pdf"
-          title="Drop PDF files here"
-          subtitle="Compress multiple PDFs at once"
+          title="Drop your PDF here"
+          subtitle="or click Choose PDFs to browse"
           buttonText="Choose PDFs"
+          infoText="PDF · Multiple files supported · No size limit"
         />
       ) : (
         <PageGrid

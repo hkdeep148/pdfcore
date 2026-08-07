@@ -1,24 +1,19 @@
 'use client';
 
 import { useRef, useState, ReactNode } from 'react';
+import { Upload, FileText } from 'lucide-react';
 
 interface UploadZoneProps {
-  /** Called with selected files */
   onFiles: (files: File[]) => void;
-  /** MIME types to accept (e.g. "application/pdf" or "image/*") */
   accept?: string;
-  /** Allow multiple files (default: true) */
   multiple?: boolean;
-  /** Main heading text */
   title?: string;
-  /** Subtitle text below title */
   subtitle?: string;
-  /** Button text */
   buttonText?: string;
-  /** Optional custom icon (defaults to upload icon) */
   icon?: ReactNode;
-  /** Additional classes */
   className?: string;
+  /** Optional small info line below button (e.g. "PDF · Multiple files · No size limit") */
+  infoText?: string;
 }
 
 export default function UploadZone({
@@ -30,6 +25,7 @@ export default function UploadZone({
   buttonText = 'Choose files',
   icon,
   className = '',
+  infoText,
 }: UploadZoneProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -55,24 +51,21 @@ export default function UploadZone({
     setIsDragging(false);
   };
 
-  const defaultIcon = (
-    <svg viewBox="0 0 24 24" className="w-10 h-10 text-[#2563EB]" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="16 16 12 12 8 16" />
-      <line x1="12" y1="12" x2="12" y2="21" />
-      <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
-    </svg>
-  );
-
   return (
     <div
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`flex-1 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all ${
-        isDragging
-          ? 'border-[#2563EB] bg-[#EFF3FF] scale-[1.02]'
-          : 'border-[#D1D5FF] bg-white/40'
-      } ${className}`}
+      onClick={() => fileInputRef.current?.click()}
+      className={`
+        flex-1 flex flex-col items-center justify-center 
+        rounded-2xl border transition-all cursor-pointer
+        ${isDragging
+          ? 'border-slate-900 bg-slate-50'
+          : 'border-slate-200 border-dashed bg-white hover:border-slate-300 hover:bg-slate-50/50'
+        }
+        ${className}
+      `}
     >
       <input
         ref={fileInputRef}
@@ -83,24 +76,43 @@ export default function UploadZone({
         accept={accept}
       />
 
-      <div className={`w-20 h-20 rounded-2xl bg-[#EFF3FF] flex items-center justify-center mb-5 transition-transform ${isDragging ? 'scale-110' : ''}`}>
-        {icon || defaultIcon}
+      {/* Icon */}
+      <div
+        className={`
+          w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-all
+          ${isDragging
+            ? 'bg-slate-900 text-white scale-110'
+            : 'bg-slate-100 text-slate-500'
+          }
+        `}
+      >
+        {icon || <Upload size={22} strokeWidth={2} />}
       </div>
 
-      <p className="text-[18px] font-bold text-[#07122E] mb-1.5">{title}</p>
-      <p className="text-[14px] text-[#8A93A3] mb-6">{subtitle}</p>
+      {/* Text */}
+      <p className="text-[17px] font-semibold text-slate-900 mb-1.5">
+        {isDragging ? 'Drop to upload' : title}
+      </p>
+      <p className="text-[13px] text-slate-500 mb-6">{subtitle}</p>
 
+      {/* Button */}
       <button
         type="button"
-        onClick={() => fileInputRef.current?.click()}
-        className="inline-flex items-center gap-2 bg-[#2563EB] text-white text-[14px] font-semibold px-6 py-3 rounded-xl hover:bg-[#1E4FD1] transition-colors"
+        onClick={(e) => {
+          e.stopPropagation();
+          fileInputRef.current?.click();
+        }}
+        className="inline-flex items-center gap-2 bg-slate-900 text-white text-[13px] font-semibold px-5 py-2.5 rounded-lg hover:bg-slate-800 transition-colors"
       >
-        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
         {buttonText}
       </button>
+
+      {/* Optional info line */}
+      {infoText && (
+        <p className="text-[11.5px] text-slate-400 mt-5 font-medium">
+          {infoText}
+        </p>
+      )}
     </div>
   );
 }

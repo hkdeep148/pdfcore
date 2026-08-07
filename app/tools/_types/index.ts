@@ -46,6 +46,7 @@ export type RotationAngle = 0 | 90 | 180 | 270;
 
 export type PdfPageItem = {
   id: string;
+  fileId: string;
   pdfId: string;              // which PDF file this page belongs to
   pageIndex: number;          // original page number (0-based)
   preview: string;            // data URL of the page image

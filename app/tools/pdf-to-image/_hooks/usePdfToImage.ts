@@ -43,6 +43,15 @@ export function usePdfToImage() {
     format: ImageFormat;
   } | null>(null);
 
+  // ⭐ NEW: Individual converted images (for success screen list + gallery)
+const [convertedImages, setConvertedImages] = useState<Array<{
+  id: string;
+  name: string;
+  size: string;
+  url: string;
+  blob: Blob;
+}>>([]);
+
   const formatBytes = (bytes: number): string => {
     if (bytes === 0) return '0 B';
     const units = ['B', 'KB', 'MB', 'GB'];
@@ -124,14 +133,16 @@ export function usePdfToImage() {
     clearStaleResult();
   }, [clearStaleResult]);
 
-  const clearAll = useCallback(() => {
-    if (conversionResult) URL.revokeObjectURL(conversionResult.blobUrl);
-    setFiles([]);
-    setPages([]);
-    setSelectedIds(new Set());
-    setErrorMessage(null);
-    setConversionResult(null);
-  }, [conversionResult]);
+const clearAll = useCallback(() => {
+  if (conversionResult) URL.revokeObjectURL(conversionResult.blobUrl);
+  convertedImages.forEach((img) => URL.revokeObjectURL(img.url));
+  setFiles([]);
+  setPages([]);
+  setSelectedIds(new Set());
+  setErrorMessage(null);
+  setConversionResult(null);
+  setConvertedImages([]); // ⭐ Clean up
+}, [conversionResult, convertedImages]);
 
   // Clear result when format/resolution changes
   const setFormatWithClear = useCallback((fmt: ImageFormat) => {
@@ -209,46 +220,70 @@ export function usePdfToImage() {
       let fileSize: string;
       let isZip = false;
 
-      if (selectedPages.length === 1) {
-        // Single page → direct image
-        const page = selectedPages[0];
-        const file = getFileForPage(page);
-        if (!file) throw new Error('File not found');
+if (selectedPages.length === 1) {
+  const page = selectedPages[0];
+  const file = getFileForPage(page);
+  if (!file) throw new Error('File not found');
 
-        const blob = await renderPageAsImage(file, page.pageIndex, format, resolution);
-        blobUrl = URL.createObjectURL(blob);
-        const baseName = page.pdfName.replace(/\.pdf$/i, '');
-        filename = `${baseName}-page-${page.pageIndex + 1}.${format}`;
-        fileSize = formatBytes(blob.size);
-        setProcessProgress(100);
-      } else {
-        // Multiple pages → ZIP
-        const images: { name: string; blob: Blob }[] = [];
+  const blob = await renderPageAsImage(file, page.pageIndex, format, resolution);
+  blobUrl = URL.createObjectURL(blob);
+  const baseName = page.pdfName.replace(/\.pdf$/i, '');
+  filename = `${baseName}-page-${page.pageIndex + 1}.${format}`;
+  fileSize = formatBytes(blob.size);
+  setProcessProgress(100);
 
-        for (let i = 0; i < selectedPages.length; i++) {
-          const page = selectedPages[i];
-          const file = getFileForPage(page);
-          if (!file) continue;
+  // ⭐ Store single file
+  setConvertedImages([{
+    id: `img-${page.id}`,
+    name: filename,
+    size: fileSize,
+    url: blobUrl,
+    blob,
+  }]);
+} else {
+  // Multiple pages → ZIP + individual files
+  const images: { name: string; blob: Blob }[] = [];
+  const individualFiles: Array<{
+    id: string;
+    name: string;
+    size: string;
+    url: string;
+    blob: Blob;
+  }> = [];
 
-          const blob = await renderPageAsImage(file, page.pageIndex, format, resolution);
-          const baseName = page.pdfName.replace(/\.pdf$/i, '');
-          images.push({
-            name: `${baseName}-page-${page.pageIndex + 1}.${format}`,
-            blob,
-          });
+  for (let i = 0; i < selectedPages.length; i++) {
+    const page = selectedPages[i];
+    const file = getFileForPage(page);
+    if (!file) continue;
 
-          setProcessProgress(((i + 1) / selectedPages.length) * 100);
-        }
+    const blob = await renderPageAsImage(file, page.pageIndex, format, resolution);
+    const baseName = page.pdfName.replace(/\.pdf$/i, '');
+    const imgName = `${baseName}-page-${page.pageIndex + 1}.${format}`;
+    const imgUrl = URL.createObjectURL(blob);
 
-        const zipUrl = await downloadAsZip(images, 'pdf-pages');
-        const zipResponse = await fetch(zipUrl);
-        const zipBlob = await zipResponse.blob();
-        blobUrl = zipUrl;
-        filename = `pdf-images-${Date.now()}.zip`;
-        fileSize = formatBytes(zipBlob.size);
-        isZip = true;
-      }
+    images.push({ name: imgName, blob });
+    individualFiles.push({
+      id: `img-${page.id}`,
+      name: imgName,
+      size: formatBytes(blob.size),
+      url: imgUrl,
+      blob,
+    });
 
+    setProcessProgress(((i + 1) / selectedPages.length) * 100);
+  }
+
+  // ⭐ Store individual files
+  setConvertedImages(individualFiles);
+
+  const zipUrl = await downloadAsZip(images, 'pdf-pages');
+  const zipResponse = await fetch(zipUrl);
+  const zipBlob = await zipResponse.blob();
+  blobUrl = zipUrl;
+  filename = `pdf-images-${Date.now()}.zip`;
+  fileSize = formatBytes(zipBlob.size);
+  isZip = true;
+}
       setConversionResult({
         blobUrl,
         filename,
@@ -297,7 +332,8 @@ export function usePdfToImage() {
     files, pages, selectedIds, format, resolution,
     isLoadingPdf, loadProgress, isProcessing, processProgress, errorMessage,
     conversionResult,
-    downloadingPageId,              // 🆕 EXPORT THIS
+    downloadingPageId,      
+    convertedImages,        // 🆕 EXPORT THIS
     // Setters
     setFormat: setFormatWithClear,
     setResolution: setResolutionWithClear,

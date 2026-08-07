@@ -92,7 +92,8 @@ export default function DesktopUploadPage({
   const afterAccent = nameParts.length > 1 ? nameParts[1] : '';
 
   return (
-    <div className="hidden lg:flex flex-col h-full overflow-hidden bg-gradient-to-b from-[#F8FAFC] to-white">
+    // ⭐ FIX: Changed `hidden lg:flex h-full` → `flex min-h-screen`
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F8FAFC] to-white">
       {/* Hidden file input */}
       <input
         ref={fileInputRef}
@@ -107,7 +108,7 @@ export default function DesktopUploadPage({
 
       {/* ⭐ CENTERED UPLOAD CONTENT */}
       <div
-        className="flex-1 flex items-center justify-center p-8 overflow-y-auto"
+        className="flex-1 flex items-center justify-center p-8"
         onDrop={handleDrop}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}
@@ -116,7 +117,6 @@ export default function DesktopUploadPage({
           
           {/* Title */}
           <div className="text-center mb-10">
-
             <h1 className="text-[40px] font-extrabold text-[#07122E] tracking-tight leading-[1.1] mb-3">
               {beforeAccent}
               <span className="bg-gradient-to-r from-[#4F46E5] to-[#8B5CF6] bg-clip-text text-transparent">

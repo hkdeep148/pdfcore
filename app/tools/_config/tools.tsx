@@ -125,6 +125,7 @@ export const tools: (Tool & {
     color: '#7C3AED',
     bgColor: '#EDE9FE',
     icon: <Files size={28} strokeWidth={2} />,
+    popular: true,
     mobileUpload: {
       titleLine1: 'Organize',
       titleLine2: 'PDF Pages',
@@ -250,6 +251,7 @@ export const tools: (Tool & {
     color: '#0EA5A4',
     bgColor: '#CCFBF1',
     icon: <PenTool size={28} strokeWidth={2} />,
+    popular: true,
     mobileUpload: {
       titleLine1: 'Add Watermark',
       titleLine2: 'to PDF',
@@ -259,6 +261,35 @@ export const tools: (Tool & {
       uploadSubtitle: 'Drag & drop your PDF here\nor choose a file',
       buttonText: 'Choose PDF',
       fileSizeNote: 'Supports PDF up to 100 MB',
+      fileType: 'pdf',
+      },
+    },
+        { 
+    href: '/tools/create-pdf',
+    label: 'Create PDF',
+    description: 'Create PDF documents from scratch',
+    category: 'convert',
+    color: '#6366F1',
+    bgColor: '#E0E7FF',
+    icon: (
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="12" y1="11" x2="12" y2="17" />
+        <line x1="9" y1="14" x2="15" y2="14" />
+      </svg>
+    ),
+    popular: true,
+    comingSoon: true,  // ⭐ NEW FLAG
+    mobileUpload: {
+      titleLine1: 'Create',
+      titleLine2: 'PDF',
+      titleAccent: 'PDF',
+      description: 'Create PDF documents\nfrom scratch.',
+      uploadTitle: 'Coming Soon',
+      uploadSubtitle: 'This feature is under development',
+      buttonText: 'Coming Soon',
+      fileSizeNote: 'Coming soon',
       fileType: 'pdf',
     },
   },

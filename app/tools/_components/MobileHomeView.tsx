@@ -90,37 +90,75 @@ export default function MobileHomeView() {
                 </p>
               )}
 
-              {filteredTools.map((tool) => (
-                <Link
-                  key={tool.href}
-                  href={tool.href}
-                  className="group flex items-center justify-between gap-3 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white shadow-[0_2px_10px_-2px_rgba(91,78,245,0.08)] hover:shadow-[0_8px_20px_-4px_rgba(91,78,245,0.15)] hover:bg-white hover:border-indigo-200 active:scale-[0.98] transition-all duration-200"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 group-hover:rotate-3"
-                      style={{
-                        backgroundColor: tool.bgColor,
-                        color: tool.color,
-                      }}
-                    >
-                      <div className="scale-90">{tool.icon}</div>
-                    </div>
-                    <div className="min-w-0 text-left">
-                      <h3 className="text-[15px] font-bold text-[#07122E] leading-[1.35] group-hover:text-[#5B4EF5] transition-colors">
-                        {tool.label}
-                      </h3>
-                      <p className="text-[12.5px] text-slate-500 leading-[1.5] mt-0.5 line-clamp-1">
-                        {tool.description}
-                      </p>
-                    </div>
-                  </div>
-                  <ChevronRight
-                    size={18}
-                    className="text-slate-400 shrink-0 group-hover:text-[#5B4EF5] group-hover:translate-x-1 transition-all"
-                  />
-                </Link>
-              ))}
+{filteredTools.map((tool) => {
+  const isComingSoon = !!(tool as any).comingSoon;
+
+  const cardContent = (
+    <>
+      <div className="flex items-center gap-3.5 min-w-0">
+        <div
+          className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform ${
+            isComingSoon ? 'opacity-50 grayscale' : 'group-hover:scale-110 group-hover:rotate-3'
+          }`}
+          style={{
+            backgroundColor: tool.bgColor,
+            color: tool.color,
+          }}
+        >
+          <div className="scale-90">{tool.icon}</div>
+        </div>
+        <div className="min-w-0 text-left">
+          <div className="flex items-center gap-2">
+            <h3 className={`text-[15px] font-bold leading-[1.35] transition-colors ${
+              isComingSoon ? 'text-slate-400' : 'text-[#07122E] group-hover:text-[#5B4EF5]'
+            }`}>
+              {tool.label}
+            </h3>
+            {isComingSoon && (
+              <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-bold uppercase tracking-wider">
+                Soon
+              </span>
+            )}
+          </div>
+          <p className={`text-[12.5px] leading-[1.5] mt-0.5 line-clamp-1 ${
+            isComingSoon ? 'text-slate-400' : 'text-slate-500'
+          }`}>
+            {tool.description}
+          </p>
+        </div>
+      </div>
+      {!isComingSoon && (
+        <ChevronRight
+          size={18}
+          className="text-slate-400 shrink-0 group-hover:text-[#5B4EF5] group-hover:translate-x-1 transition-all"
+        />
+      )}
+    </>
+  );
+
+  // ⭐ Coming Soon: render as div (non-clickable)
+  if (isComingSoon) {
+    return (
+      <div
+        key={tool.href}
+        className="flex items-center justify-between gap-3 p-4 rounded-2xl bg-white/50 border border-slate-200 opacity-75 cursor-default"
+      >
+        {cardContent}
+      </div>
+    );
+  }
+
+  // ⭐ Normal: render as Link (clickable)
+  return (
+    <Link
+      key={tool.href}
+      href={tool.href}
+      className="group flex items-center justify-between gap-3 p-4 rounded-2xl bg-white/80 backdrop-blur-sm border border-white shadow-[0_2px_10px_-2px_rgba(91,78,245,0.08)] hover:shadow-[0_8px_20px_-4px_rgba(91,78,245,0.15)] hover:bg-white hover:border-indigo-200 active:scale-[0.98] transition-all duration-200"
+    >
+      {cardContent}
+    </Link>
+  );
+})}
             </>
           ) : (
             <div className="text-center py-12 px-4">

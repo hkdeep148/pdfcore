@@ -9,8 +9,12 @@ const MobileView = dynamic(() => import('./_mobile/MobileView'), { ssr: false })
 export default function SplitPdfPage() {
   return (
     <SplitPdfProvider>
-      <DesktopView />
-      <MobileView />
+      <div className="hidden lg:contents">
+        <DesktopView />
+      </div>
+      <div className="lg:hidden contents">
+        <MobileView />
+      </div>
     </SplitPdfProvider>
   );
 }

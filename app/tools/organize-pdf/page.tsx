@@ -9,8 +9,13 @@ const MobileView = dynamic(() => import('./_mobile/MobileView'), { ssr: false })
 export default function OrganizePdfPage() {
   return (
     <OrganizePdfProvider>
-      <DesktopView />
-      <MobileView />
+      <div className="hidden lg:contents">
+        <DesktopView />
+      </div>
+      <div className="lg:hidden contents">
+        <MobileView />
+      </div>
+        <MobileView />
     </OrganizePdfProvider>
   );
 }

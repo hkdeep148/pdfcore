@@ -104,42 +104,13 @@ export default function ProcessingOverlay({
           </div>
         </div>
 
-        {/* Stage indicators */}
-        <div className="flex items-center gap-2 mt-4">
-          {/* First step (Merge OR Watermark) */}
-          <div className={`flex items-center justify-center gap-1.5 flex-1 px-3 py-2 rounded-lg transition-all ${
-            isFirstActive
-              ? 'bg-[#EFF3FF] text-[#2563EB]'
-              : isFirstDone
-              ? 'bg-[#F0FDF4] text-[#10B981]'
-              : 'bg-gray-50 text-gray-400'
-          }`}>
-            {isFirstDone ? (
-              <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="3">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            ) : (
-              <div className={`w-2 h-2 rounded-full ${
-                isFirstActive ? 'bg-[#2563EB] animate-pulse' : 'bg-gray-300'
-              }`} />
-            )}
-            <span className="text-[11px] font-semibold">{firstStepLabel}</span>
-          </div>
-
-          <div className="text-gray-300">→</div>
-
-          {/* Second step (Compress) */}
-          <div className={`flex items-center justify-center gap-1.5 flex-1 px-3 py-2 rounded-lg transition-all ${
-            isSecondActive
-              ? 'bg-[#EFF3FF] text-[#2563EB]'
-              : 'bg-gray-50 text-gray-400'
-          }`}>
-            <div className={`w-2 h-2 rounded-full ${
-              isSecondActive ? 'bg-[#2563EB] animate-pulse' : 'bg-gray-300'
-            }`} />
-            <span className="text-[11px] font-semibold">Compress</span>
-          </div>
-        </div>
+{/* Stage indicator — single step */}
+<div className="flex items-center justify-center mt-4">
+  <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#EFF3FF] text-[#2563EB]">
+    <div className="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse" />
+    <span className="text-[12px] font-semibold">{info.label}</span>
+  </div>
+</div>
 
         {/* Tip */}
         <p className="text-[11px] text-[#8A93A3] text-center mt-5 leading-relaxed">

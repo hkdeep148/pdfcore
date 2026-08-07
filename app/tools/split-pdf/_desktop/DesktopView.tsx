@@ -1,15 +1,19 @@
 'use client';
 
-import { useMemo, useRef, useEffect } from 'react';
+import { useMemo } from 'react';
 import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import ToolBottomBar from '../../_components/ToolBottomBar';
 import ToolActionButton from '../../_components/ToolActionButton';
 import UploadZone from '../../_components/UploadZone';
 import PageGrid from '../../_components/PageGrid';
+import SuccessScreenV2 from '../../_components/SuccessScreen/SuccessScreenV2';
+import DesktopProcessingScreen from '../../_components/DesktopProcessingScreen';
 import { useSplitPdfContext } from '../_context/SplitPdfContext';
 import PageThumbnail, { GROUP_COLORS } from './PageThumbnail';
 import SplitOptionsPanel from './SplitOptionsPanel';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
+import { useToolLoadingScreen } from '../../_hooks/useToolLoadingScreen';
+import { buildSplitPdfV2Config } from '../../_config/successScreenConfigs';
 
 export default function DesktopView() {
   const {
@@ -19,38 +23,36 @@ export default function DesktopView() {
     isLoadingPdf, loadProgress, isProcessing,
     errorMessage, setErrorMessage,
     addPdf, clearFile,
-    splitAndPrepare,           // ⭐ CHANGED (was splitAndDownload)
-    splitResult,               // ⭐ ADDED
+    splitAndPrepare,
+    splitFiles,                 // ⭐ NEW: Individual files
+    downloadSplitFileById,      // ⭐ NEW
+    previewSplitFileById,       // ⭐ NEW
+    downloadAllAsZip,           // ⭐ NEW
   } = useSplitPdfContext();
 
-   useToolFileReceiver((files: File[]) => addPdf(files));
+  useToolFileReceiver((files: File[]) => addPdf(files));
 
-  // ⭐ Auto-download flag
-  const shouldDownloadRef = useRef(false);
+  // ⭐ Done state
+  const isDone = splitFiles.length > 0 && !isProcessing;
 
-  // ⭐ Watch for splitResult → auto-download when ready
-  useEffect(() => {
-    if (splitResult && shouldDownloadRef.current) {
-      shouldDownloadRef.current = false;
-      console.log('⬇️ Auto-downloading split file:', splitResult.filename);
+  // ⭐ Loading screen hook
+  const showLoading = useToolLoadingScreen(isProcessing, isDone, 1800);
 
-      const link = document.createElement('a');
-      link.href = splitResult.blobUrl;
-      link.download = splitResult.filename;
-      link.rel = 'noopener';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  // ⭐ Handle split (just create, no auto-download)
+  const handleSplit = async () => {
+    await splitAndPrepare();
+  };
+
+  // Helper: Get split method description
+  const getSplitMethodLabel = (): string => {
+    if (mode === 'pages') {
+      if (extractMode === 'all') return 'Every page';
+      if (extractMode === 'select') return `Selected pages (${selectedPages.size})`;
+      return 'By pages';
     }
-  }, [splitResult]);
-
-  // ⭐ Desktop handler — split then useEffect handles download
-  const handleDesktopSplit = async () => {
-    shouldDownloadRef.current = true;
-    const url = await splitAndPrepare();
-    if (!url) {
-      shouldDownloadRef.current = false;
-    }
+    if (mode === 'range') return 'By page ranges';
+    if (mode === 'size') return 'By file size';
+    return 'Custom';
   };
 
   const pageToGroup = useMemo(() => {
@@ -61,9 +63,65 @@ export default function DesktopView() {
     return map;
   }, [pageGroups]);
 
-  // Is selection mode active?
   const isSelectMode = mode === 'pages' && extractMode === 'select';
 
+  // ═══════════════════════════════════════════════════════════════
+  // 1️⃣ LOADING SCREEN
+  // ═══════════════════════════════════════════════════════════════
+  if (showLoading) {
+    return (
+      <DesktopProcessingScreen
+        title="Splitting PDF"
+        subtitle={
+          outputCount > 1
+            ? `Creating ${outputCount} PDFs...`
+            : 'Extracting pages...'
+        }
+        fileCount={outputCount}
+        gradientFrom="#F59E0B"
+        gradientTo="#F97316"
+        infoText="Your files are processed securely in your browser"
+        progressDuration={1.8}
+        icon={
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="6" cy="6" r="3" />
+            <circle cx="6" cy="18" r="3" />
+            <line x1="20" y1="4" x2="8.12" y2="15.88" />
+            <line x1="14.47" y1="14.48" x2="20" y2="20" />
+            <line x1="8.12" y1="8.12" x2="12" y2="12" />
+          </svg>
+        }
+      />
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 2️⃣ SUCCESS SCREEN (V2 Design - Multi-file support)
+  // ═══════════════════════════════════════════════════════════════
+  if (isDone && splitFiles.length > 0 && file) {
+    const config = buildSplitPdfV2Config({
+      originalFileName: file.name,
+      originalPageCount: file.totalPages,
+      splitMethod: getSplitMethodLabel(),
+      files: splitFiles.map((f) => ({
+        id: f.id,
+        name: f.name,
+        size: f.size,
+        pageCount: f.pageCount,
+        onDownload: () => downloadSplitFileById(f.id),
+        onPreview: () => previewSplitFileById(f.id),
+      })),
+      onDownloadAll: downloadAllAsZip,
+      onStartOver: clearFile,
+      onDelete: clearFile,
+    });
+
+    return <SuccessScreenV2 config={config} />;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 3️⃣ BOTTOM TOOLBAR (default view)
+  // ═══════════════════════════════════════════════════════════════
   const bottomBar = (
     <ToolBottomBar
       actions={[
@@ -115,30 +173,38 @@ export default function DesktopView() {
     />
   );
 
+  // ═══════════════════════════════════════════════════════════════
+  // 4️⃣ MAIN ACTION BUTTON
+  // ═══════════════════════════════════════════════════════════════
   const actionButton = (
     <ToolActionButton
-      onClick={handleDesktopSplit}          // ⭐ CHANGED
+      onClick={handleSplit}
       disabled={!canSplit}
       isLoading={isProcessing}
       loadingLabel="Splitting…"
       icon={
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-          <line x1="8" y1="13" x2="16" y2="13" />
+          <circle cx="6" cy="6" r="3" />
+          <circle cx="6" cy="18" r="3" />
+          <line x1="20" y1="4" x2="8.12" y2="15.88" />
+          <line x1="14.47" y1="14.48" x2="20" y2="20" />
+          <line x1="8.12" y1="8.12" x2="12" y2="12" />
         </svg>
       }
       label={
         outputCount > 1
           ? `Split into ${outputCount} PDFs`
           : outputCount === 1
-          ? 'Download PDF'
+          ? 'Extract PDF'
           : 'Split PDF'
       }
       subtitle="Extract selected pages"
     />
   );
 
+  // ═══════════════════════════════════════════════════════════════
+  // 5️⃣ NORMAL TOOL SHELL (default view)
+  // ═══════════════════════════════════════════════════════════════
   return (
     <ToolShellDesktop
       title="Split PDF"
@@ -231,7 +297,6 @@ export default function DesktopView() {
             disableDrag
           >
             {(page) => {
-              // Select mode: interactive selection
               if (isSelectMode) {
                 return (
                   <PageThumbnail
@@ -246,7 +311,6 @@ export default function DesktopView() {
                 );
               }
 
-              // Default mode: group coloring
               const groupIdx = pageToGroup.get(page.pageIndex);
               const groupColor = groupIdx !== undefined
                 ? GROUP_COLORS[groupIdx % GROUP_COLORS.length]

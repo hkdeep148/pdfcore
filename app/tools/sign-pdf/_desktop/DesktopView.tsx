@@ -5,9 +5,13 @@ import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import ToolBottomBar from '../../_components/ToolBottomBar';
 import ToolActionButton from '../../_components/ToolActionButton';
 import UploadZone from '../../_components/UploadZone';
+import SuccessScreenV2 from '../../_components/SuccessScreen/SuccessScreenV2';
+import DesktopProcessingScreen from '../../_components/DesktopProcessingScreen';
 import { useSignPdfContext } from '../_context/SignPdfContext';
 import SignaturePanel from './SignaturePanel';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
+import { useToolLoadingScreen } from '../../_hooks/useToolLoadingScreen';
+import { buildSignPdfV2Config } from '../../_config/successScreenConfigs';
 
 type DragState = {
   type: 'move' | 'resize';
@@ -29,48 +33,29 @@ export default function DesktopView() {
     addPdf, clearFile, placeSignature, updatePlacedSignature, removePlacedSignature,
     signAndPreparePdf,
     downloadSignedFile,
+    previewSignedPdf,
     signedPdfUrl,
+    signedPdfSize,
   } = useSignPdfContext();
 
   useToolFileReceiver((files: File[]) => addPdf(files));
 
   const [dragState, setDragState] = useState<DragState | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
-
-  // ⭐ NEW: Track if drag/resize just finished (prevents accidental placement)
   const justFinishedDragRef = useRef(false);
 
-  // Auto-download flag
-  const shouldDownloadRef = useRef(false);
+  // ⭐ Done state
+  const isDone = !!signedPdfUrl && !isProcessing;
 
-  // Watch for signedPdfUrl → auto-download when ready
-  useEffect(() => {
-    if (signedPdfUrl && shouldDownloadRef.current && file) {
-      shouldDownloadRef.current = false;
-      console.log('⬇️ Auto-downloading signed PDF');
+  // ⭐ Loading screen hook
+  const showLoading = useToolLoadingScreen(isProcessing, isDone, 1800);
 
-      const filename = file.name.replace(/\.pdf$/i, '-signed.pdf');
-
-      const link = document.createElement('a');
-      link.href = signedPdfUrl;
-      link.download = filename;
-      link.rel = 'noopener';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  }, [signedPdfUrl, file]);
-
-  // Desktop handler — sign then useEffect handles download
-  const handleDesktopDownload = async () => {
-    shouldDownloadRef.current = true;
-    const url = await signAndPreparePdf();
-    if (!url) {
-      shouldDownloadRef.current = false;
-    }
+  // ⭐ Handle sign (just create, no auto-download)
+  const handleDesktopSign = async () => {
+    await signAndPreparePdf();
   };
 
-  // Helper to get CURRENT preview container dimensions
+  // Helper to get current preview dimensions
   const getCurrentDimensions = useCallback(() => {
     if (!previewRef.current) return null;
     const rect = previewRef.current.getBoundingClientRect();
@@ -78,7 +63,6 @@ export default function DesktopView() {
   }, []);
 
   // ============ DRAG & RESIZE HANDLERS ============
-
   const handleMouseDown = useCallback((
     e: React.MouseEvent,
     placedId: string,
@@ -86,28 +70,20 @@ export default function DesktopView() {
   ) => {
     e.stopPropagation();
     e.preventDefault();
-
     const placed = placedSignatures.find(p => p.id === placedId);
     if (!placed) return;
-
     setDragState({
-      type,
-      placedId,
-      startX: e.clientX,
-      startY: e.clientY,
-      origX: placed.x,
-      origY: placed.y,
-      origWidth: placed.width,
-      origHeight: placed.height,
+      type, placedId,
+      startX: e.clientX, startY: e.clientY,
+      origX: placed.x, origY: placed.y,
+      origWidth: placed.width, origHeight: placed.height,
     });
   }, [placedSignatures]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!dragState) return;
-
     const deltaX = e.clientX - dragState.startX;
     const deltaY = e.clientY - dragState.startY;
-
     const dims = getCurrentDimensions();
 
     if (dragState.type === 'move') {
@@ -120,53 +96,84 @@ export default function DesktopView() {
       const newWidth = Math.max(40, dragState.origWidth + deltaX);
       const aspectRatio = dragState.origHeight / dragState.origWidth;
       const newHeight = newWidth * aspectRatio;
-
       updatePlacedSignature(dragState.placedId, {
-        width: newWidth,
-        height: newHeight,
+        width: newWidth, height: newHeight,
         ...(dims && { displayWidth: dims.width, displayHeight: dims.height }),
       });
     }
   }, [dragState, updatePlacedSignature, getCurrentDimensions]);
 
-  // ⭐ UPDATED: Set flag when drag/resize ends (prevents accidental placement)
   const handleMouseUp = useCallback(() => {
     if (dragState) {
       justFinishedDragRef.current = true;
-      // Reset flag after 100ms so normal clicks work
-      setTimeout(() => {
-        justFinishedDragRef.current = false;
-      }, 100);
+      setTimeout(() => { justFinishedDragRef.current = false; }, 100);
     }
     setDragState(null);
   }, [dragState]);
 
-  // ⭐ UPDATED: Check flag before placing new signature
   const handlePageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (dragState) return;
     if (!activeSignatureId || !file) return;
-
-    // Ignore click if we just finished dragging/resizing
-    if (justFinishedDragRef.current) {
-      justFinishedDragRef.current = false;
-      return;
-    }
+    if (justFinishedDragRef.current) { justFinishedDragRef.current = false; return; }
 
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-
-    placeSignature(
-      activeSignatureId,
-      currentPageIndex,
-      x,
-      y,
-      rect.width,
-      rect.height
-    );
+    placeSignature(activeSignatureId, currentPageIndex, x, y, rect.width, rect.height);
   };
 
-  // ============ BOTTOM TOOLBAR ============
+  // ═══════════════════════════════════════════════════════════════
+  // 1️⃣ LOADING SCREEN
+  // ═══════════════════════════════════════════════════════════════
+  if (showLoading) {
+    return (
+      <DesktopProcessingScreen
+        title="Signing PDF"
+        subtitle={`Applying ${placedSignatures.length} signature${placedSignatures.length !== 1 ? 's' : ''}...`}
+        fileCount={1}
+        gradientFrom="#6366F1"
+        gradientTo="#8B5CF6"
+        infoText="Your files are processed securely in your browser"
+        progressDuration={1.8}
+        icon={
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+          </svg>
+        }
+      />
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 2️⃣ SUCCESS SCREEN (V2 Design)
+  // ═══════════════════════════════════════════════════════════════
+  if (isDone && signedPdfUrl && file) {
+    const signedName = file.name.replace(/\.pdf$/i, '-signed.pdf');
+
+    const config = buildSignPdfV2Config({
+      fileName: signedName,
+      fileSize: signedPdfSize || '—',
+      totalSignatures: placedSignatures.length,
+      totalPages: file.totalPages,
+      onDownload: downloadSignedFile,
+      onStartOver: clearFile,
+      onDelete: clearFile,
+      onPreview: previewSignedPdf,
+    });
+
+    // ⭐ Add PDF data for gallery preview
+    const configWithPdf = {
+      ...config,
+      pdfPreviewUrl: signedPdfUrl,
+    };
+
+    return <SuccessScreenV2 config={configWithPdf} />;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 3️⃣ BOTTOM TOOLBAR
+  // ═══════════════════════════════════════════════════════════════
   const bottomBar = (
     <ToolBottomBar
       actions={[
@@ -230,10 +237,12 @@ export default function DesktopView() {
     />
   );
 
-  // ============ MAIN ACTION BUTTON ============
+  // ═══════════════════════════════════════════════════════════════
+  // 4️⃣ MAIN ACTION BUTTON
+  // ═══════════════════════════════════════════════════════════════
   const actionButton = (
     <ToolActionButton
-      onClick={handleDesktopDownload}
+      onClick={handleDesktopSign}
       disabled={!file || placedSignatures.length === 0}
       isLoading={isProcessing}
       loadingLabel="Signing…"
@@ -243,11 +252,14 @@ export default function DesktopView() {
           <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
         </svg>
       }
-      label="Download Signed"
+      label="Sign PDF"
       subtitle={placedSignatures.length > 0 ? `${placedSignatures.length} signature${placedSignatures.length > 1 ? 's' : ''} placed` : 'Place signatures first'}
     />
   );
 
+  // ═══════════════════════════════════════════════════════════════
+  // 5️⃣ NORMAL TOOL SHELL
+  // ═══════════════════════════════════════════════════════════════
   const currentPage = file?.pages[currentPageIndex];
   const currentPageSignatures = placedSignatures.filter(
     (ps) => ps.pageIndex === currentPageIndex
@@ -372,43 +384,24 @@ export default function DesktopView() {
                   <div
                     key={placed.id}
                     className={`absolute group ${isDragging ? 'z-50' : 'z-10'}`}
-                    style={{
-                      left: placed.x,
-                      top: placed.y,
-                      width: placed.width,
-                      height: placed.height,
-                    }}
+                    style={{ left: placed.x, top: placed.y, width: placed.width, height: placed.height }}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <div
                       className="w-full h-full cursor-grab active:cursor-grabbing"
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        handleMouseDown(e, placed.id, 'move');
-                      }}
+                      onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); handleMouseDown(e, placed.id, 'move'); }}
                     >
-                      <img
-                        src={sig.imageDataUrl}
-                        alt="Signature"
-                        className="w-full h-full object-contain pointer-events-none select-none"
-                        draggable={false}
-                      />
+                      <img src={sig.imageDataUrl} alt="Signature" className="w-full h-full object-contain pointer-events-none select-none" draggable={false} />
                     </div>
 
                     <div className={`absolute inset-0 border-2 border-dashed rounded pointer-events-none transition-opacity ${
-                      isDragging
-                        ? 'border-[#4F46E5] opacity-100'
-                        : 'border-[#4F46E5]/40 opacity-100 group-hover:border-[#4F46E5] group-hover:opacity-100'
+                      isDragging ? 'border-[#4F46E5] opacity-100' : 'border-[#4F46E5]/40 opacity-100 group-hover:border-[#4F46E5]'
                     }`} />
 
                     <button
                       type="button"
                       onMouseDown={(e) => e.stopPropagation()}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removePlacedSignature(placed.id);
-                      }}
+                      onClick={(e) => { e.stopPropagation(); removePlacedSignature(placed.id); }}
                       className="absolute -top-3 -right-3 w-6 h-6 rounded-full bg-[#EF4444] hover:bg-[#DC2626] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-20 cursor-pointer"
                     >
                       <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
@@ -419,11 +412,7 @@ export default function DesktopView() {
 
                     <div
                       className="absolute -bottom-2 -right-2 w-5 h-5 bg-[#4F46E5] hover:bg-[#4338CA] rounded-full cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-20 flex items-center justify-center"
-                      onMouseDown={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        handleMouseDown(e, placed.id, 'resize');
-                      }}
+                      onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); handleMouseDown(e, placed.id, 'resize'); }}
                     >
                       <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="15 3 21 3 21 9" />

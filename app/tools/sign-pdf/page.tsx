@@ -9,8 +9,10 @@ const MobileView = dynamic(() => import('./_mobile/MobileView'), { ssr: false })
 export default function SignPdfPage() {
   return (
     <SignPdfProvider>
-      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+      <div className="hidden lg:contents">
         <DesktopView />
+      </div>
+      <div className="lg:hidden contents">
         <MobileView />
       </div>
     </SignPdfProvider>

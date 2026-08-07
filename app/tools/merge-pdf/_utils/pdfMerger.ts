@@ -1,8 +1,5 @@
 import type { MergePdfItem } from '../../_types';
 
-// ============ COMPRESSION LEVEL TYPE ============
-export type MergeCompressionLevel = 'none' | 'low' | 'medium' | 'high';
-
 // ============ PDF.JS SETUP ============
 
 let pdfjsLib: typeof import('pdfjs-dist') | null = null;
@@ -44,61 +41,27 @@ export async function loadPdfInfo(file: File): Promise<MergePdfItem> {
   };
 }
 
-// ============ MERGE ALL PDFs (with optional compression) ============
+// ============ MERGE ALL PDFs ============
 
-export interface MergeOptions {
-  compressionLevel?: MergeCompressionLevel;
-  onProgress?: (stage: 'merging' | 'compressing', current: number, total: number) => void;
-}
-
-export async function mergePdfs(
-  items: MergePdfItem[],
-  options: MergeOptions = {}
-): Promise<string> {
-  const { compressionLevel = 'none', onProgress } = options;
-
+export async function mergePdfs(items: MergePdfItem[]): Promise<string> {
   const { PDFDocument } = await import('pdf-lib');
   const outputPdf = await PDFDocument.create();
 
-  // ---- STEP 1: Merge all PDFs ----
-  for (let i = 0; i < items.length; i++) {
-    onProgress?.('merging', i, items.length);
-    const item = items[i];
+  // Merge all PDFs
+  for (const item of items) {
     const buffer = await item.file.arrayBuffer();
     const srcDoc = await PDFDocument.load(buffer, { ignoreEncryption: true });
     const pageIndices = srcDoc.getPageIndices();
     const copiedPages = await outputPdf.copyPages(srcDoc, pageIndices);
     copiedPages.forEach((page) => outputPdf.addPage(page));
   }
-  onProgress?.('merging', items.length, items.length);
 
-  // Save merged PDF (uncompressed)
+  // Save merged PDF
   const mergedBytes = await outputPdf.save({
     useObjectStreams: true,
     addDefaultPage: false,
   });
 
-  // ---- STEP 2: Optionally compress the merged PDF ----
-  if (compressionLevel === 'none') {
-    const blob = new Blob([mergedBytes as BlobPart], { type: 'application/pdf' });
-    return URL.createObjectURL(blob);
-  }
-
-  // Dynamically import the compressor (reuse existing logic)
-  const { compressPdf } = await import('../../compress-pdf/_utils/pdfCompressor');
-
-  // Wrap merged bytes as a File for the compressor
-  const mergedFile = new File(
-    [mergedBytes as BlobPart],
-    'merged.pdf',
-    { type: 'application/pdf' }
-  );
-
-  const compressedBlob = await compressPdf(
-    mergedFile,
-    compressionLevel,
-    (current, total) => onProgress?.('compressing', current, total)
-  );
-
-  return URL.createObjectURL(compressedBlob);
+  const blob = new Blob([mergedBytes as BlobPart], { type: 'application/pdf' });
+  return URL.createObjectURL(blob);
 }

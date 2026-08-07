@@ -41,6 +41,9 @@ export function useImageToPdf() {
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  // ⭐ NEW: PDF blob for success screen (separate from URL because we need Blob type)
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+
   // ============ COMPUTED ============
   const currentPageRatio = useMemo(() => {
     const baseRatio = PAGE_ASPECT_RATIOS[pageSize];
@@ -71,28 +74,28 @@ export function useImageToPdf() {
     setIsReady(false);
 
     validFiles.forEach((file) => {
-  const preview = URL.createObjectURL(file);
-  const img = new Image();
-  img.onload = () => {
-    const newItem: ImageItem = {
-      id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
-      file,
-      preview,
-      sizeMB: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-      width: img.naturalWidth,
-      height: img.naturalHeight,
-      rotation: 0,
-      scale: 1,
-    };
-    setImages((prev) => [...prev, newItem]);
-  };
-  img.onerror = () => {
-    URL.revokeObjectURL(preview);
-    console.error(`Failed to load image: ${file.name}`);
-    toast.error(`Could not read "${file.name}"`);
-  };
-  img.src = preview;
-});
+      const preview = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const newItem: ImageItem = {
+          id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+          file,
+          preview,
+          sizeMB: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+          rotation: 0,
+          scale: 1,
+        };
+        setImages((prev) => [...prev, newItem]);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(preview);
+        console.error(`Failed to load image: ${file.name}`);
+        toast.error(`Could not read "${file.name}"`);
+      };
+      img.src = preview;
+    });
   }, [toast]);
 
   const removeImage = useCallback((id: string) => {
@@ -118,19 +121,19 @@ export function useImageToPdf() {
     setIsReady(false);
   }, []);
 
-const updateImageSize = useCallback(
-  (id: string, pageSize?: PageSize, orientation?: Orientation) => {
-    setImages((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, pageSize, orientation }
-          : item
-      )
-    );
-    setIsReady(false);
-  },
-  []
-);
+  const updateImageSize = useCallback(
+    (id: string, pageSize?: PageSize, orientation?: Orientation) => {
+      setImages((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? { ...item, pageSize, orientation }
+            : item
+        )
+      );
+      setIsReady(false);
+    },
+    []
+  );
 
   const clearAll = useCallback(() => {
     images.forEach((i) => URL.revokeObjectURL(i.preview));
@@ -140,6 +143,8 @@ const updateImageSize = useCallback(
     setLastPdfUrl(null);
     setLastPdfSize(null);
     setErrorMessage(null);
+    // ⭐ NEW: Reset PDF blob too
+    setPdfBlob(null);
   }, [images, lastPdfUrl]);
 
   const reorderImages = useCallback((newOrder: ImageItem[]) => {
@@ -169,6 +174,10 @@ const updateImageSize = useCallback(
       try {
         const res = await fetch(url);
         const blob = await res.blob();
+
+        // ⭐ NEW: Store blob for success screen
+        setPdfBlob(blob);
+
         const sizeKB = blob.size / 1024;
         setLastPdfSize(
           sizeKB > 1024
@@ -244,6 +253,13 @@ const updateImageSize = useCallback(
     createPdf,
     downloadPdf,
     previewPdf,
+
+    // ⭐ NEW: For success screen
+    pdfBlob,
+    pdfUrl: lastPdfUrl,                   // Alias for consistency
+    pdfName: `${pdfFilename || 'document'}.pdf`,
+    pdfSize: pdfBlob?.size || 0,
+    pageCount: images.length,
   };
 }
 

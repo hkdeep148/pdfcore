@@ -1,10 +1,11 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { FileText, LayoutGrid } from 'lucide-react';
 import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileToolHeader from '../../_components/MobileToolHeader';
-import MobileSuccessScreen from '../../_components/MobileSuccessScreen';
+import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import { getToolByPath } from '../../_config/tools';
 import { useOrganizePdfContext } from '../_context/OrganizePdfContext';
 import OrganizeGrid from './OrganizeGrid';
@@ -99,6 +100,10 @@ export default function MobileView() {
       {/* 🎊 SUCCESS SCREEN */}
       {showSuccess && organizedPdfUrl ? (
         <MobileSuccessScreen
+          toolIcon={tool.icon}
+          toolName="Organize PDF"
+          toolColor="#06B6D4"
+          onBack={handleBackToEdit}
           title="PDF Organized!"
           subtitle={`${pages.length} pages ready to download`}
           filename={`${pdfFilename}.pdf`}
@@ -107,7 +112,31 @@ export default function MobileView() {
           onDownload={downloadOrganizedFile}
           onPreview={previewOrganizedPdf}
           onStartOver={handleStartOver}
-          onBack={handleBackToEdit}
+          summaryTitle="Organize Summary"
+          summaryRows={[
+            {
+              icon: <LayoutGrid size={13} />,
+              iconBg: '#DBEAFE',
+              iconColor: '#2563EB',
+              label: 'Total Pages',
+              value: `${pages.length}`,
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#D1FAE5',
+              iconColor: '#10B981',
+              label: 'File Size',
+              value: organizedPdfSize || '—',
+              valueColor: '#10B981',
+            },
+            {
+              icon: <FileText size={13} />,
+              iconBg: '#FEF3C7',
+              iconColor: '#F59E0B',
+              label: 'Format',
+              value: 'PDF',
+            },
+          ]}
         />
       ) : !hasPages && !isLoadingPdf ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
@@ -121,7 +150,7 @@ export default function MobileView() {
             />
 
             {/* Grid */}
-            <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-y-auto">
               <OrganizeGrid />
             </div>
 

@@ -4,11 +4,12 @@ import { useRef } from 'react';
 import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileToolHeader from '../../_components/MobileToolHeader';
+import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import { getToolByPath } from '../../_config/tools';
 import { useCompressPdfContext } from '../_context/CompressPdfContext';
+import { formatBytes } from '../_utils/pdfCompressor';
 import PdfList from './PdfList';
 import BottomToolbar from './BottomToolbar';
-import CompressionSummary from './CompressionSummary';
 
 export default function MobileView() {
   const {
@@ -17,7 +18,11 @@ export default function MobileView() {
     clearAll,
     errorMessage,
     setErrorMessage,
-    totalSaved,
+    totalOriginalBytes,
+    totalCompressedBytes,
+    totalSavedPercent,
+    downloadOne,
+    downloadAll,
   } = useCompressPdfContext();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,7 +36,72 @@ export default function MobileView() {
   const openFilePicker = () => fileInputRef.current?.click();
 
   const hasItems = items.length > 0;
+  const allDone = items.length > 0 && items.every((it) => it.status === 'done');
+  const isSingleFile = items.length === 1;
+  const savedBytes = totalOriginalBytes - totalCompressedBytes;
+  const isAlreadyOptimized = savedBytes <= 0 || totalSavedPercent === 0;
 
+  const handleDownload = () => {
+    if (isSingleFile && items[0]) {
+      downloadOne(items[0].id);
+    } else {
+      downloadAll();
+    }
+  };
+
+  const handlePreview = () => {
+    const firstDone = items.find((it) => it.status === 'done');
+    if (!firstDone?.compressedBlob) return;
+    const url = URL.createObjectURL(firstDone.compressedBlob);
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  };
+
+  // ═══════════ SUCCESS SCREEN (renders OUTSIDE ToolShellMobile) ═══════════
+  if (allDone) {
+    return (
+      <MobileSuccessScreen
+        toolIcon={tool.icon}
+        toolName="Compress PDF"
+        toolColor="#F43F5E"
+        onBack={clearAll}
+        title={isAlreadyOptimized ? 'Already Optimized!' : 'Compression Successful!'}
+        subtitle={
+          isAlreadyOptimized
+            ? 'Your PDF is already at optimal size.'
+            : isSingleFile
+              ? 'Your PDF has been compressed successfully.'
+              : `${items.length} PDFs have been compressed successfully.`
+        }
+        files={items
+          .filter((it) => it.status === 'done')
+          .map((it) => ({
+            id: it.id,
+            name: it.name,
+            size: it.compressedSizeMB || formatBytes(it.compressedBlob?.size || 0),
+            onDownload: () => downloadOne(it.id),
+          }))}
+        onPreview={handlePreview}
+        compressionStats={
+          !isAlreadyOptimized
+            ? {
+                originalSize: formatBytes(totalOriginalBytes),
+                compressedSize: formatBytes(totalCompressedBytes),
+                savedPercentage: totalSavedPercent,
+                savedBytes: formatBytes(savedBytes),
+                format: 'PDF',
+              }
+            : undefined
+        }
+        downloadLabel={isSingleFile ? 'Download Compressed PDF' : `Download All (${items.length})`}
+        onDownload={handleDownload}
+        onStartOver={clearAll}
+        collapsibleSummary={true}
+      />
+    );
+  }
+
+  // ═══════════ NORMAL VIEW (inside ToolShellMobile) ═══════════
   return (
     <ToolShellMobile fixedHeight={hasItems}>
       <input
@@ -59,23 +129,15 @@ export default function MobileView() {
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
       ) : (
         <div className="flex flex-col h-full bg-[#F4F5F7]">
-          {/* Shared Header - "Back" button clears all */}
           <MobileToolHeader
             filename={`${items.length} PDF${items.length > 1 ? 's' : ''}`}
             onFilenameChange={() => {}}
             editable={false}
             onBack={clearAll}
           />
-
-          {/* Compression Summary Banner - only shows when compression is done */}
-          {totalSaved > 0 && <CompressionSummary />}
-
-          {/* PDF List with compression stats */}
           <div className="flex-1 min-h-0 overflow-hidden">
             <PdfList />
           </div>
-
-          {/* Bottom Toolbar with compression level + action */}
           <BottomToolbar onAddPdfs={openFilePicker} />
         </div>
       )}

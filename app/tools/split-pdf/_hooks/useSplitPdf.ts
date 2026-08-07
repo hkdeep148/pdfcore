@@ -14,6 +14,16 @@ import {
 import { downloadFile } from '../../_utils/browser';
 import { useToast } from '../../_components/ToastProvider';
 
+// ⭐ Individual split file (for success screen list)
+export interface SplitFileItem {
+  id: string;
+  name: string;
+  size: string;
+  blob: Blob;
+  url: string;
+  pageCount: number;
+}
+
 export function useSplitPdf() {
   const toast = useToast();
 
@@ -38,7 +48,7 @@ export function useSplitPdf() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // 🆕 Split result state
+  // 🆕 Split result state (backwards compat + ZIP)
   const [splitResult, setSplitResult] = useState<{
     blobUrl: string;
     filename: string;
@@ -47,6 +57,9 @@ export function useSplitPdf() {
     isZip: boolean;
     totalPages: number;
   } | null>(null);
+
+  // ⭐ NEW: Individual split files (for showing in list with per-file actions)
+  const [splitFiles, setSplitFiles] = useState<SplitFileItem[]>([]);
 
   // Recalculate size groups when file or maxSize changes
   useEffect(() => {
@@ -104,6 +117,8 @@ export function useSplitPdf() {
 
   const clearFile = useCallback(() => {
     if (splitResult) URL.revokeObjectURL(splitResult.blobUrl);
+    // ⭐ Also cleanup individual split files
+    splitFiles.forEach((f) => URL.revokeObjectURL(f.url));
     setFile(null);
     setPages([]);
     setRangeInput('');
@@ -112,7 +127,8 @@ export function useSplitPdf() {
     setSizeGroups([]);
     setErrorMessage(null);
     setSplitResult(null);
-  }, [splitResult]);
+    setSplitFiles([]); // ⭐ Reset individual files
+  }, [splitResult, splitFiles]);
 
   // Update input from selection (bidirectional)
   const updateInputFromSelection = useCallback((newSelection: Set<number>) => {
@@ -215,7 +231,7 @@ export function useSplitPdf() {
     }
   }, [mode, extractMode, selectPagesInput, file]);
 
-  // ============ 🆕 SPLIT & PREPARE (no auto-download) ============
+  // ============ 🆕 SPLIT & PREPARE (individual files + no auto-download) ============
   const splitAndPrepare = useCallback(async () => {
     if (!file) return null;
     const pageGroups = getPageGroups();
@@ -228,21 +244,38 @@ export function useSplitPdf() {
     setIsProcessing(true);
     setErrorMessage(null);
 
-    // Clear previous result
-    if (splitResult) {
-      URL.revokeObjectURL(splitResult.blobUrl);
-      setSplitResult(null);
-    }
+    // Clear previous results
+    if (splitResult) URL.revokeObjectURL(splitResult.blobUrl);
+    splitFiles.forEach((f) => URL.revokeObjectURL(f.url));
+    setSplitResult(null);
+    setSplitFiles([]);
 
     try {
       const results = await splitPdf(file.file, pageGroups);
+
+      // ⭐ Create individual split file items
+      const individualFiles: SplitFileItem[] = results.map((r, idx) => {
+        const url = URL.createObjectURL(r.blob);
+        return {
+          id: `split-${idx}-${Date.now()}`,
+          name: r.name,
+          size: formatBytes(r.blob.size),
+          blob: r.blob,
+          url,
+          pageCount: pageGroups[idx]?.length || 0,
+        };
+      });
+
+      setSplitFiles(individualFiles);
+
+      // Also set aggregated result (for backwards compat + main download button)
       let blobUrl: string;
       let filename: string;
       let fileSize: string;
       let isZip = false;
 
       if (results.length === 1) {
-        blobUrl = URL.createObjectURL(results[0].blob);
+        blobUrl = individualFiles[0].url;
         filename = results[0].name;
         fileSize = formatBytes(results[0].blob.size);
       } else {
@@ -276,9 +309,9 @@ export function useSplitPdf() {
     } finally {
       setIsProcessing(false);
     }
-  }, [file, getPageGroups, splitResult, toast]);
+  }, [file, getPageGroups, splitResult, splitFiles, toast]);
 
-  // 🆕 Download the prepared file
+  // 🆕 Download the prepared file (single file OR ZIP)
   const downloadSplitFile = useCallback(() => {
     if (!splitResult) return;
     downloadFile(splitResult.blobUrl, splitResult.filename);
@@ -291,13 +324,60 @@ export function useSplitPdf() {
     }
   }, [splitResult]);
 
+  // ⭐ NEW: Download individual split file by ID
+  const downloadSplitFileById = useCallback((fileId: string) => {
+    const f = splitFiles.find((sf) => sf.id === fileId);
+    if (!f) return;
+    downloadFile(f.url, f.name);
+  }, [splitFiles]);
+
+  // ⭐ NEW: Preview individual split file by ID
+  const previewSplitFileById = useCallback((fileId: string) => {
+    const f = splitFiles.find((sf) => sf.id === fileId);
+    if (f) window.open(f.url, '_blank');
+  }, [splitFiles]);
+
+  // ⭐ NEW: Download all as ZIP (or single file directly)
+  const downloadAllAsZip = useCallback(async () => {
+    if (splitFiles.length === 0) return;
+
+    // If only 1 file, download it directly (no ZIP needed)
+    if (splitFiles.length === 1) {
+      downloadSplitFileById(splitFiles[0].id);
+      return;
+    }
+
+    // Use existing splitResult ZIP (already created)
+    if (splitResult?.isZip) {
+      downloadFile(splitResult.blobUrl, splitResult.filename);
+      return;
+    }
+
+    // Fallback: Create ZIP on-the-fly
+    try {
+      const JSZip = (await import('jszip')).default;
+      const zip = new JSZip();
+      splitFiles.forEach((f) => {
+        zip.file(f.name, f.blob);
+      });
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipUrl = URL.createObjectURL(zipBlob);
+      const zipName = file?.name.replace(/\.pdf$/i, '-split.zip') || 'split.zip';
+      downloadFile(zipUrl, zipName);
+      setTimeout(() => URL.revokeObjectURL(zipUrl), 1000);
+    } catch (err) {
+      console.error('Failed to create ZIP:', err);
+      toast.error('Failed to create ZIP file');
+    }
+  }, [splitFiles, splitResult, file, downloadSplitFileById, toast]);
+
   // 🆕 Reset for re-splitting
   const resetSplit = useCallback(() => {
-    if (splitResult) {
-      URL.revokeObjectURL(splitResult.blobUrl);
-      setSplitResult(null);
-    }
-  }, [splitResult]);
+    if (splitResult) URL.revokeObjectURL(splitResult.blobUrl);
+    splitFiles.forEach((f) => URL.revokeObjectURL(f.url));
+    setSplitResult(null);
+    setSplitFiles([]);
+  }, [splitResult, splitFiles]);
 
   // ============ COMPUTED ============
   const pageGroups = getPageGroups();
@@ -307,34 +387,38 @@ export function useSplitPdf() {
   const canSplit = file !== null && pageGroups.length > 0 && !rangeError && !selectError && !isCalculatingSize;
 
   return {
-  // State
-  file, pages, mode, rangeInput,
-  extractMode, selectedPages, selectPagesInput, mergeExtracted,
-  maxSizeMB, sizeGroups, isCalculatingSize,
-  isLoadingPdf, loadProgress, isProcessing, errorMessage,
-  splitResult,
-  // Computed
-  pageGroups, outputCount, rangeError, selectError, canSplit,
-  // Setters
-  setMode, setRangeInput,
-  setExtractMode, setSelectPagesInput, setMergeExtracted,
-  setMaxSizeMB,
-  setErrorMessage,
-  // Actions
-  addPdf, clearFile,
-  splitAndPrepare,
-  downloadSplitFile,
-  previewSplitFile,
-  resetSplit,
-  togglePageSelection: handleTogglePage,
-  // Utilities
-  formatBytes,
-  // 🩹 Backward compat for desktop
-  splitAndDownload: async () => {
-    const url = await splitAndPrepare();
-    if (url) downloadSplitFile();
-  },
-};
+    // State
+    file, pages, mode, rangeInput,
+    extractMode, selectedPages, selectPagesInput, mergeExtracted,
+    maxSizeMB, sizeGroups, isCalculatingSize,
+    isLoadingPdf, loadProgress, isProcessing, errorMessage,
+    splitResult,
+    splitFiles,                // ⭐ NEW: Individual files
+    // Computed
+    pageGroups, outputCount, rangeError, selectError, canSplit,
+    // Setters
+    setMode, setRangeInput,
+    setExtractMode, setSelectPagesInput, setMergeExtracted,
+    setMaxSizeMB,
+    setErrorMessage,
+    // Actions
+    addPdf, clearFile,
+    splitAndPrepare,
+    downloadSplitFile,
+    previewSplitFile,
+    downloadSplitFileById,     // ⭐ NEW: Download specific file
+    previewSplitFileById,      // ⭐ NEW: Preview specific file
+    downloadAllAsZip,          // ⭐ NEW: Download all as ZIP
+    resetSplit,
+    togglePageSelection: handleTogglePage,
+    // Utilities
+    formatBytes,
+    // 🩹 Backward compat for desktop
+    splitAndDownload: async () => {
+      const url = await splitAndPrepare();
+      if (url) downloadSplitFile();
+    },
+  };
 }
 
 export type SplitPdfState = ReturnType<typeof useSplitPdf>;

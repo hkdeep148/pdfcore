@@ -1,57 +1,46 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import ToolBottomBar from '../../_components/ToolBottomBar';
 import ToolActionButton from '../../_components/ToolActionButton';
+import SuccessScreenV2 from '../../_components/SuccessScreen/SuccessScreenV2';
+import DesktopProcessingScreen from '../../_components/DesktopProcessingScreen';
 import { useRotatePdfContext } from '../_context/RotatePdfContext';
 import PdfPageCard from './PdfPageCard';
 import OptionsPanel from './OptionsPanel';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
+import { useToolLoadingScreen } from '../../_hooks/useToolLoadingScreen';
+import { buildRotatePdfV2Config } from '../../_config/successScreenConfigs';
 
 export default function DesktopView() {
-  const {
-    pages, selectedIds, isProcessing, isLoadingPdf, loadProgress,
-    errorMessage, setErrorMessage,
-    addPdfs, removePage, rotatePage, toggleSelect,
-    clearAll,
-    rotateAndPrepare,
-    rotatedPdfUrl,           // ⭐ ADDED (was downloadRotatedFile)
-    pdfFilename,             // ⭐ ADDED (for filename)
-  } = useRotatePdfContext();
+const {
+  pages, selectedIds, isProcessing, isLoadingPdf, loadProgress,
+  errorMessage, setErrorMessage,
+  addPdfs, removePage, rotatePage, toggleSelect,
+  clearAll,
+  rotateAndPrepare,
+  rotatedPdfUrl,
+  rotatedFiles,              // ⭐ NEW
+  downloadRotatedFileById,   // ⭐ NEW
+  previewRotatedFileById,    // ⭐ NEW
+  downloadAllAsZip,          // ⭐ NEW
+  rotatedCount,
+} = useRotatePdfContext();
 
   useToolFileReceiver((files: File[]) => addPdfs(files));
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ⭐ Auto-download flag
-  const shouldDownloadRef = useRef(false);
+  // ⭐ Done state
+  const isDone = rotatedFiles.length > 0 && !isProcessing;
 
-  // ⭐ Watch for rotatedPdfUrl → auto-download when ready
-  useEffect(() => {
-    if (rotatedPdfUrl && shouldDownloadRef.current) {
-      shouldDownloadRef.current = false;
-      console.log('⬇️ Auto-downloading rotated PDF');
+  // ⭐ Loading screen hook
+  const showLoading = useToolLoadingScreen(isProcessing, isDone, 1800);
 
-      const filename = `${pdfFilename || 'rotated'}.pdf`;
-
-      const link = document.createElement('a');
-      link.href = rotatedPdfUrl;
-      link.download = filename;
-      link.rel = 'noopener';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  }, [rotatedPdfUrl, pdfFilename]);
-
-  // ⭐ Desktop handler — trigger rotation, useEffect handles download
+  // ⭐ Trigger rotation (create only, no auto-download)
   const handleDesktopSave = async () => {
-    shouldDownloadRef.current = true;
-    const url = await rotateAndPrepare();
-    if (!url) {
-      shouldDownloadRef.current = false;
-    }
+    await rotateAndPrepare();
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,13 +56,78 @@ export default function DesktopView() {
   // ============ HELPER: Rotate Selected Pages ============
   const rotateSelectedPages = (direction: 'left' | 'right') => {
     if (selectedIds.size === 0) {
-      pages.forEach(page => rotatePage(page.id, direction));
+      pages.forEach((page) => rotatePage(page.id, direction));
     } else {
-      selectedIds.forEach(id => rotatePage(id, direction));
+      selectedIds.forEach((id) => rotatePage(id, direction));
     }
   };
 
-  // ============ BOTTOM TOOLBAR ============
+  // ⭐ Helper: Get rotation description
+  const getRotationDetails = (): string => {
+    const rotations = pages
+      .filter((p) => p.rotation !== 0)
+      .map((p) => p.rotation);
+
+    if (rotations.length === 0) return 'No rotation';
+
+    // Check if all rotations are the same
+    const uniqueRotations = [...new Set(rotations)];
+    if (uniqueRotations.length === 1) {
+      return `${uniqueRotations[0]}°`;
+    }
+
+    // Mixed rotations
+    return 'Mixed rotations';
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // 1️⃣ LOADING SCREEN
+  // ═══════════════════════════════════════════════════════════════
+  if (showLoading) {
+    return (
+      <DesktopProcessingScreen
+        title="Rotating your PDF"
+        subtitle={`Applying rotations to ${rotatedCount} ${rotatedCount === 1 ? 'page' : 'pages'}...`}
+        fileCount={1}
+        gradientFrom="#EC4899"
+        gradientTo="#F43F5E"
+        infoText="Your files are processed securely in your browser"
+        progressDuration={1.8}
+        icon={
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="23 4 23 10 17 10" />
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+          </svg>
+        }
+      />
+    );
+  }
+
+// ═══════════════════════════════════════════════════════════════
+// 2️⃣ SUCCESS SCREEN (V2 Design) — Multi-file support
+// ═══════════════════════════════════════════════════════════════
+if (isDone && rotatedFiles.length > 0) {
+  const config = buildRotatePdfV2Config({
+    files: rotatedFiles.map((f) => ({
+      id: f.id,
+      name: f.name,
+      size: f.size,
+      onDownload: () => downloadRotatedFileById(f.id),
+      onPreview: () => previewRotatedFileById(f.id),
+    })),
+    totalPages: pages.length,
+    rotatedPagesCount: rotatedCount,
+    rotationDetails: getRotationDetails(),
+    onDownloadAll: downloadAllAsZip,
+    onStartOver: clearAll,
+    onDelete: clearAll,
+  });
+
+  return <SuccessScreenV2 config={config} />;
+}
+  // ═══════════════════════════════════════════════════════════════
+  // 3️⃣ BOTTOM TOOLBAR
+  // ═══════════════════════════════════════════════════════════════
   const bottomBar = (
     <ToolBottomBar
       actions={[
@@ -130,7 +184,9 @@ export default function DesktopView() {
     />
   );
 
-  // ============ MAIN ACTION BUTTON ============
+  // ═══════════════════════════════════════════════════════════════
+  // 4️⃣ MAIN ACTION BUTTON
+  // ═══════════════════════════════════════════════════════════════
   const actionButton = (
     <ToolActionButton
       onClick={handleDesktopSave}
@@ -139,16 +195,18 @@ export default function DesktopView() {
       loadingLabel="Processing…"
       icon={
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
+          <polyline points="23 4 23 10 17 10" />
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
         </svg>
       }
-      label="Download PDF"
-      subtitle="Save rotated pages"
+      label="Apply Rotation"
+      subtitle="Rotate pages"
     />
   );
 
+  // ═══════════════════════════════════════════════════════════════
+  // 5️⃣ NORMAL TOOL SHELL (default view)
+  // ═══════════════════════════════════════════════════════════════
   return (
     <ToolShellDesktop
       title="Rotate PDF"
