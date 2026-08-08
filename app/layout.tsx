@@ -191,7 +191,7 @@ const organizationSchema = {
   '@type': 'Organization',
   name: 'PDF Core',
   url: 'https://pdfcore.online',
-  logo: 'https://pdfcore.online/favicon.ico',
+  logo: 'https://pdfcore.online/icon.png',
   description:
     'Free online PDF and image tools that respect your privacy. All processing happens in your browser.',
 };
