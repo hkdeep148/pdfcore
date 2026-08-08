@@ -1,5 +1,5 @@
 import type { OrganizePdfFile, OrganizePdfPage } from '../../_types';
-import { getPdfjs } from '../../_utils/pdf';
+import { renderPdfPreviews } from '../../_utils/pdf';
 
 // ============ LOAD PDF & GENERATE PREVIEWS ============
 
@@ -7,45 +7,28 @@ export async function loadPdfPages(file: File): Promise<{
   fileItem: OrganizePdfFile;
   pages: OrganizePdfPage[];
 }> {
-  const pdfjs = await getPdfjs();
-  const buffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: buffer }).promise;
+  const rendered = await renderPdfPreviews(file, { previewQuality: 0.8 });
 
   const pdfId = `${file.name}-${file.size}-${Date.now()}-${Math.random()}`;
+
   const fileItem: OrganizePdfFile = {
     id: pdfId,
     file,
     name: file.name,
-    totalPages: pdf.numPages,
+    totalPages: rendered.numPages,
   };
 
-  const pages: OrganizePdfPage[] = [];
-
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 0.5 });
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Canvas not supported');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    await page.render({ canvasContext: ctx, viewport, canvas }).promise;
-    const preview = canvas.toDataURL('image/jpeg', 0.8);
-
-    pages.push({
-      id: `${pdfId}-page-${i}-${Math.random()}`,
-      pdfId,
-      pdfName: file.name,
-      originalPageIndex: i - 1,
-      originalRotation: page.rotate,
-      userRotation: 0,
-      preview,
-      width: viewport.width,
-      height: viewport.height,
-    });
-  }
+  const pages: OrganizePdfPage[] = rendered.pages.map((p) => ({
+    id: `${pdfId}-page-${p.pageIndex + 1}-${Math.random()}`,
+    pdfId,
+    pdfName: file.name,
+    originalPageIndex: p.pageIndex,
+    originalRotation: p.originalRotation,
+    userRotation: 0,
+    preview: p.preview,
+    width: p.width,
+    height: p.height,
+  }));
 
   return { fileItem, pages };
 }

@@ -4,7 +4,7 @@ import type {
   ImageFormat,
   ImageResolution,
 } from '../../_types';
-import { getPdfjs } from '../../_utils/pdf';
+import { getPdfjs, renderPdfPreviews } from '../../_utils/pdf';
 
 
 // ============ CONSTANTS ============
@@ -35,43 +35,26 @@ export async function loadPdfPages(file: File): Promise<{
   fileItem: PdfImageFile;
   pages: PdfImagePage[];
 }> {
-  const pdfjs = await getPdfjs();
-  const buffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: buffer }).promise;
+  const rendered = await renderPdfPreviews(file, { previewQuality: 0.75 });
 
   const pdfId = `${file.name}-${file.size}-${Date.now()}`;
+
   const fileItem: PdfImageFile = {
     id: pdfId,
     file,
     name: file.name,
-    totalPages: pdf.numPages,
+    totalPages: rendered.numPages,
   };
 
-  const pages: PdfImagePage[] = [];
-
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 0.5 });
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Canvas not supported');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    await page.render({ canvasContext: ctx, viewport, canvas }).promise;
-    const preview = canvas.toDataURL('image/jpeg', 0.75);
-
-    pages.push({
-      id: `${pdfId}-page-${i}`,
-      pdfId,
-      pdfName: file.name,
-      pageIndex: i - 1,
-      preview,
-      width: viewport.width,
-      height: viewport.height,
-    });
-  }
+  const pages: PdfImagePage[] = rendered.pages.map((p) => ({
+    id: `${pdfId}-page-${p.pageIndex + 1}`,
+    pdfId,
+    pdfName: file.name,
+    pageIndex: p.pageIndex,
+    preview: p.preview,
+    width: p.width,
+    height: p.height,
+  }));
 
   return { fileItem, pages };
 }

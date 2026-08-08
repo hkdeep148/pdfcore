@@ -1,5 +1,5 @@
 import type { PdfFileItem, PdfPageItem, RotationAngle } from '../../_types';
-import { getPdfjs } from '../../_utils/pdf';
+import { renderPdfPreviews } from '../../_utils/pdf';
 
 
 // ============ LOAD PDF & GENERATE PREVIEWS ============
@@ -8,47 +8,29 @@ export async function loadPdfPages(file: File): Promise<{
   fileItem: PdfFileItem;
   pages: PdfPageItem[];
 }> {
-  const pdfjs = await getPdfjs();
-  const buffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: buffer }).promise;
+  const rendered = await renderPdfPreviews(file, { previewQuality: 0.8 });
 
   const pdfId = `${file.name}-${file.size}-${Date.now()}`;
+
   const fileItem: PdfFileItem = {
     id: pdfId,
     file,
     name: file.name,
     sizeMB: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-    totalPages: pdf.numPages,
+    totalPages: rendered.numPages,
   };
 
-  const pages: PdfPageItem[] = [];
-
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 0.5 }); // small preview
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Canvas not supported');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-
-    await page.render({ canvasContext: ctx, viewport, canvas }).promise;
-
-    const preview = canvas.toDataURL('image/jpeg', 0.8);
-
-    pages.push({
-      id: `${pdfId}-page-${i}`,
-      fileId: pdfId,      // ⭐ ADDED: Required by PdfPageItem type
-      pdfId,              // ⭐ Kept for backwards compatibility
-      pageIndex: i - 1,
-      preview,
-      rotation: 0,
-      originalRotation: page.rotate,
-      width: viewport.width,
-      height: viewport.height,
-    });
-  }
+  const pages: PdfPageItem[] = rendered.pages.map((p) => ({
+    id: `${pdfId}-page-${p.pageIndex + 1}`,
+    fileId: pdfId,
+    pdfId,
+    pageIndex: p.pageIndex,
+    preview: p.preview,
+    rotation: 0,
+    originalRotation: p.originalRotation,
+    width: p.width,
+    height: p.height,
+  }));
 
   return { fileItem, pages };
 }
