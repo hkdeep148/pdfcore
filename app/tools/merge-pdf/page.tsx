@@ -87,13 +87,6 @@ const webApplicationSchema = {
     'Files never uploaded to server',
     'Works on mobile and desktop',
   ],
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.9',
-    ratingCount: '487',
-    bestRating: '5',
-    worstRating: '1',
-  },
 };
 
 const howToSchema = {

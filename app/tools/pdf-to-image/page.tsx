@@ -96,13 +96,6 @@ const webApplicationSchema = {
     'No watermarks added',
     '100% browser-based processing',
   ],
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.8',
-    ratingCount: '412',
-    bestRating: '5',
-    worstRating: '1',
-  },
 };
 
 const howToSchema = {
@@ -199,7 +192,7 @@ const faqSchema = {
       name: 'Can I convert PDF to image on my phone?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works perfectly on iPhone, Android, iPad, and any modern mobile browser. Convert PDFs to images directly on your phone without uploading to any server.',
+        text: 'Yes! PDF Core works on iPhone, Android, iPad, and any modern mobile browser. Convert PDFs to images directly on your phone without uploading to any server.',
       },
     },
     {
@@ -207,7 +200,7 @@ const faqSchema = {
       name: 'What is the maximum PDF file size I can convert?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No file size limits. Unlike iLovePDF or Smallpdf which cap free users at 100MB, PDF Core has no restrictions because everything runs in your browser. Convert PDFs of any size your device can handle.',
+        text: 'No file size limits from us. Unlike some competitors that cap free users, PDF Core has no restrictions because everything runs in your browser. Convert PDFs of any size your device can handle.',
       },
     },
     {

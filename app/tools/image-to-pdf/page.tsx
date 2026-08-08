@@ -100,13 +100,6 @@ const webApplicationSchema = {
     'No watermarks added',
     '100% browser-based processing',
   ],
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.9',
-    ratingCount: '621',
-    bestRating: '5',
-    worstRating: '1',
-  },
 };
 
 const howToSchema = {

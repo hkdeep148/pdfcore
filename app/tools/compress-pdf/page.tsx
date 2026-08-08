@@ -83,13 +83,6 @@ const webApplicationSchema = {
     'Works on mobile and desktop',
     'Multiple quality presets',
   ],
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.8',
-    ratingCount: '342',
-    bestRating: '5',
-    worstRating: '1',
-  },
 };
 
 const howToSchema = {
