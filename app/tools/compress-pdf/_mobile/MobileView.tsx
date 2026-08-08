@@ -7,7 +7,7 @@ import MobileToolHeader from '../../_components/MobileToolHeader';
 import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import { getToolByPath } from '../../_config/tools';
 import { useCompressPdfContext } from '../_context/CompressPdfContext';
-import { formatBytes } from '../_utils/pdfCompressor';
+import { formatBytes } from '../../_utils/browser';
 import PdfList from './PdfList';
 import BottomToolbar from './BottomToolbar';
 

@@ -4,18 +4,8 @@ import type {
   ImageFormat,
   ImageResolution,
 } from '../../_types';
+import { getPdfjs } from '../../_utils/pdf';
 
-// ============ PDF.JS SETUP ============
-
-let pdfjsLib: typeof import('pdfjs-dist') | null = null;
-
-async function getPdfjs() {
-  if (pdfjsLib) return pdfjsLib;
-  const lib = await import('pdfjs-dist');
-  lib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${lib.version}/pdf.worker.min.mjs`;
-  pdfjsLib = lib;
-  return lib;
-}
 
 // ============ CONSTANTS ============
 

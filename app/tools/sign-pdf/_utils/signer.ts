@@ -1,4 +1,5 @@
 import type { SignPdfFile, SignPdfPage, PlacedSignature, Signature } from '../../_types';
+import { getPdfjs } from '../../_utils/pdf';
 
 // ============ BLUE INK COLORS (Realistic Pen Colors) ============
 
@@ -21,18 +22,6 @@ export const SIGNATURE_FONTS = [
   { name: 'Sacramento', family: '"Sacramento", cursive' },
   { name: 'Allura', family: '"Allura", cursive' },
 ];
-
-// ============ PDF.JS SETUP ============
-
-let pdfjsLib: typeof import('pdfjs-dist') | null = null;
-
-async function getPdfjs() {
-  if (pdfjsLib) return pdfjsLib;
-  const lib = await import('pdfjs-dist');
-  lib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${lib.version}/pdf.worker.min.mjs`;
-  pdfjsLib = lib;
-  return lib;
-}
 
 // ============ LOAD PDF WITH ALL PAGES ============
 

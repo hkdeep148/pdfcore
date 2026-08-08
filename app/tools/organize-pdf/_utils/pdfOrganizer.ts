@@ -1,16 +1,5 @@
 import type { OrganizePdfFile, OrganizePdfPage } from '../../_types';
-
-// ============ PDF.JS SETUP ============
-
-let pdfjsLib: typeof import('pdfjs-dist') | null = null;
-
-async function getPdfjs() {
-  if (pdfjsLib) return pdfjsLib;
-  const lib = await import('pdfjs-dist');
-  lib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${lib.version}/pdf.worker.min.mjs`;
-  pdfjsLib = lib;
-  return lib;
-}
+import { getPdfjs } from '../../_utils/pdf';
 
 // ============ LOAD PDF & GENERATE PREVIEWS ============
 

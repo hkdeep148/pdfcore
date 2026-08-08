@@ -12,9 +12,9 @@ import { getToolByPath } from '../../_config/tools';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 import {
   useCompressImageContext,
-  formatBytes,
   type FileStatus,
 } from '../_context/CompressImageContext';
+import { formatBytes } from '../../_utils/browser';
 import { Upload, X, Trash2 } from 'lucide-react';
 
 import MobileSettingsSheet from './MobileSettingsSheet';

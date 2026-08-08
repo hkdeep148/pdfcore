@@ -38,11 +38,12 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 
 /**
  * Format file size to human-readable string.
- * Example: 1048576 → "1.00 MB"
+ * Examples: 850 → "850 B", 1500 → "1.5 KB", 1500000 → "1.4 MB"
  */
-export function formatFileSize(bytes: number): string {
+export function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${units[i]}`;
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / Math.pow(k, i)).toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
 }

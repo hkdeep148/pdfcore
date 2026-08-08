@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import ToolShellDesktop from '../../_components/ToolShellDesktop';
 import ToolBottomBar from '../../_components/ToolBottomBar';
 import ToolActionButton from '../../_components/ToolActionButton';
@@ -8,21 +9,16 @@ import PageGrid from '../../_components/PageGrid';
 import AddMoreCard from '../../_components/AddMoreCard';
 import SuccessScreenV2 from '../../_components/SuccessScreen/SuccessScreenV2';
 import DesktopProcessingScreen from '../../_components/DesktopProcessingScreen';
+import ImagePreviewModal from '../_components/ImagePreviewModal';
 import { useImageToPdfContext } from '../_context/ImageToPdfContext';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 import { useToolLoadingScreen } from '../../_hooks/useToolLoadingScreen';
 import { buildImageToPdfV2Config } from '../../_config/successScreenConfigs';
 import type { ImageItem } from '../../_types';
+import { formatBytes } from '../../_utils/browser';
 import PageCard from './PageCard';
 import OptionsPanel from './OptionsPanel';
 
-// ⭐ Helper: format bytes to readable size
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return '—';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-}
 
 export default function DesktopView() {
   const {
@@ -36,7 +32,17 @@ export default function DesktopView() {
     selectedId, setSelectedId,
   } = useImageToPdfContext();
 
+  const [previewState, setPreviewState] = useState<{ isOpen: boolean; imageUrl: string; imageName: string }>({
+    isOpen: false,
+    imageUrl: '',
+    imageName: '',
+  });
+
   useToolFileReceiver((files: File[]) => addImages(files));
+
+  const handlePreviewImage = (imageUrl: string, imageName: string) => {
+    setPreviewState({ isOpen: true, imageUrl, imageName });
+  };
 
   // ⭐ Done state
   const isDone = !!pdfBlob && !isConverting;
@@ -181,6 +187,7 @@ if (isDone && pdfBlob) {
 
   // ═══════════ Otherwise show normal tool shell ═══════════
   return (
+    <>
     <ToolShellDesktop
       title="Image to PDF"
       subtitle="Convert images to PDF. Drag to reorder."
@@ -235,10 +242,19 @@ if (isDone && pdfBlob) {
               isSelected={selectedId === item.id}
               onSelect={setSelectedId}
               onRemove={removeImage}
+              onPreview={handlePreviewImage}
             />
           )}
         </PageGrid>
       )}
     </ToolShellDesktop>
+
+    <ImagePreviewModal
+      isOpen={previewState.isOpen}
+      imageUrl={previewState.imageUrl}
+      imageName={previewState.imageName}
+      onClose={() => setPreviewState(prev => ({ ...prev, isOpen: false }))}
+    />
+    </>
   );
 }

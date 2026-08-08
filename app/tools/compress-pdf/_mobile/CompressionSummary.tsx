@@ -1,7 +1,7 @@
 'use client';
 
 import { useCompressPdfContext } from '../_context/CompressPdfContext';
-import { formatBytes } from '../_utils/pdfCompressor';
+import { formatBytes } from '../../_utils/browser';
 
 export default function CompressionSummary() {
   const {

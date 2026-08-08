@@ -1,17 +1,6 @@
 import type { PdfFileItem, PdfPageItem, RotationAngle } from '../../_types';
+import { getPdfjs } from '../../_utils/pdf';
 
-// ============ PDF.JS WORKER SETUP ============
-
-let pdfjsLib: typeof import('pdfjs-dist') | null = null;
-
-async function getPdfjs() {
-  if (pdfjsLib) return pdfjsLib;
-  const lib = await import('pdfjs-dist');
-  // Use the CDN-hosted worker
-  lib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${lib.version}/pdf.worker.min.mjs`;
-  pdfjsLib = lib;
-  return lib;
-}
 
 // ============ LOAD PDF & GENERATE PREVIEWS ============
 

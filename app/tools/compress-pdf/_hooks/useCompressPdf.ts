@@ -2,8 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import type { CompressPdfItem, CompressionLevel } from '../../_types';
-import { compressPdf, formatBytes, calculateSavings } from '../_utils/pdfCompressor';
-import { downloadFile } from '../../_utils/browser';
+import { compressPdf, calculateSavings } from '../_utils/pdfCompressor';
+import { downloadFile, formatBytes } from '../../_utils/browser';
 import { useToast } from '../../_components/ToastProvider';
 
 export function useCompressPdf() {

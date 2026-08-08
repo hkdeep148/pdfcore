@@ -2,8 +2,16 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import type { ImageItem, PageFit, PageBackground } from '../../_types';
+import type { ImageItem, PageFit, PageBackground, PageSize, Orientation } from '../../_types';
 import { PAGE_BACKGROUND_HEX } from '../_utils/pdfGenerator';
+
+const PAGE_ASPECT_RATIOS: Record<PageSize, number> = {
+  A4: 595.28 / 841.89,
+  A3: 841.89 / 1190.55,
+  A5: 419.53 / 595.28,
+  Letter: 612 / 792,
+  Legal: 612 / 1008,
+};
 
 interface PageCardProps {
   item: ImageItem;
@@ -15,11 +23,12 @@ interface PageCardProps {
   isSelected: boolean;
   onSelect: (id: string) => void;
   onRemove: (id: string) => void;
+  onPreview?: (imageUrl: string, imageName: string) => void;
 }
 
 export default function PageCard({
   item, index, ratio, marginPercent, pageFit, background,
-  isSelected, onSelect, onRemove,
+  isSelected, onSelect, onRemove, onPreview,
 }: PageCardProps) {
   const {
     attributes,
@@ -29,6 +38,14 @@ export default function PageCard({
     transition,
     isDragging,
   } = useSortable({ id: item.id });
+
+  // Calculate preview ratio based on per-image orientation if set
+  const previewRatio = item.orientation && item.pageSize
+    ? (() => {
+      const baseRatio = PAGE_ASPECT_RATIOS[item.pageSize];
+      return item.orientation === 'Portrait' ? baseRatio : 1 / baseRatio;
+    })()
+    : ratio;
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -105,7 +122,7 @@ export default function PageCard({
           className={`relative w-full mx-auto border border-[#E2E2EE] shadow-sm overflow-hidden ${
             bgHex === '#000000' ? 'bg-black' : bgHex === '#FFFFFF' ? 'bg-white' : pageBgClass
           }`}
-          style={{ aspectRatio: ratio }}
+          style={{ aspectRatio: previewRatio }}
         >
           {/* Content area with margins */}
           <div
@@ -121,7 +138,11 @@ export default function PageCard({
               src={item.preview}
               alt={item.file.name}
               draggable={false}
-              className="transition-transform duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPreview?.(item.preview, item.file.name);
+              }}
+              className="transition-transform duration-200 cursor-pointer hover:opacity-90"
               style={{
                 width: pageFit === 'Fill page' ? '100%' : 'auto',
                 height: pageFit === 'Fill page' ? '100%' : 'auto',

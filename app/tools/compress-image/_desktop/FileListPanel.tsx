@@ -2,7 +2,8 @@
 
 import { AlertCircle, X, FileImage } from 'lucide-react';
 import { useCompressImageContext } from '../_context/CompressImageContext';
-import { formatBytes, type FileStatus } from '../_context/CompressImageContext';
+import { type FileStatus } from '../_context/CompressImageContext';
+import { formatBytes } from '../../_utils/browser';
 import FileCard from './FileCard';
 
 interface FileListPanelProps {

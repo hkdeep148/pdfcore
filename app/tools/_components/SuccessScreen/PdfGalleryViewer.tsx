@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Download, Maximize2, ZoomIn, ZoomOut, FileText } from 'lucide-react';
+import { getPdfjs } from '../../_utils/pdf';
 
 interface Props {
   isOpen: boolean;
@@ -52,14 +53,7 @@ export default function PdfGalleryViewer({
       setIsLoading(true);
 
       try {
-        const pdfjs = await import('pdfjs-dist');
-
-        if (typeof window !== 'undefined') {
-          pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-            'pdfjs-dist/build/pdf.worker.min.mjs',
-            import.meta.url
-          ).toString();
-        }
+        const pdfjs = await getPdfjs();
 
         let data: ArrayBuffer;
         if (blob) {

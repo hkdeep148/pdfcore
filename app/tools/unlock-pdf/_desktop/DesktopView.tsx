@@ -10,6 +10,7 @@ import PasswordCard from './PasswordCard';
 import AddMorePdfRow from './AddMorePdfRow';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 import { buildUnlockPdfV2Config } from '../../_config/successScreenConfigs';
+import { formatBytes } from '../../_utils/browser';
 
 export default function DesktopView() {
   const {
@@ -29,14 +30,6 @@ export default function DesktopView() {
     } else {
       downloadAll();
     }
-  };
-
-  // ⭐ Helper: format bytes
-  const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return '—';
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
   // ═══════════════════════════════════════════════════════════════

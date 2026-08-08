@@ -13,7 +13,7 @@ export default function ToolShellMobile({
 }: ToolShellMobileProps) {
   return (
     <div
-      className={`lg:hidden flex flex-col bg-[#F5F5FA] w-full ${
+      className={`lg:hidden flex flex-col bg-[#F5F5FA] w-full pt-[64px] ${
         fixedHeight
           ? 'h-full min-h-0 overflow-hidden'
           : 'min-h-full'

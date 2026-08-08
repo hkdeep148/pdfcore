@@ -121,7 +121,7 @@ export default function MobileSuccessScreen({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-[#FAFBFC]">
+    <div className="fixed inset-0 z-[100] flex flex-col bg-[#FAFBFC] top-[64px]">
 
 {/* ═══════════ HEADER BAR (always visible) ═══════════ */}
 <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100 shrink-0">

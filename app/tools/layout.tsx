@@ -14,7 +14,7 @@ export default function ToolsLayout({
 
   const isToolsIndexPage = pathname === '/tools' || pathname === '/tools/';
 
-  // Tools index page — keep LandingNavbar for consistency
+  // Tools index page
   if (isToolsIndexPage) {
     return (
       <ToastProvider>
@@ -27,15 +27,18 @@ export default function ToolsLayout({
     );
   }
 
-  // Individual tool pages — desktop uses its own sidebar, mobile keeps LandingNavbar
+  // Individual tool pages
   return (
     <ToastProvider>
       <div className="min-h-screen bg-[#F8FAFC] font-['Inter',sans-serif]">
-        {/* Only show LandingNavbar on mobile — desktop uses DesktopSidebar */}
-        <div className="lg:hidden">
-          <LandingNavbar />
-        </div>
-        <div className="h-[calc(100dvh-73px)] lg:h-screen flex flex-col">
+        {/*
+          LandingNavbar handles its own responsive logic:
+          - Desktop: original navbar
+          - Mobile: floating tool navbar
+        */}
+        <LandingNavbar />
+
+        <div className="flex flex-col">
           {children}
         </div>
       </div>

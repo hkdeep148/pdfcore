@@ -355,3 +355,43 @@ export async function generatePdf(options: GeneratePdfOptions): Promise<string> 
   const blob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' });
   return URL.createObjectURL(blob);
 }
+
+// ═══════════════════════════════════════════════════════════════
+// SEPARATE PDFs — one PDF per image, returned as array
+// ═══════════════════════════════════════════════════════════════
+
+export interface SeparatePdfResult {
+  blob: Blob;
+  name: string;   // e.g. "photo1.pdf"
+}
+
+export async function generateSeparatePdfs(
+  options: GeneratePdfOptions
+): Promise<SeparatePdfResult[]> {
+  const results: SeparatePdfResult[] = [];
+
+  for (let i = 0; i < options.images.length; i++) {
+    const singleImage = options.images[i];
+
+    // Generate a PDF containing just this one image
+    const url = await generatePdf({
+      ...options,
+      images: [singleImage],
+    });
+
+    // Convert the blob URL back to a Blob
+    const res = await fetch(url);
+    const blob = await res.blob();
+    URL.revokeObjectURL(url);
+
+    // Derive filename from original image name
+    const originalName = singleImage.file.name.replace(/\.[^/.]+$/, ''); // strip extension
+    const safeName = originalName.replace(/[^\w\-. ]+/g, '_') || `image_${i + 1}`;
+    results.push({
+      blob,
+      name: `${safeName}.pdf`,
+    });
+  }
+
+  return results;
+}

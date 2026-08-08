@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import type { MergePdfItem } from '../../_types';
 import { loadPdfInfo, mergePdfs } from '../_utils/pdfMerger';
-import { downloadFile } from '../../_utils/browser';
+import { downloadFile, formatBytes } from '../../_utils/browser';
 import { useToast } from '../../_components/ToastProvider';
 
 export interface MergeResult {
@@ -28,13 +28,6 @@ export function useMergePdf() {
 
   // Merge result state
   const [mergeResult, setMergeResult] = useState<MergeResult | null>(null);
-
-  const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${units[i]}`;
-  };
 
   // ============ ACTIONS ============
   const addPdfs = useCallback(async (newFiles: File[]) => {

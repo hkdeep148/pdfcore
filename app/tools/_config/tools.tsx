@@ -315,5 +315,7 @@ export const categoryLabels: Record<string, string> = {
 
 // ============ HELPERS ============
 export function getToolByPath(pathname: string): (typeof tools)[0] | undefined {
-  return tools.find((t) => t.href === pathname);
+  // Normalize pathname by removing trailing slash for comparison
+  const normalizedPathname = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+  return tools.find((t) => t.href === normalizedPathname);
 }

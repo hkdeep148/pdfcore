@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, Eye, Download, X } from 'lucide-react';
-import { formatBytes, type FileStatus } from '../_context/CompressImageContext';
+import { type FileStatus } from '../_context/CompressImageContext';
+import { formatBytes } from '../../_utils/browser';
 
 interface MobileFileCardProps {
   file: FileStatus;

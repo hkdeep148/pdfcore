@@ -8,10 +8,9 @@ import {
   splitPdf,
   downloadAsZip,
   calculateSizeBasedGroups,
-  formatBytes,
   mbToBytes,
 } from '../_utils/pdfSplitter';
-import { downloadFile } from '../../_utils/browser';
+import { downloadFile, formatBytes } from '../../_utils/browser';
 import { useToast } from '../../_components/ToastProvider';
 
 // ⭐ Individual split file (for success screen list)

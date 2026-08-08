@@ -11,9 +11,9 @@ import SuccessScreenV2 from '../../_components/SuccessScreen/SuccessScreenV2';
 import DesktopLoadingScreen from '../../_components/DesktopLoadingScreen';
 import DesktopProcessingScreen from '../../_components/DesktopProcessingScreen';
 import { useToolLoadingScreen } from '../../_hooks/useToolLoadingScreen';
+import { formatBytes } from '../../_utils/browser';
 import {
   useCompressImageContext,
-  formatBytes,
   type FileStatus,
 } from '../_context/CompressImageContext';
 import { buildCompressImageV2Config } from '../../_config/successScreenConfigs';

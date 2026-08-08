@@ -13,6 +13,7 @@ import type {
 } from '../../_types';
 import {
   generatePdf,
+  generateSeparatePdfs,
   PAGE_ASPECT_RATIOS,
   MARGIN_PREVIEW_PERCENT,
 } from '../_utils/pdfGenerator';
@@ -41,7 +42,10 @@ export function useImageToPdf() {
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // ⭐ NEW: PDF blob for success screen (separate from URL because we need Blob type)
+  // ⭐ Separate PDFs mode
+  const [createSeparate, setCreateSeparate] = useState(false);
+  const [isZip, setIsZip] = useState(false); // whether last output was a zip
+
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
 
   // ============ COMPUTED ============
@@ -143,8 +147,8 @@ export function useImageToPdf() {
     setLastPdfUrl(null);
     setLastPdfSize(null);
     setErrorMessage(null);
-    // ⭐ NEW: Reset PDF blob too
     setPdfBlob(null);
+    setIsZip(false);
   }, [images, lastPdfUrl]);
 
   const reorderImages = useCallback((newOrder: ImageItem[]) => {
@@ -152,7 +156,13 @@ export function useImageToPdf() {
     setIsReady(false);
   }, []);
 
-  const createPdf = useCallback(async (): Promise<string | null> => {
+  // ⭐ Reset ready state when toggling mode
+  useEffect(() => {
+    setIsReady(false);
+  }, [createSeparate]);
+
+  // ═════════ SINGLE PDF ═════════
+  const createSinglePdf = useCallback(async (): Promise<string | null> => {
     if (images.length === 0) return null;
     setIsConverting(true);
     setErrorMessage(null);
@@ -169,20 +179,15 @@ export function useImageToPdf() {
       });
       if (lastPdfUrl) URL.revokeObjectURL(lastPdfUrl);
       setLastPdfUrl(url);
+      setIsZip(false);
 
-      // Fetch size for display
       try {
         const res = await fetch(url);
         const blob = await res.blob();
-
-        // ⭐ NEW: Store blob for success screen
         setPdfBlob(blob);
-
         const sizeKB = blob.size / 1024;
         setLastPdfSize(
-          sizeKB > 1024
-            ? `${(sizeKB / 1024).toFixed(2)} MB`
-            : `${Math.round(sizeKB)} KB`
+          sizeKB > 1024 ? `${(sizeKB / 1024).toFixed(2)} MB` : `${Math.round(sizeKB)} KB`
         );
       } catch {
         setLastPdfSize(null);
@@ -200,17 +205,91 @@ export function useImageToPdf() {
     }
   }, [images, pageSize, orientation, pageFit, margins, alignment, pageBackground, quality, lastPdfUrl, toast]);
 
+  // ═════════ SEPARATE PDFs → ZIP ═════════
+  const createZip = useCallback(async (): Promise<string | null> => {
+    if (images.length === 0) return null;
+    setIsConverting(true);
+    setErrorMessage(null);
+    try {
+      const [{ default: JSZip }, results] = await Promise.all([
+        import('jszip'),
+        generateSeparatePdfs({
+          images,
+          pageSize,
+          orientation,
+          pageFit,
+          margins,
+          alignment,
+          background: pageBackground,
+          quality,
+        }),
+      ]);
+
+      const zip = new JSZip();
+
+      // Handle duplicate filenames by appending index
+      const usedNames = new Set<string>();
+      results.forEach((result, idx) => {
+        let finalName = result.name;
+        if (usedNames.has(finalName)) {
+          const base = finalName.replace(/\.pdf$/i, '');
+          finalName = `${base}_${idx + 1}.pdf`;
+        }
+        usedNames.add(finalName);
+        zip.file(finalName, result.blob);
+      });
+
+      const zipBlob = await zip.generateAsync({
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: { level: 6 },
+      });
+
+      if (lastPdfUrl) URL.revokeObjectURL(lastPdfUrl);
+      const url = URL.createObjectURL(zipBlob);
+      setLastPdfUrl(url);
+      setPdfBlob(zipBlob);
+      setIsZip(true);
+
+      const sizeKB = zipBlob.size / 1024;
+      setLastPdfSize(
+        sizeKB > 1024 ? `${(sizeKB / 1024).toFixed(2)} MB` : `${Math.round(sizeKB)} KB`
+      );
+
+      setIsReady(true);
+      return url;
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('Something went wrong. Please try again.');
+      toast.error('Failed to create ZIP');
+      return null;
+    } finally {
+      setIsConverting(false);
+    }
+  }, [images, pageSize, orientation, pageFit, margins, alignment, pageBackground, quality, lastPdfUrl, toast]);
+
+  // ⭐ Unified entry point — routes based on toggle
+  const createPdf = useCallback(async (): Promise<string | null> => {
+    return createSeparate ? createZip() : createSinglePdf();
+  }, [createSeparate, createZip, createSinglePdf]);
+
   const downloadPdf = useCallback(async () => {
     const url = lastPdfUrl && isReady ? lastPdfUrl : await createPdf();
-    if (url) {
-      downloadFile(url, `${pdfFilename || 'document'}.pdf`);
-    }
-  }, [lastPdfUrl, isReady, pdfFilename, createPdf]);
+    if (!url) return;
+    const filename = isZip
+      ? `${pdfFilename || 'documents'}.zip`
+      : `${pdfFilename || 'document'}.pdf`;
+    downloadFile(url, filename);
+  }, [lastPdfUrl, isReady, isZip, pdfFilename, createPdf]);
 
   const previewPdf = useCallback(async () => {
+    if (isZip) {
+      // ZIPs can't be previewed — download instead
+      return downloadPdf();
+    }
     const url = lastPdfUrl && isReady ? lastPdfUrl : await createPdf();
     if (url) window.open(url, '_blank');
-  }, [lastPdfUrl, isReady, createPdf]);
+  }, [lastPdfUrl, isReady, isZip, createPdf, downloadPdf]);
 
   return {
     // State
@@ -229,6 +308,10 @@ export function useImageToPdf() {
     selectedId,
     lastPdfUrl,
     lastPdfSize,
+    // ⭐ Separate PDFs
+    createSeparate,
+    setCreateSeparate,
+    isZip,
     // Computed
     currentPageRatio,
     marginPercent,
@@ -254,10 +337,12 @@ export function useImageToPdf() {
     downloadPdf,
     previewPdf,
 
-    // ⭐ NEW: For success screen
+    // Success screen
     pdfBlob,
-    pdfUrl: lastPdfUrl,                   // Alias for consistency
-    pdfName: `${pdfFilename || 'document'}.pdf`,
+    pdfUrl: lastPdfUrl,
+    pdfName: isZip
+      ? `${pdfFilename || 'documents'}.zip`
+      : `${pdfFilename || 'document'}.pdf`,
     pdfSize: pdfBlob?.size || 0,
     pageCount: images.length,
   };

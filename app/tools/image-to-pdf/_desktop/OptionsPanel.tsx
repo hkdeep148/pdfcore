@@ -8,6 +8,7 @@ import { PAGE_SIZE_LABELS, FIT_LABELS } from '../_utils/pdfGenerator';
 
 export default function OptionsPanel() {
   const {
+    images,
     pdfFilename, setPdfFilename,
     pageSize, setPageSize,
     orientation, setOrientation,
@@ -15,6 +16,7 @@ export default function OptionsPanel() {
     pageFit, setPageFit,
     quality, setQuality,
     setErrorMessage,
+    updateImageSize,
   } = useImageToPdfContext();
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -23,6 +25,13 @@ export default function OptionsPanel() {
   const handleChange = <T,>(setter: (v: T) => void) => (v: T) => {
     setter(v);
     setErrorMessage(null);
+  };
+
+  const handleAutoDetectOrientation = () => {
+    images.forEach(img => {
+      const autoOrientation = img.width > img.height ? 'Landscape' : 'Portrait';
+      updateImageSize(img.id, pageSize, autoOrientation);
+    });
   };
 
   return (
@@ -104,6 +113,17 @@ export default function OptionsPanel() {
             Landscape
           </button>
         </div>
+        <button
+          type="button"
+          onClick={handleAutoDetectOrientation}
+          disabled={images.length === 0}
+          className="w-full mt-2.5 flex items-center justify-center gap-2 py-2.5 rounded-lg border border-[#C9D8F3] bg-[#F5F8FF] text-[#2563EB] text-[12px] font-semibold hover:bg-[#EFF3FF] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 12h18m-9-9v18" />
+          </svg>
+          Auto detect
+        </button>
       </PanelSection>
 
       {/* Margins */}

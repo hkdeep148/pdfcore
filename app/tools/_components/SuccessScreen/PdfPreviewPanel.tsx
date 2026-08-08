@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Maximize2, FileText, Edit3 } from 'lucide-react';
+import { getPdfjs } from '../../_utils/pdf';
 
 interface PdfPreviewPanelProps {
   blob?: Blob | null;
@@ -45,14 +46,7 @@ export default function PdfPreviewPanel({
       setError(null);
 
       try {
-        const pdfjs = await import('pdfjs-dist');
-
-        if (typeof window !== 'undefined') {
-          pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-            'pdfjs-dist/build/pdf.worker.min.mjs',
-            import.meta.url
-          ).toString();
-        }
+        const pdfjs = await getPdfjs();
 
         let data: ArrayBuffer;
         if (blob) {

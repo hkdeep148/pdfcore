@@ -11,7 +11,7 @@ import DesktopProcessingScreen from '../../_components/DesktopProcessingScreen';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
 import { useToolLoadingScreen } from '../../_hooks/useToolLoadingScreen';
 import { useCompressPdfContext } from '../_context/CompressPdfContext';
-import { formatBytes } from '../_utils/pdfCompressor';
+import { formatBytes } from '../../_utils/browser';
 import PdfCard from './PdfCard';
 import OptionsPanel from './OptionsPanel';
 import { buildCompressPdfV2Config } from '../../_config/successScreenConfigs';  // ⭐ NEW

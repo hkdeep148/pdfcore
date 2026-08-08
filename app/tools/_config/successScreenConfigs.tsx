@@ -16,6 +16,7 @@ import {
   Minimize2,
   AlertCircle,
 } from 'lucide-react';
+import { formatBytes } from '../_utils/browser';
 
 // ═══════════════════════════════════════════════════════════════
 // V1 TYPES (OLD DESIGN - used by tools not yet migrated)
@@ -561,12 +562,6 @@ export function buildRotatePdfV2Config(params: {
     return sum + bytes;
   }, 0);
 
-  const formatBytes = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-  };
-
   return {
     toolBadge: {
       icon: <RotateCw size={20} strokeWidth={2} />,
@@ -768,12 +763,6 @@ export function buildSplitPdfV2Config(params: {
     else if (unit === 'GB') bytes = value * 1024 * 1024 * 1024;
     return sum + bytes;
   }, 0);
-
-  const formatBytes = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-  };
 
   return {
     toolBadge: {

@@ -2,7 +2,7 @@
 
 import { useCompressPdfContext } from '../_context/CompressPdfContext';
 import PanelSection from '../../_components/PanelSection';
-import { formatBytes } from '../_utils/pdfCompressor';
+import { formatBytes } from '../../_utils/browser';
 import { COMPRESSION_LEVELS, estimateOutputSize } from '../_constants/compressionLevels';
 import { Check } from 'lucide-react';
 
