@@ -3,6 +3,8 @@
 import { useRef, useState } from 'react';
 import LandingNavbar from './LandingNavbar';
 import { Upload, Zap, Shield, Package } from 'lucide-react';
+import { validateFiles } from '../_utils/fileValidation';
+import { useToast } from './ToastProvider';
 
 interface DesktopUploadPageProps {
   toolName: string;
@@ -68,20 +70,49 @@ export default function DesktopUploadPage({
 }: DesktopUploadPageProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const toast = useToast();
 
   const displayFeatures = features || defaultFeatures[fileType];
+
+  /**
+   * Validate + notify + forward valid files.
+   * Called by both drop and file-picker handlers.
+   */
+  const processFiles = (files: File[]) => {
+    const result = validateFiles(files);
+
+    // Show errors for rejected files (0-byte, corrupt, etc.)
+    result.rejectedFiles.forEach(({ file, reason }) => {
+      toast.error(`"${file.name}": ${reason}`);
+    });
+
+    // Notify about large files (still process them!)
+    result.largeFiles.forEach(({ file, assessment }) => {
+      const message = `"${file.name}" — ${assessment.message}`;
+      if (assessment.category === 'info') {
+        toast.info(message);
+      } else if (assessment.category === 'warning' || assessment.category === 'confirm') {
+        toast.warning(message);
+      }
+    });
+
+    // Forward valid files (large ones included — user was notified)
+    if (result.validFiles.length > 0) {
+      onFilesSelected(result.validFiles);
+    }
+  };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files?.length) {
-      onFilesSelected(Array.from(e.dataTransfer.files));
+      processFiles(Array.from(e.dataTransfer.files));
     }
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) {
-      onFilesSelected(Array.from(e.target.files));
+      processFiles(Array.from(e.target.files));
     }
     e.target.value = '';
   };
@@ -156,7 +187,7 @@ export default function DesktopUploadPage({
 
               <p className="text-[14px] text-[#6B7280] mb-8 text-center">
                 <span className="font-semibold text-[#07122E]">{supportedFormats}</span>
-                {' '}· Up to {maxSizeMB} MB each
+                {' '}· No size limit
                 {multiple && ' · Multiple files'}
               </p>
 

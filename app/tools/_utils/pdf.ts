@@ -104,3 +104,68 @@ export async function renderPdfPreviews(
 
   return { numPages: pdf.numPages, pages };
 }
+
+// ============================================================
+// PDF LOADING WITH FRIENDLY ERRORS
+// ============================================================
+
+/**
+ * Wraps pdfjs.getDocument() with user-friendly error messages.
+ * Detects common issues: corrupt PDFs, password-protected, etc.
+ *
+ * @throws Error with a user-friendly message that can be displayed via toast.
+ */
+export async function loadPdfDocument(
+  file: File,
+  options?: { password?: string }
+): Promise<import('pdfjs-dist').PDFDocumentProxy> {
+  const pdfjs = await getPdfjs();
+  const buffer = await file.arrayBuffer();
+
+  try {
+    const loadingTask = pdfjs.getDocument({
+      data: buffer,
+      password: options?.password,
+    });
+    return await loadingTask.promise;
+  } catch (err) {
+    // Extract PDF.js error info
+    const errorObj = err as { name?: string; message?: string };
+    const errorName = errorObj?.name ?? '';
+    const errorMessage = errorObj?.message ?? '';
+
+    // Password-protected PDF (no password given)
+    if (errorName === 'PasswordException') {
+      if (errorMessage.includes('Incorrect')) {
+        throw new Error(
+          `"${file.name}" — incorrect password. Please check and try again.`
+        );
+      }
+      throw new Error(
+        `"${file.name}" is password-protected. Use the Unlock PDF tool first.`
+      );
+    }
+
+    // Invalid or corrupt PDF
+    if (
+      errorName === 'InvalidPDFException' ||
+      errorMessage.toLowerCase().includes('invalid pdf')
+    ) {
+      throw new Error(
+        `"${file.name}" is not a valid PDF or appears to be corrupted. Try re-downloading the file.`
+      );
+    }
+
+    // Missing PDF header (usually not a PDF at all)
+    if (errorMessage.toLowerCase().includes('missing pdf')) {
+      throw new Error(
+        `"${file.name}" doesn't appear to be a PDF file. Please check the file extension.`
+      );
+    }
+
+    // Fallback for unknown PDF errors
+    throw new Error(
+      `Failed to open "${file.name}". The file may be corrupted or in an unsupported format.`
+    );
+  }
+}

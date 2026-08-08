@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { popularTools, tools } from './tools/_config/tools';
 import { usePendingFile } from './_context/PendingFileContext';
+import { useToast } from './tools/_components/ToastProvider';
+import { validateFiles } from './tools/_utils/fileValidation';
 import LandingNavbar from './tools/_components/LandingNavbar';
 import LandingFooter from './tools/_components/LandingFooter';
 import MobileHomeView from './tools/_components/MobileHomeView';
@@ -28,6 +30,7 @@ import { analyzeFiles, FileAnalysis } from './tools/_utils/fileAnalysis';
 export default function HomeClient() {
   const router = useRouter();
   const { setPendingFiles } = usePendingFile();
+  const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [analysis, setAnalysis] = useState<FileAnalysis | null>(null);
@@ -35,22 +38,50 @@ export default function HomeClient() {
 
   // Handle file drop/upload
   const handleFiles = async (files: FileList | null) => {
-  if (!files || files.length === 0) return;
+    if (!files || files.length === 0) return;
 
-  const validFiles = Array.from(files).filter(
-    (f: File) => f.type === 'application/pdf' || f.type.startsWith('image/')
-  );
+    const filesArray = Array.from(files);
 
-  if (validFiles.length === 0) {
-    alert('Please upload PDF or image files');
-    return;
-  }
+    // 1. Filter to only PDF/image types
+    const typeFiltered = filesArray.filter(
+      (f: File) => f.type === 'application/pdf' || f.type.startsWith('image/')
+    );
 
-  // Analyze (now async - reads PDF pages)
-  const result = await analyzeFiles(validFiles);
-  setSelectedFiles(validFiles);
-  setAnalysis(result);
-};
+    // Report unsupported file types
+    const unsupportedFiles = filesArray.filter(
+      (f: File) => f.type !== 'application/pdf' && !f.type.startsWith('image/')
+    );
+    unsupportedFiles.forEach((file) => {
+      toast.error(`"${file.name}" is not supported. Please upload PDFs or images (JPG, PNG, WEBP).`);
+    });
+
+    if (typeFiltered.length === 0) return;
+
+    // 2. Validate file sizes (warn about large files, reject empty ones)
+    const validation = validateFiles(typeFiltered);
+
+    // Show errors for rejected files (0-byte, corrupt, etc.)
+    validation.rejectedFiles.forEach(({ file, reason }) => {
+      toast.error(`"${file.name}": ${reason}`);
+    });
+
+    // Notify about large files (informational — still proceed)
+    validation.largeFiles.forEach(({ file, assessment }) => {
+      const message = `"${file.name}" — ${assessment.message}`;
+      if (assessment.category === 'info') {
+        toast.info(message);
+      } else if (assessment.category === 'warning' || assessment.category === 'confirm') {
+        toast.warning(message);
+      }
+    });
+
+    if (validation.validFiles.length === 0) return;
+
+    // 3. Analyze the valid files (reads PDF pages, etc.)
+    const result = await analyzeFiles(validation.validFiles);
+    setSelectedFiles(validation.validFiles);
+    setAnalysis(result);
+  };
 
   const goToTool = (href: string) => {
     if (selectedFiles.length > 0) {

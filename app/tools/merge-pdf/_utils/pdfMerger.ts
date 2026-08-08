@@ -1,19 +1,17 @@
 import type { MergePdfItem } from '../../_types';
-import { getPdfjs } from '../../_utils/pdf';
+import { loadPdfDocument } from '../../_utils/pdf';
 
 // ============ LOAD PDF INFO (page count + first page preview) ============
 
 export async function loadPdfInfo(file: File): Promise<MergePdfItem> {
-  const pdfjs = await getPdfjs();
-  const buffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: buffer }).promise;
+  const pdf = await loadPdfDocument(file);
 
   const page = await pdf.getPage(1);
   const viewport = page.getViewport({ scale: 0.4 });
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Canvas not supported');
+  if (!ctx) throw new Error(`Unable to render preview for "${file.name}". Your browser may not support canvas rendering.`);
   canvas.width = viewport.width;
   canvas.height = viewport.height;
 

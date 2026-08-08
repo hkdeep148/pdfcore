@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from 'next/font/google';
 import './globals.css';
 import CookieBanner from './tools/_components/CookieBanner';
 import { PendingFileProvider } from './_context/PendingFileContext';
+import { ToastProvider } from './tools/_components/ToastProvider';
 
 // ═══════════════════════════════════════════════════════════════
 // FONTS
@@ -251,8 +252,10 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <PendingFileProvider>
-          {children}
-          <CookieBanner />
+          <ToastProvider>
+            {children}
+            <CookieBanner />
+          </ToastProvider>
         </PendingFileProvider>
       </body>
     </html>

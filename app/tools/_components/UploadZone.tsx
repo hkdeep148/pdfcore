@@ -2,6 +2,8 @@
 
 import { useRef, useState, ReactNode } from 'react';
 import { Upload, FileText } from 'lucide-react';
+import { validateFiles } from '../_utils/fileValidation';
+import { useToast } from './ToastProvider';
 
 interface UploadZoneProps {
   onFiles: (files: File[]) => void;
@@ -29,16 +31,45 @@ export default function UploadZone({
 }: UploadZoneProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const toast = useToast();
+
+  /**
+   * Validate + notify + forward valid files.
+   * Called by both drop and file-picker handlers.
+   */
+  const processFiles = (files: File[]) => {
+    const result = validateFiles(files);
+
+    // Show errors for rejected files (e.g., 0-byte files)
+    result.rejectedFiles.forEach(({ file, reason }) => {
+      toast.error(`"${file.name}": ${reason}`);
+    });
+
+    // Notify about large files (but still process them!)
+    result.largeFiles.forEach(({ file, assessment }) => {
+      const message = `"${file.name}" — ${assessment.message}`;
+      if (assessment.category === 'info') {
+        toast.info(message);
+      } else if (assessment.category === 'warning' || assessment.category === 'confirm') {
+        toast.warning(message);
+      }
+    });
+
+    // Forward valid files (large ones included — user was notified)
+    if (result.validFiles.length > 0) {
+      onFiles(result.validFiles);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.length) onFiles(Array.from(e.target.files));
+    if (e.target.files?.length) processFiles(Array.from(e.target.files));
     e.target.value = '';
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files?.length) onFiles(Array.from(e.dataTransfer.files));
+    if (e.dataTransfer.files?.length) processFiles(Array.from(e.dataTransfer.files));
   };
 
   const handleDragOver = (e: React.DragEvent) => {

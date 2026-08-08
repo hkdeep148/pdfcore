@@ -2,7 +2,6 @@
 
 import { usePathname } from 'next/navigation';
 import LandingNavbar from './_components/LandingNavbar';
-import { ToastProvider } from './_components/ToastProvider';
 import LandingFooter from './_components/LandingFooter';
 
 export default function ToolsLayout({
@@ -17,31 +16,27 @@ export default function ToolsLayout({
   // Tools index page
   if (isToolsIndexPage) {
     return (
-      <ToastProvider>
-        <div className="min-h-screen bg-[#F8FAFC] font-['Inter',sans-serif] overflow-x-hidden">
-          <LandingNavbar />
-          <main>{children}</main>
-          <LandingFooter />
-        </div>
-      </ToastProvider>
+      <div className="min-h-screen bg-[#F8FAFC] font-['Inter',sans-serif] overflow-x-hidden">
+        <LandingNavbar />
+        <main>{children}</main>
+        <LandingFooter />
+      </div>
     );
   }
 
   // Individual tool pages
   return (
-    <ToastProvider>
-      <div className="min-h-screen bg-[#F8FAFC] font-['Inter',sans-serif]">
-        {/*
-          LandingNavbar handles its own responsive logic:
-          - Desktop: original navbar
-          - Mobile: floating tool navbar
-        */}
-        <LandingNavbar />
+    <div className="min-h-screen bg-[#F8FAFC] font-['Inter',sans-serif]">
+      {/*
+        LandingNavbar handles its own responsive logic:
+        - Desktop: original navbar
+        - Mobile: floating tool navbar
+      */}
+      <LandingNavbar />
 
-        <div className="flex flex-col">
-          {children}
-        </div>
+      <div className="flex flex-col">
+        {children}
       </div>
-    </ToastProvider>
+    </div>
   );
 }

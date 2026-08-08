@@ -55,8 +55,9 @@ export function useMergePdf() {
       }
     } catch (err) {
       console.error(err);
-      setErrorMessage('Failed to load PDF. It may be corrupted or password-protected.');
-      toast.error('Failed to load PDF');
+      const message = err instanceof Error ? err.message : 'Failed to load PDF. It may be corrupted.';
+      setErrorMessage(message);
+      toast.error(message);
     } finally {
       setIsLoadingPdf(false);
       setTimeout(() => setLoadProgress(0), 500);
@@ -139,8 +140,9 @@ export function useMergePdf() {
 
     } catch (err) {
       console.error(err);
-      setErrorMessage('Failed to merge PDFs. Please try again.');
-      toast.error('Failed to merge PDFs');
+      const message = err instanceof Error ? err.message : 'Failed to merge PDFs. Please try again.';
+      setErrorMessage(message);
+      toast.error(message);
     } finally {
       setIsProcessing(false);
     }
