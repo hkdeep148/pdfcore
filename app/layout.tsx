@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     template: '%s | PDF Core — Free & Private PDF Tools',
   },
   description:
-    'Free online PDF tools that work 100% in your browser. Compress, merge, split, convert, sign, unlock PDFs & images. No signup, no upload, no watermark. Your files never leave your device.',
+    'Free online PDF and image tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. Unlock protected PDFs. Compress and convert images. No signup, no upload, no watermark. Your files never leave your device.',
 
   keywords: [
     // Primary tools
@@ -104,7 +104,7 @@ export const metadata: Metadata = {
     title:
       'PDF Core — Free PDF Tools | No Signup, No Upload, 100% Private',
     description:
-      '12+ PDF & image tools that work 100% in your browser. No file uploads, no signup, no watermarks. Compress, merge, convert, sign & more — completely free.',
+      '11 PDF and image tools that work 100% in your browser. No file uploads, no signup, no watermarks. Compress, merge, convert, sign & more — completely free.',
     images: [
       {
         url: '/opengraph-image.png',
@@ -120,7 +120,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'PDF Core — Free PDF Tools, No Signup Required',
     description:
-      '12+ browser-based PDF tools. No uploads, no signup, no watermarks. 100% free & private.',
+      '11 browser-based PDF and image tools. No uploads, no signup, no watermarks. 100% free & private.',
     images: ['/twitter-image.png'],
   },
 
@@ -149,73 +149,49 @@ export const metadata: Metadata = {
     canonical: 'https://pdfcore.online',
   },
 
-  // ═══════════ Verification (add codes when you set these up) ═══════════
-  verification: {
-   
-  },
-
   // ═══════════ Category ═══════════
   category: 'technology',
 };
 
 // ═══════════════════════════════════════════════════════════════
-// VIEWPORT (themeColor moved here — Next.js 15+ convention)
+// VIEWPORT (accessibility-friendly — allows zoom)
 // ═══════════════════════════════════════════════════════════════
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
   themeColor: '#4F46E5',
 };
 
 // ═══════════════════════════════════════════════════════════════
-// STRUCTURED DATA (JSON-LD)
+// STRUCTURED DATA (JSON-LD) — SITE-WIDE ONLY
 // ═══════════════════════════════════════════════════════════════
-const structuredData = {
+
+// WebSite schema — identifies the site + enables Sitelinks Search Box in Google
+const websiteSchema = {
   '@context': 'https://schema.org',
-  '@type': 'WebApplication',
+  '@type': 'WebSite',
   name: 'PDF Core',
   url: 'https://pdfcore.online',
   description:
-    'Free online PDF tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs without signup or watermark.',
-  applicationCategory: 'UtilityApplication',
-  operatingSystem: 'Any',
-  browserRequirements: 'Requires JavaScript',
-  offers: {
-    '@type': 'Offer',
-    price: '0',
-    priceCurrency: 'USD',
-  },
-  featureList: [
-    'Compress PDF',
-    'Merge PDF',
-    'Split PDF',
-    'Rotate PDF',
-    'Organize PDF',
-    'Unlock PDF',
-    'Sign PDF',
-    'Add Watermark to PDF',
-    'Convert PDF to Image',
-    'Convert Image to PDF',
-    'Compress Images',
-  ],
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.8',
-    ratingCount: '1247',
-    bestRating: '5',
-    worstRating: '1',
+    'Free online PDF tools that respect your privacy. All processing happens in your browser.',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://pdfcore.online/tools?q={search_term_string}',
+    },
+    'query-input': 'required name=search_term_string',
   },
 };
 
-const organizationData = {
+// Organization schema — identifies the brand/company entity
+const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'PDF Core',
   url: 'https://pdfcore.online',
-  logo: 'https://pdfcore.online/icon.png',
+  logo: 'https://pdfcore.online/favicon.ico',
   description:
     'Free online PDF and image tools that respect your privacy. All processing happens in your browser.',
 };
@@ -235,18 +211,18 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
     >
       <head>
-        {/* Structured Data — WebApplication */}
+        {/* Structured Data — WebSite (identifies site + enables search box) */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData),
+            __html: JSON.stringify(websiteSchema),
           }}
         />
-        {/* Structured Data — Organization */}
+        {/* Structured Data — Organization (identifies the brand) */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationData),
+            __html: JSON.stringify(organizationSchema),
           }}
         />
       </head>

@@ -2,16 +2,20 @@ export interface BlogPost {
   slug: string;
   title: string;
   excerpt: string;
+  /** SEO-optimized meta description (150-160 chars). Falls back to excerpt if not provided. */
+  metaDescription?: string;
+  /** SEO-optimized page title. Falls back to `title` if not provided. */
+  metaTitle?: string;
   category: BlogCategory;
   tags: string[];
-  coverImage?: string; // Optional image URL
-  coverEmoji: string;  // Fallback emoji if no image
-  coverGradient: string; // Gradient for card background
+  coverImage?: string;
+  coverEmoji: string;
+  coverGradient: string;
   author: string;
-  publishedAt: string;  // ISO date
-  readTime: number;     // Minutes
+  publishedAt: string;
+  readTime: number;
   featured?: boolean;
-  relatedTool?: string; // e.g., '/tools/merge-pdf'
+  relatedTool?: string;
 }
 
 export type BlogCategory =

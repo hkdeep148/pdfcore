@@ -6,7 +6,6 @@ import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Zap,
   Check,
   Lock,
   Upload,
@@ -173,7 +172,7 @@ export default function HomeClient() {
 
       {/* Subheadline */}
       <p className="text-[16px] md:text-[18px] text-slate-600 mb-8 max-w-xl mx-auto lg:mx-0 font-medium leading-[1.65]">
-        Merge, split, convert, compress and more. All in one place, running{' '}
+        Merge, split, convert, compress and more. Process files up to <span className="text-slate-900 font-semibold">any size</span>, running{' '}
         <span className="text-slate-900 font-semibold">entirely in your browser</span>.
       </p>
 
@@ -198,10 +197,10 @@ export default function HomeClient() {
         <div className="w-1 h-1 rounded-full bg-slate-300" />
 
         <div className="inline-flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center">
-            <Zap size={11} className="text-amber-600 fill-amber-600" strokeWidth={0} />
+          <div className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center">
+            <Files size={11} className="text-purple-600" strokeWidth={2.5} />
           </div>
-          <span>Lightning Fast</span>
+          <span>No Size Limit</span>
         </div>
       </div>
     </motion.div>

@@ -7,7 +7,7 @@ import HomeClient from './HomeClient';
 export const metadata: Metadata = {
   title: 'PDF Core — Free PDF Tools Online | No Signup, No Upload, 100% Private',
   description:
-    'Free online PDF tools that work 100% in your browser. Compress, merge, split, convert, sign, unlock PDFs. No signup, no upload, no watermark. Your files stay private.',
+    'Free online PDF and image tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. Unlock protected PDFs. No signup, no upload, no watermark. Your files stay private.',
   keywords: [
     'free pdf tools',
     'pdf tools online',
@@ -38,6 +38,8 @@ export const metadata: Metadata = {
     'pdf tools without registration',
     'pdf tools no email',
     'unlimited pdf tools free',
+    'pdf tools no size limit',
+    'large pdf online free',
   ],
   alternates: {
     canonical: 'https://pdfcore.online',
@@ -45,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'PDF Core — Free PDF Tools | No Signup, No Upload, 100% Private',
     description:
-      '12+ browser-based PDF tools. No file uploads, no signup, no watermarks. Compress, merge, convert, sign & more — completely free forever.',
+      '11 browser-based PDF and image tools. No file uploads, no signup, no watermarks. Compress, merge, convert, sign & more — completely free forever.',
     url: 'https://pdfcore.online',
     siteName: 'PDF Core',
     type: 'website',
@@ -62,31 +64,52 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'PDF Core — Free PDF Tools, No Signup Required',
     description:
-      '12+ browser-based PDF tools. No uploads, no signup, no watermarks. 100% free & private.',
+      '11 browser-based PDF and image tools. No uploads, no signup, no watermarks. 100% free & private.',
     images: ['/twitter-image.png'],
   },
 };
 
 // ═══════════════════════════════════════════════════════════════
-// STRUCTURED DATA — JSON-LD Schemas
+// STRUCTURED DATA — HOMEPAGE-SPECIFIC SCHEMAS
+// (WebSite + Organization are in app/layout.tsx — don't duplicate here)
 // ═══════════════════════════════════════════════════════════════
-const websiteSchema = {
+
+// WebApplication — describes the overall PDF Core app
+const webApplicationSchema = {
   '@context': 'https://schema.org',
-  '@type': 'WebSite',
+  '@type': 'WebApplication',
   name: 'PDF Core',
   url: 'https://pdfcore.online',
   description:
-    'Free online PDF tools that work in your browser. Compress, merge, split, convert, sign PDFs without signup or watermark.',
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: {
-      '@type': 'EntryPoint',
-      urlTemplate: 'https://pdfcore.online/tools?q={search_term_string}',
-    },
-    'query-input': 'required name=search_term_string',
+    'Free online PDF tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs without signup or watermark.',
+  applicationCategory: 'UtilityApplication',
+  operatingSystem: 'Any',
+  browserRequirements: 'Requires JavaScript',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
   },
+  featureList: [
+    'Compress PDF without losing quality',
+    'Merge multiple PDFs',
+    'Split PDF into pages',
+    'Rotate PDF pages',
+    'Organize and reorder pages',
+    'Unlock password-protected PDFs',
+    'Sign PDF documents',
+    'Add watermarks to PDFs',
+    'Convert PDF to JPG/PNG',
+    'Convert images to PDF',
+    'Compress images',
+    'No file size limits',
+    '100% browser-based (no uploads)',
+    'No signup required',
+    'No watermarks added',
+  ],
 };
 
+// ItemList — lists all 11 tools for Google's discovery
 const itemListSchema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
@@ -174,6 +197,7 @@ const itemListSchema = {
   ],
 };
 
+// FAQPage — enables FAQ rich snippets in Google search results
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -183,7 +207,7 @@ const faqSchema = {
       name: 'Are PDF Core tools really free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes, 100% free forever. All 12+ tools are completely free with no hidden costs, no premium tiers, no trials, and no daily usage limits. Use them as often as you want for personal or commercial purposes.',
+        text: 'Yes, 100% free forever. All our PDF and image tools are completely free with no hidden costs, no premium tiers, no trials, and no daily usage limits. Use them as often as you want for personal or commercial purposes.',
       },
     },
     {
@@ -199,7 +223,7 @@ const faqSchema = {
       name: 'Are my files uploaded to your servers?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Never. All PDF Core tools run 100% in your browser using WebAssembly technology. Your files never leave your device — nothing is uploaded, stored, or transmitted to any server. This is the safest way to work with sensitive documents.',
+        text: 'Never. All PDF Core tools run 100% in your browser using modern JavaScript and WebAssembly. Your files never leave your device — nothing is uploaded, stored, or transmitted to any server. This is the safest way to work with sensitive documents.',
       },
     },
     {
@@ -207,7 +231,7 @@ const faqSchema = {
       name: 'Is there a file size limit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No file size limits. Unlike competitors that cap free users at 20-100MB, PDF Core has no restrictions because everything runs locally. Process PDFs of any size your device can handle.',
+        text: 'No file size limits from us. Unlike some competitors that impose file size caps on free users, PDF Core has no restrictions because everything runs locally in your browser. Process PDFs of any size your device can handle.',
       },
     },
     {
@@ -223,7 +247,7 @@ const faqSchema = {
       name: 'Do PDF Core tools work on mobile?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! All tools work perfectly on iPhone, Android, iPad, and any modern mobile browser. The interface is fully touch-optimized for mobile use.',
+        text: 'Yes! All tools work on iPhone, Android, iPad, and any modern mobile browser. The interface is touch-optimized for mobile use.',
       },
     },
     {
@@ -231,7 +255,7 @@ const faqSchema = {
       name: 'Do the tools work offline?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'After the first page load, PDF Core tools work even without an internet connection. Great for travelers, remote work, or privacy-conscious users who want to work offline.',
+        text: 'After the first page load, PDF Core tools can work even without an internet connection since all processing happens in your browser. Great for travelers, remote work, or privacy-conscious users.',
       },
     },
     {
@@ -239,20 +263,10 @@ const faqSchema = {
       name: 'How is PDF Core different from iLovePDF or Smallpdf?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'The main differences: PDF Core is 100% browser-based (no uploads), has no signup requirements, no file size limits, no watermarks, no daily caps, and is completely free forever. iLovePDF and Smallpdf upload your files to servers, require accounts for full features, and add watermarks to free files.',
+        text: 'The main differences: PDF Core is 100% browser-based (no uploads), has no signup requirements, no file size limits imposed by us, no watermarks, no daily caps, and is completely free forever. iLovePDF and Smallpdf typically upload your files to servers, may require accounts for full features, and add watermarks to free files.',
       },
     },
   ],
-};
-
-const organizationSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: 'PDF Core',
-  url: 'https://pdfcore.online',
-  logo: 'https://pdfcore.online/icon.png',
-  description: 'Free online PDF and image tools that respect your privacy. All processing happens in your browser.',
-  foundingDate: '2025',
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -261,10 +275,10 @@ const organizationSchema = {
 export default function HomePage() {
   return (
     <>
-      {/* Structured Data */}
+      {/* Structured Data — Homepage-specific schemas */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webApplicationSchema) }}
       />
       <script
         type="application/ld+json"
@@ -273,10 +287,6 @@ export default function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
       />
 
       {/* Interactive Homepage (Client Component) */}

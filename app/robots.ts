@@ -9,7 +9,12 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/_next/'],
+        disallow: [
+          '/api/',
+          '/_next/',
+          '/blog/',       // 🚫 Blog hidden until content is SEO-ready
+          '/tools/create-pdf/',  // 🚫 Coming-soon page shouldn't be indexed
+        ],
       },
     ],
     sitemap: 'https://pdfcore.online/sitemap.xml',
