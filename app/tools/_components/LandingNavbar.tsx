@@ -16,7 +16,7 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { Search, Zap, Menu } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
-import { tools } from '../_config/tools';
+import { tools, getToolByPath } from '../_config/tools';
 
 // Group tools by category (for organized dropdown)
 const toolsByCategory = {
@@ -56,6 +56,12 @@ const simpleLinks = [
 
 export default function LandingNavbar() {
   const pathname = usePathname();
+
+  // Detect current tool — used ONLY to swap the "PDF Core" text
+  // with the tool name on mobile. Desktop still shows "PDF Core".
+  const currentTool = getToolByPath(pathname);
+  const isToolPage = !!currentTool && pathname.startsWith('/tools/');
+
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -96,24 +102,81 @@ export default function LandingNavbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[72px]">
 
-            {/* ============ LOGO ============ */}
-            <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shadow-[0_4px_12px_-2px_rgba(99,102,241,0.4)]">
-                <svg
-                  viewBox="0 0 24 24"
-                  className="w-5 h-5 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-              </div>
-              <span className="text-[18px] font-bold text-[#07122E]">PDF Core</span>
-            </Link>
+{/* ============ LOGO ============ */}
+{/*
+  On mobile tool pages, the logo text swaps from "PDF Core" to the
+  current tool name (e.g., "Image to PDF"). This lets us remove the
+  in-page tool title entirely without losing context.
+  Desktop always shows "PDF Core" — unchanged.
+  The icon/logo image stays the same everywhere for brand consistency.
+*/}
+<Link href="/" className="flex items-center gap-2.5 flex-shrink-0 min-w-0">
+  {/*
+    Logo icon.
+    - Desktop: always shows the PDF Core purple gradient icon
+    - Mobile on tool pages: shows the tool's own icon + color
+    - Mobile elsewhere: shows the PDF Core purple gradient icon
+  */}
+
+  {/* Desktop logo — always PDF Core branding */}
+  <div className="hidden lg:flex w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] items-center justify-center shadow-[0_4px_12px_-2px_rgba(99,102,241,0.4)] flex-shrink-0">
+    <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+    </svg>
+  </div>
+
+  {/* Mobile logo on tool pages — tool's own icon and color */}
+  {isToolPage && currentTool ? (
+    <div
+      className="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-white"
+      style={{
+        background: `linear-gradient(135deg, ${currentTool.color}dd 0%, ${currentTool.color} 100%)`,
+        boxShadow: `0 4px 12px -2px ${currentTool.color}66`,
+      }}
+    >
+      <div className="scale-[0.65]">{currentTool.icon}</div>
+    </div>
+  ) : (
+    /* Mobile logo elsewhere — PDF Core branding */
+    <div className="lg:hidden w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shadow-[0_4px_12px_-2px_rgba(99,102,241,0.4)] flex-shrink-0">
+      <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+      </svg>
+    </div>
+  )}
+
+  {/* Desktop: always "PDF Core" */}
+  <span className="hidden lg:inline text-[18px] font-bold text-[#07122E]">
+    PDF Core
+  </span>
+
+{/*
+  Mobile logo text.
+  - On tool pages: tool name (bold) + "by PDFCore" subtitle in muted grey
+  - Elsewhere: just "PDF Core"
+*/}
+{isToolPage && currentTool ? (
+  <div className="lg:hidden relative flex items-center min-w-0 h-10">
+    {/*
+      Title is vertically centered with the logo (h-10 matches the
+      logo height). "by PDFCore" is absolutely positioned so it
+      doesn't affect the title's vertical alignment.
+    */}
+    <span className="text-[16px] font-bold text-[#07122E] truncate">
+      {currentTool.label}
+    </span>
+    <span className="absolute top-full right-0 text-[8px] font-normal text-[#8A93A3] truncate leading-none -mt-2">
+      by PDFCore
+    </span>
+  </div>
+) : (
+  <span className="lg:hidden text-[16px] font-bold text-[#07122E] truncate">
+    PDF Core
+  </span>
+)}
+</Link>
 
             {/* ============ DESKTOP MENU (Centered) ============ */}
             <div className="hidden lg:flex items-center gap-1 flex-1 justify-center">

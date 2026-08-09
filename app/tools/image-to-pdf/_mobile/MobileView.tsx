@@ -36,18 +36,18 @@ const MARGIN_OPTIONS: OptionItem<Margins>[] = [
   { id: 'Large',  label: 'Large'  },
 ];
 
-// CHANGED: shortened labels so the mobile toolbar fits on 360px screens
-// without horizontal overflow. Full labels appear inside the OptionSheet.
+// Full labels used inside the dropdown cells.
 const MARGIN_SHORT: Record<Margins, string> = {
   None: 'None',
-  Small: 'Sm',
-  Normal: 'Md',
-  Large: 'Lg',
+  Small: 'Small',
+  Normal: 'Normal',
+  Large: 'Large',
 };
 const ORIENTATION_SHORT: Record<Orientation, string> = {
-  Portrait: 'Port',
-  Landscape: 'Land',
+  Portrait: 'Portrait',
+  Landscape: 'Landscape',
 };
+
 // ═══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════
@@ -206,14 +206,7 @@ export default function MobileView() {
   // ═════════ EMPTY STATE ═════════
   if (!hasImages) {
     return (
-      /*
-       * CHANGED: pt-[64px] → pt-[72px]
-       * The old MobileToolNavbar was fixed at 64px height.
-       * The universal LandingNavbar is sticky at 72px height.
-       * This div is only rendered on mobile (lg:hidden wraps the entire
-       * MobileView call site), so desktop is unaffected.
-       */
-      <div className="min-h-screen bg-white pt-[72px] overflow-x-hidden">
+      <div className="min-h-screen bg-white overflow-x-hidden">
         <input
           ref={fileInputRef}
           type="file"
@@ -229,11 +222,7 @@ export default function MobileView() {
 
   // ═════════ MAIN VIEW ═════════
   return (
-    /*
-     * CHANGED: pt-[64px] → pt-[72px]
-     * Same reason as above — universal navbar is 72px not 64px.
-     */
-    <div className="min-h-screen bg-white pb-[160px] pt-[72px] overflow-x-hidden">
+    <div className="min-h-screen bg-white pb-[240px] overflow-x-hidden">
       <input
         ref={fileInputRef}
         type="file"
@@ -256,62 +245,43 @@ export default function MobileView() {
         </div>
       )}
 
-      {/* ⭐ INLINE TOOLBAR */}
-      <div className="px-3 mt-3">
-        {/*
-  CHANGED: min-w-0 and reduced gap prevents children from forcing
-  container wider than viewport on small screens.
-*/}
-<div className="flex items-center justify-between gap-1 p-2 rounded-lg bg-white border border-[#EEF1F5] min-w-0 overflow-hidden">
-          {/* + Add */}
-          <button
-            onClick={openFilePicker}
-            aria-label="Add images"
-            className="w-9 h-9 flex-shrink-0 rounded-md bg-[#4F46E5] text-white flex items-center justify-center active:scale-95 active:bg-[#4338CA] transition"
-          >
-            <Plus size={18} strokeWidth={2.5} />
-          </button>
 
-          {/* Rotate Left */}
-          <button
+
+      {/*
+        ⭐ TOP TOOLBAR — Row 1 only (Actions)
+        The dropdown row was moved to the sticky bottom bar so the
+        primary options sit next to the "Create PDF" button.
+      */}
+      <div className="px-3 mt-3">
+        <div className="flex items-center rounded-md bg-white border border-[#E2E8F0] min-w-0 overflow-hidden">
+          <ActionIcon
+            onClick={openFilePicker}
+            ariaLabel="Add images"
+            variant="primary"
+            icon={<Plus size={20} strokeWidth={2.2} />}
+          />
+          <ToolbarDivider />
+          <ActionIcon
             onClick={handleRotateLeft}
             disabled={images.length === 0}
-            aria-label="Rotate left"
-            className="w-9 h-9 flex-shrink-0 rounded-md bg-white border border-[#EEF1F5] text-[#0F172A] flex items-center justify-center active:bg-[#F8FAFC] active:scale-95 transition disabled:opacity-40"
-          >
-            <RotateCcw size={16} strokeWidth={2} />
-          </button>
-
-          {/* Rotate Right */}
-          <button
+            ariaLabel="Rotate left"
+            icon={<RotateCcw size={18} strokeWidth={2} />}
+          />
+          <ToolbarDivider />
+          <ActionIcon
             onClick={handleRotateRight}
             disabled={images.length === 0}
-            aria-label="Rotate right"
-            className="w-9 h-9 flex-shrink-0 rounded-md bg-white border border-[#EEF1F5] text-[#0F172A] flex items-center justify-center active:bg-[#F8FAFC] active:scale-95 transition disabled:opacity-40"
-          >
-            <RotateCw size={16} strokeWidth={2} />
-          </button>
-
-          {/* Delete */}
-          <button
+            ariaLabel="Rotate right"
+            icon={<RotateCw size={18} strokeWidth={2} />}
+          />
+          <ToolbarDivider />
+          <ActionIcon
             onClick={handleDeleteSelected}
             disabled={selectedCount === 0}
-            aria-label="Delete selected"
-            className="w-9 h-9 flex-shrink-0 rounded-md bg-white border border-[#EEF1F5] text-[#EF4444] flex items-center justify-center active:bg-[#FEF2F2] active:scale-95 transition disabled:opacity-40"
-          >
-            <Trash2 size={16} strokeWidth={2} />
-          </button>
-
-          {/* Divider */}
-          <div className="w-px h-6 bg-[#E2E8F0] mx-1 flex-shrink-0" />
-
-          {/* Dropdowns */}
-          <ToolbarChip label={pageSize} onClick={() => setSheet('size')} />
-          <ToolbarChip
-            label={ORIENTATION_SHORT[orientation]}
-            onClick={() => setSheet('orientation')}
+            ariaLabel="Remove"
+            variant="danger"
+            icon={<Trash2 size={18} strokeWidth={2} />}
           />
-          <ToolbarChip label={MARGIN_SHORT[margins]} onClick={() => setSheet('margin')} />
         </div>
       </div>
 
@@ -401,11 +371,56 @@ export default function MobileView() {
         Your files are 100% secure. We never store your data.
       </div>
 
-      {/* ⭐ STICKY BOTTOM — Toggle + Create button */}
+      {/*
+        ⭐ STICKY BOTTOM
+        Contents (top → bottom):
+          1. Dropdowns row (Size / Orientation / Margin)
+          2. Create-separate-PDFs toggle
+          3. Create PDF button
+      */}
       <div
         className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
         style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
       >
+        {/* Dropdowns — sits right above the toggle and Create button */}
+        <div className="flex items-center rounded-md bg-white border border-[#E2E8F0] min-w-0 overflow-hidden mb-3">
+          <ChipCell
+            label="Size"
+            value={pageSize}
+            onClick={() => setSheet('size')}
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+            }
+          />
+          <ToolbarDivider />
+          <ChipCell
+            label="Orientation"
+            value={ORIENTATION_SHORT[orientation]}
+            onClick={() => setSheet('orientation')}
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="6" y="3" width="12" height="18" rx="1.5" />
+                <line x1="9" y1="7" x2="15" y2="7" />
+              </svg>
+            }
+          />
+          <ToolbarDivider />
+          <ChipCell
+            label="Margin"
+            value={MARGIN_SHORT[margins]}
+            onClick={() => setSheet('margin')}
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="1.5" />
+                <rect x="7" y="7" width="10" height="10" rx="0.5" strokeDasharray="2 2" />
+              </svg>
+            }
+          />
+        </div>
+
         {/* Toggle — above button */}
         <div className="flex items-center justify-between px-1 pb-3">
           <div className="flex items-center gap-2">
@@ -483,16 +498,91 @@ export default function MobileView() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ToolbarChip — dropdown pill
+// ActionIcon — Row 1 icon button
+// Just an icon centered in a flex-1 slot. No labels, no borders.
 // ═══════════════════════════════════════════════════════════════
-function ToolbarChip({ label, onClick }: { label: string; onClick: () => void }) {
+function ActionIcon({
+  onClick,
+  disabled,
+  ariaLabel,
+  icon,
+  variant = 'default',
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  ariaLabel: string;
+  icon: React.ReactNode;
+  variant?: 'default' | 'primary' | 'danger';
+}) {
+  const colorClass =
+    variant === 'primary'
+      ? 'text-[#6366F1]'
+      : variant === 'danger'
+      ? 'text-[#EF4444]'
+      : 'text-[#0F172A]';
+
   return (
     <button
       onClick={onClick}
-      className="flex-shrink-0 h-9 flex items-center gap-1 px-2.5 rounded-md bg-white border border-[#EEF1F5] text-[12px] text-[#0F172A] font-medium active:bg-[#F8FAFC] transition"
+      disabled={disabled}
+      aria-label={ariaLabel}
+      className={`flex-1 min-w-0 h-12 flex items-center justify-center active:bg-[#F8FAFC] active:scale-95 transition disabled:opacity-40 ${colorClass}`}
     >
-      <span className="whitespace-nowrap">{label}</span>
-      <ChevronDown size={12} className="text-[#94A3B8] flex-shrink-0" strokeWidth={2} />
+      {icon}
+    </button>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ToolbarDivider — thin vertical line between Row 1 icons
+// and between Row 2 dropdown cells.
+// ═══════════════════════════════════════════════════════════════
+function ToolbarDivider() {
+  return <div className="w-px h-6 bg-[#E2E8F0] flex-shrink-0" />;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ChipCell — Row 2 dropdown cell (lives inside a bordered row)
+// Layout: [icon] [value ▾]
+//              [ label   ]
+// No individual border or shadow — the parent container provides
+// the border, and ToolbarDivider elements separate the cells.
+// ═══════════════════════════════════════════════════════════════
+function ChipCell({
+  label,
+  value,
+  onClick,
+  icon,
+}: {
+  label: string;
+  value: string;
+  onClick: () => void;
+  icon: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex-1 min-w-0 flex items-center gap-2 py-2.5 px-2.5 bg-white active:bg-[#F8FAFC] active:scale-[0.98] transition"
+    >
+      {/* Left icon */}
+      <span className="w-4 h-4 text-[#6366F1] flex-shrink-0">{icon}</span>
+
+      {/* Right stacked text */}
+      <div className="flex-1 min-w-0 flex flex-col items-start leading-tight">
+        <div className="flex items-center gap-0.5 max-w-full">
+          <span className="text-[12px] font-bold text-[#0F172A] truncate">
+            {value}
+          </span>
+          <ChevronDown
+            size={11}
+            className="text-[#94A3B8] flex-shrink-0"
+            strokeWidth={2}
+          />
+        </div>
+        <span className="text-[9px] font-medium text-[#94A3B8] truncate max-w-full mt-0.5">
+          {label}
+        </span>
+      </div>
     </button>
   );
 }
