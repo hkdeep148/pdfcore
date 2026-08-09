@@ -36,17 +36,18 @@ const MARGIN_OPTIONS: OptionItem<Margins>[] = [
   { id: 'Large',  label: 'Large'  },
 ];
 
+// CHANGED: shortened labels so the mobile toolbar fits on 360px screens
+// without horizontal overflow. Full labels appear inside the OptionSheet.
 const MARGIN_SHORT: Record<Margins, string> = {
   None: 'None',
-  Small: 'Small',
-  Normal: 'Normal',
-  Large: 'Large',
+  Small: 'Sm',
+  Normal: 'Md',
+  Large: 'Lg',
 };
 const ORIENTATION_SHORT: Record<Orientation, string> = {
-  Portrait: 'Portrait',
-  Landscape: 'Landscape',
+  Portrait: 'Port',
+  Landscape: 'Land',
 };
-
 // ═══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════
@@ -212,7 +213,7 @@ export default function MobileView() {
        * This div is only rendered on mobile (lg:hidden wraps the entire
        * MobileView call site), so desktop is unaffected.
        */
-      <div className="min-h-screen bg-white pt-[72px]">
+      <div className="min-h-screen bg-white pt-[72px] overflow-x-hidden">
         <input
           ref={fileInputRef}
           type="file"
@@ -232,7 +233,7 @@ export default function MobileView() {
      * CHANGED: pt-[64px] → pt-[72px]
      * Same reason as above — universal navbar is 72px not 64px.
      */
-    <div className="min-h-screen bg-white pb-[160px] pt-[72px]">
+    <div className="min-h-screen bg-white pb-[160px] pt-[72px] overflow-x-hidden">
       <input
         ref={fileInputRef}
         type="file"
@@ -257,7 +258,11 @@ export default function MobileView() {
 
       {/* ⭐ INLINE TOOLBAR */}
       <div className="px-3 mt-3">
-        <div className="flex items-center justify-between gap-1.5 p-2 rounded-lg bg-white border border-[#EEF1F5]">
+        {/*
+  CHANGED: min-w-0 and reduced gap prevents children from forcing
+  container wider than viewport on small screens.
+*/}
+<div className="flex items-center justify-between gap-1 p-2 rounded-lg bg-white border border-[#EEF1F5] min-w-0 overflow-hidden">
           {/* + Add */}
           <button
             onClick={openFilePicker}
