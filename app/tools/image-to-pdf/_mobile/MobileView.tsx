@@ -66,7 +66,11 @@ export default function MobileView() {
   const [sheet, setSheet] = useState<null | 'size' | 'orientation' | 'margin'>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sortAsc, setSortAsc] = useState(false);
-  const [previewState, setPreviewState] = useState<{ isOpen: boolean; imageUrl: string; imageName: string }>({
+  const [previewState, setPreviewState] = useState<{
+    isOpen: boolean;
+    imageUrl: string;
+    imageName: string;
+  }>({
     isOpen: false,
     imageUrl: '',
     imageName: '',
@@ -95,7 +99,6 @@ export default function MobileView() {
 
   const handleOrientationChange = (value: string | Orientation | 'Auto') => {
     if (value === 'Auto') {
-      // Apply auto-detect to all images based on their dimensions
       images.forEach(img => {
         const autoOrientation = img.width > img.height ? 'Landscape' : 'Portrait';
         updateImageSize(img.id, pageSize, autoOrientation);
@@ -202,9 +205,22 @@ export default function MobileView() {
   // ═════════ EMPTY STATE ═════════
   if (!hasImages) {
     return (
-      <div className="min-h-screen bg-white pt-[64px]">
-        <input ref={fileInputRef} type="file" className="hidden" multiple
-          onChange={handleFileChange} accept="image/jpeg,image/jpg,image/png,image/webp" />
+      /*
+       * CHANGED: pt-[64px] → pt-[72px]
+       * The old MobileToolNavbar was fixed at 64px height.
+       * The universal LandingNavbar is sticky at 72px height.
+       * This div is only rendered on mobile (lg:hidden wraps the entire
+       * MobileView call site), so desktop is unaffected.
+       */
+      <div className="min-h-screen bg-white pt-[72px]">
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          multiple
+          onChange={handleFileChange}
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+        />
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
       </div>
     );
@@ -212,15 +228,30 @@ export default function MobileView() {
 
   // ═════════ MAIN VIEW ═════════
   return (
-    <div className="min-h-screen bg-white pb-[160px] pt-[64px]">
-      <input ref={fileInputRef} type="file" className="hidden" multiple
-        onChange={handleFileChange} accept="image/jpeg,image/jpg,image/png,image/webp" />
+    /*
+     * CHANGED: pt-[64px] → pt-[72px]
+     * Same reason as above — universal navbar is 72px not 64px.
+     */
+    <div className="min-h-screen bg-white pb-[160px] pt-[72px]">
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        multiple
+        onChange={handleFileChange}
+        accept="image/jpeg,image/jpg,image/png,image/webp"
+      />
 
       {/* Error */}
       {errorMessage && (
         <div className="mx-4 mb-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
           <span className="text-[13px] text-red-600 font-medium">{errorMessage}</span>
-          <button onClick={() => setErrorMessage(null)} className="text-red-400 text-xl leading-none">×</button>
+          <button
+            onClick={() => setErrorMessage(null)}
+            className="text-red-400 text-xl leading-none"
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -271,7 +302,10 @@ export default function MobileView() {
 
           {/* Dropdowns */}
           <ToolbarChip label={pageSize} onClick={() => setSheet('size')} />
-          <ToolbarChip label={ORIENTATION_SHORT[orientation]} onClick={() => setSheet('orientation')} />
+          <ToolbarChip
+            label={ORIENTATION_SHORT[orientation]}
+            onClick={() => setSheet('orientation')}
+          />
           <ToolbarChip label={MARGIN_SHORT[margins]} onClick={() => setSheet('margin')} />
         </div>
       </div>
@@ -282,14 +316,18 @@ export default function MobileView() {
           onClick={toggleSelectAll}
           className="flex items-center gap-2.5 active:opacity-70"
         >
-          <div className={`w-5 h-5 rounded flex items-center justify-center transition ${
-            allSelected
-              ? 'bg-[#2563EB]'
-              : selectedCount > 0
+          <div
+            className={`w-5 h-5 rounded flex items-center justify-center transition ${
+              allSelected
                 ? 'bg-[#2563EB]'
-                : 'border-2 border-[#CBD5E1] bg-white'
-          }`}>
-            {allSelected && <Check size={13} className="text-white" strokeWidth={3} />}
+                : selectedCount > 0
+                  ? 'bg-[#2563EB]'
+                  : 'border-2 border-[#CBD5E1] bg-white'
+            }`}
+          >
+            {allSelected && (
+              <Check size={13} className="text-white" strokeWidth={3} />
+            )}
             {!allSelected && selectedCount > 0 && (
               <div className="w-2.5 h-0.5 bg-white rounded" />
             )}
@@ -405,18 +443,27 @@ export default function MobileView() {
 
       {/* Sheets */}
       <OptionSheet
-        open={sheet === 'size'} title="Page Size" options={PAGE_SIZE_OPTIONS}
-        value={pageSize} onChange={(v) => { setPageSize(v); setSheet(null); }}
+        open={sheet === 'size'}
+        title="Page Size"
+        options={PAGE_SIZE_OPTIONS}
+        value={pageSize}
+        onChange={(v) => { setPageSize(v); setSheet(null); }}
         onClose={() => setSheet(null)}
       />
       <OptionSheet
-        open={sheet === 'orientation'} title="Orientation" options={ORIENTATION_OPTIONS}
-        value={orientation} onChange={(v) => { handleOrientationChange(v); setSheet(null); }}
+        open={sheet === 'orientation'}
+        title="Orientation"
+        options={ORIENTATION_OPTIONS}
+        value={orientation}
+        onChange={(v) => { handleOrientationChange(v); setSheet(null); }}
         onClose={() => setSheet(null)}
       />
       <OptionSheet
-        open={sheet === 'margin'} title="Page Margin" options={MARGIN_OPTIONS}
-        value={margins} onChange={(v) => { setMargins(v); setSheet(null); }}
+        open={sheet === 'margin'}
+        title="Page Margin"
+        options={MARGIN_OPTIONS}
+        value={margins}
+        onChange={(v) => { setMargins(v); setSheet(null); }}
         onClose={() => setSheet(null)}
       />
 

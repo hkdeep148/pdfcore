@@ -1,11 +1,22 @@
+// components/LandingNavbar.tsx
+// CHANGES:
+//   1. Removed MobileToolNavbar local component
+//   2. Removed isToolPage / currentTool detection
+//   3. Removed conditional hiding of main <nav> on tool pages
+//   4. Removed isToolPage branch in mobile actions
+//   5. Removed Home icon (no longer needed in navbar)
+//   6. Removed getToolByPath import
+//   7. Mobile overlay top is now always '72px'
+//   8. Desktop behavior: zero changes
+
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { Search, Zap, ShieldCheck, Menu, X, Home } from 'lucide-react';
+import { Search, Zap, Menu } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
-import { tools, getToolByPath } from '../_config/tools';
+import { tools } from '../_config/tools';
 
 // Group tools by category (for organized dropdown)
 const toolsByCategory = {
@@ -52,10 +63,6 @@ export default function LandingNavbar() {
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const compressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Detect tool page
-  const currentTool = getToolByPath(pathname);
-  const isToolPage = !!currentTool && pathname.startsWith('/tools/');
-
   // Keyboard shortcut: Cmd/Ctrl + K
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -81,22 +88,10 @@ export default function LandingNavbar() {
 
   return (
     <>
-      {/* ═══════════ MOBILE — TOOL PAGE NAVBAR ═══════════ */}
-      {isToolPage && (
-        <MobileToolNavbar
-          tool={currentTool}
-          onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          onSearchClick={() => setSearchOpen(true)}
-        />
-      )}
-
-      {/* ═══════════ MAIN NAVBAR (HOMEPAGE STYLE) ═══════════ */}
-      {/* Hide completely on tool pages (they have their own navbar) */}
+      {/* ═══════════ MAIN NAVBAR — universal, all pages ═══════════ */}
       <nav
         ref={navRef}
-        className={`sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-[#5B4EF5]/10 ${
-          isToolPage ? 'hidden' : ''
-        }`}
+        className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-[#5B4EF5]/10"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[72px]">
@@ -104,7 +99,15 @@ export default function LandingNavbar() {
             {/* ============ LOGO ============ */}
             <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shadow-[0_4px_12px_-2px_rgba(99,102,241,0.4)]">
-                <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-5 h-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   <polyline points="14 2 14 8 20 8" />
                 </svg>
@@ -129,13 +132,17 @@ export default function LandingNavbar() {
                 <button
                   type="button"
                   className={`flex items-center gap-1 px-5 py-2 text-[15px] font-medium transition-colors ${
-                    openDropdown === 'Tools' ? 'text-[#5B4EF5]' : 'text-[#26324B] hover:text-[#5B4EF5]'
+                    openDropdown === 'Tools'
+                      ? 'text-[#5B4EF5]'
+                      : 'text-[#26324B] hover:text-[#5B4EF5]'
                   }`}
                 >
                   Tools
                   <svg
                     viewBox="0 0 24 24"
-                    className={`w-3.5 h-3.5 transition-transform ${openDropdown === 'Tools' ? 'rotate-180' : ''}`}
+                    className={`w-3.5 h-3.5 transition-transform ${
+                      openDropdown === 'Tools' ? 'rotate-180' : ''
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -164,7 +171,10 @@ export default function LandingNavbar() {
                                 >
                                   <div
                                     className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
-                                    style={{ backgroundColor: tool.bgColor, color: tool.color }}
+                                    style={{
+                                      backgroundColor: tool.bgColor,
+                                      color: tool.color,
+                                    }}
                                   >
                                     <div className="scale-[0.55]">{tool.icon}</div>
                                   </div>
@@ -183,7 +193,15 @@ export default function LandingNavbar() {
                         className="flex items-center justify-center gap-1.5 text-[13px] font-bold text-[#5B4EF5] hover:gap-2 transition-all"
                       >
                         <span>View All Tools</span>
-                        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="w-3.5 h-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
                           <line x1="5" y1="12" x2="19" y2="12" />
                           <polyline points="12 5 19 12 12 19" />
                         </svg>
@@ -215,7 +233,10 @@ export default function LandingNavbar() {
                   setOpenDropdown('Compress');
                 }}
                 onMouseLeave={() => {
-                  compressTimeoutRef.current = setTimeout(() => setOpenDropdown(null), 150);
+                  compressTimeoutRef.current = setTimeout(
+                    () => setOpenDropdown(null),
+                    150
+                  );
                 }}
               >
                 <button
@@ -231,7 +252,9 @@ export default function LandingNavbar() {
                   <span>Quick Compress</span>
                   <svg
                     viewBox="0 0 24 24"
-                    className={`w-3 h-3 transition-transform ${openDropdown === 'Compress' ? 'rotate-180' : ''}`}
+                    className={`w-3 h-3 transition-transform ${
+                      openDropdown === 'Compress' ? 'rotate-180' : ''
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -247,7 +270,12 @@ export default function LandingNavbar() {
                     <div className="px-4 py-3 bg-gradient-to-br from-[#F5F3FF] via-[#EEF2FF] to-[#F5F3FF] border-b border-slate-100">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-md bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shadow-sm">
-                          <Zap size={12} className="text-white" strokeWidth={2.5} fill="currentColor" />
+                          <Zap
+                            size={12}
+                            className="text-white"
+                            strokeWidth={2.5}
+                            fill="currentColor"
+                          />
                         </div>
                         <p className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-[#5B4EF5]">
                           Quick Compress
@@ -307,7 +335,15 @@ export default function LandingNavbar() {
                         className="flex items-center justify-center gap-1.5 text-[12px] font-bold text-[#5B4EF5] hover:gap-2 transition-all"
                       >
                         <span>View All Tools</span>
-                        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="w-3.5 h-3.5"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
                           <line x1="5" y1="12" x2="19" y2="12" />
                           <polyline points="12 5 19 12 12 19" />
                         </svg>
@@ -327,15 +363,25 @@ export default function LandingNavbar() {
                 aria-label="Search (⌘K)"
                 title="Search (⌘K)"
               >
-                <Search size={16} className="text-[#8A93A3] group-hover:text-[#6366F1] transition-colors" strokeWidth={2.2} />
+                <Search
+                  size={16}
+                  className="text-[#8A93A3] group-hover:text-[#6366F1] transition-colors"
+                  strokeWidth={2.2}
+                />
                 <span className="absolute top-full mt-2 right-0 px-2.5 py-1.5 rounded-lg bg-slate-900 text-white text-[11px] font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center gap-1.5 shadow-lg">
                   Search
-                  <kbd className="px-1.5 py-0.5 rounded bg-white/20 text-[9px] font-bold">⌘K</kbd>
+                  <kbd className="px-1.5 py-0.5 rounded bg-white/20 text-[9px] font-bold">
+                    ⌘K
+                  </kbd>
                 </span>
               </button>
             </div>
 
             {/* ============ MOBILE ACTIONS ============ */}
+            {/*
+              Universal mobile actions — same on every page.
+              No tool-specific branching.
+            */}
             <div className="lg:hidden flex items-center gap-1">
               <Link
                 href="/tools/compress-image"
@@ -345,24 +391,14 @@ export default function LandingNavbar() {
                 <Zap size={20} strokeWidth={2.5} fill="currentColor" />
               </Link>
 
-              {isToolPage ? (
-                <Link
-                  href="/"
-                  className="p-2 text-[#26324B] hover:text-[#6366F1] transition-colors"
-                  aria-label="Home"
-                >
-                  <Home size={20} />
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setSearchOpen(true)}
-                  className="p-2 text-[#26324B] hover:text-[#6366F1] transition-colors"
-                  aria-label="Search"
-                >
-                  <Search size={20} />
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                className="p-2 text-[#26324B] hover:text-[#6366F1] transition-colors"
+                aria-label="Search"
+              >
+                <Search size={20} />
+              </button>
 
               <button
                 type="button"
@@ -374,9 +410,14 @@ export default function LandingNavbar() {
                   <svg
                     viewBox="0 0 24 24"
                     className={`absolute inset-0 w-6 h-6 transition-all duration-300 ease-out ${
-                      mobileMenuOpen ? 'opacity-0 rotate-90 scale-75' : 'opacity-100 rotate-0 scale-100'
+                      mobileMenuOpen
+                        ? 'opacity-0 rotate-90 scale-75'
+                        : 'opacity-100 rotate-0 scale-100'
                     }`}
-                    fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
                   >
                     <line x1="3" y1="6" x2="21" y2="6" />
                     <line x1="3" y1="12" x2="21" y2="12" />
@@ -385,9 +426,14 @@ export default function LandingNavbar() {
                   <svg
                     viewBox="0 0 24 24"
                     className={`absolute inset-0 w-6 h-6 transition-all duration-300 ease-out ${
-                      mobileMenuOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75'
+                      mobileMenuOpen
+                        ? 'opacity-100 rotate-0 scale-100'
+                        : 'opacity-0 -rotate-90 scale-75'
                     }`}
-                    fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
                   >
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
@@ -395,33 +441,43 @@ export default function LandingNavbar() {
                 </div>
               </button>
             </div>
+
           </div>
         </div>
       </nav>
 
-      {/* ═══════════ MOBILE MENU OVERLAY (shared) ═══════════ */}
+      {/* ═══════════ MOBILE MENU OVERLAY ═══════════ */}
       <>
+        {/* Backdrop */}
         <div
           className={`lg:hidden fixed inset-0 bg-black/30 z-40 backdrop-blur-sm transition-opacity duration-300 ease-out ${
-            mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            mobileMenuOpen
+              ? 'opacity-100 pointer-events-auto'
+              : 'opacity-0 pointer-events-none'
           }`}
-          style={{ top: isToolPage ? '64px' : '72px' }}
+          style={{ top: '72px' }}
           onClick={() => setMobileMenuOpen(false)}
         />
 
+        {/* Slide-down panel */}
         <div
           className={`lg:hidden fixed left-0 right-0 bottom-0 bg-white z-40 flex flex-col overflow-hidden transition-all duration-300 ease-out ${
             mobileMenuOpen
               ? 'opacity-100 translate-y-0 pointer-events-auto'
               : 'opacity-0 -translate-y-4 pointer-events-none'
           }`}
-          style={{ top: isToolPage ? '64px' : '72px' }}
+          style={{ top: '72px' }}
         >
           <div className="flex-1 overflow-y-auto px-4 py-4">
             {/* Quick Compress */}
             <div className="mb-5">
               <div className="flex items-center gap-2 px-2 mb-2">
-                <Zap size={12} className="text-[#6366F1]" strokeWidth={2.5} fill="currentColor" />
+                <Zap
+                  size={12}
+                  className="text-[#6366F1]"
+                  strokeWidth={2.5}
+                  fill="currentColor"
+                />
                 <p className="text-[11px] font-bold text-[#5B4EF5] uppercase tracking-wider">
                   Quick Compress
                 </p>
@@ -441,8 +497,12 @@ export default function LandingNavbar() {
                       {tool.icon}
                     </div>
                     <div className="text-center">
-                      <p className="text-[12px] font-bold text-[#07122E]">{tool.label}</p>
-                      <p className="text-[10px] text-[#6B7280] font-medium mt-0.5">{tool.description}</p>
+                      <p className="text-[12px] font-bold text-[#07122E]">
+                        {tool.label}
+                      </p>
+                      <p className="text-[10px] text-[#6B7280] font-medium mt-0.5">
+                        {tool.description}
+                      </p>
                     </div>
                   </Link>
                 ))}
@@ -452,11 +512,14 @@ export default function LandingNavbar() {
             <div className="border-t border-[#F1F5F9] my-4" />
 
             {(() => {
-              const categorized = tools.reduce((acc, tool) => {
-                if (!acc[tool.category]) acc[tool.category] = [];
-                acc[tool.category].push(tool);
-                return acc;
-              }, {} as Record<string, typeof tools>);
+              const categorized = tools.reduce(
+                (acc, tool) => {
+                  if (!acc[tool.category]) acc[tool.category] = [];
+                  acc[tool.category].push(tool);
+                  return acc;
+                },
+                {} as Record<string, typeof tools>
+              );
 
               const categoryOrder: { key: string; label: string }[] = [
                 { key: 'convert', label: 'Convert' },
@@ -511,59 +574,5 @@ export default function LandingNavbar() {
       {/* ============ GLOBAL SEARCH MODAL ============ */}
       <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// MOBILE TOOL NAVBAR — fixed top navbar, clean design
-// ═══════════════════════════════════════════════════════════════
-function MobileToolNavbar({
-  tool,
-  onMenuClick,
-  onSearchClick,
-}: {
-  tool: any;
-  onMenuClick: () => void;
-  onSearchClick: () => void;
-}) {
-  return (
-    <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-[#E8EDF5]">
-      <div className="max-w-full px-4 py-3 flex items-center gap-3 h-[64px]">
-        {/* Hamburger Menu */}
-        <button
-          onClick={onMenuClick}
-          aria-label="Menu"
-          className="w-9 h-9 flex-shrink-0 flex items-center justify-center text-[#26324B] hover:bg-[#F5F7FB] active:bg-[#EEF1F5] rounded-lg transition-colors"
-        >
-          <Menu size={20} strokeWidth={2} />
-        </button>
-
-        {/* Tool icon + title */}
-        <div className="flex items-center gap-2.5 flex-1 min-w-0">
-          <div
-            className="w-10 h-10 flex-shrink-0 rounded-lg flex items-center justify-center text-white"
-            style={{
-              background: `linear-gradient(135deg, ${tool.color}dd 0%, ${tool.color} 100%)`,
-            }}
-          >
-            <div className="scale-[0.7]">{tool.icon}</div>
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-[15px] font-bold text-[#0F172A] leading-tight truncate">
-              {tool.label}
-            </h1>
-          </div>
-        </div>
-
-        {/* Home Icon */}
-        <Link
-          href="/"
-          aria-label="Home"
-          className="w-9 h-9 flex-shrink-0 flex items-center justify-center text-[#26324B] hover:bg-[#F5F7FB] active:bg-[#EEF1F5] rounded-lg transition-colors"
-        >
-          <Home size={20} strokeWidth={2} />
-        </Link>
-      </div>
-    </div>
   );
 }

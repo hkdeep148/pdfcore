@@ -3,7 +3,11 @@
 import { useState } from 'react';
 import PdfGalleryViewer from './PdfGalleryViewer';
 import { motion } from 'framer-motion';
-import LandingNavbar from '../LandingNavbar';
+// REMOVED: import LandingNavbar from '../LandingNavbar';
+//
+// REASON: tools/layout.tsx already wraps every tool page in <LandingNavbar />.
+// Rendering it again here caused two stacked navbars on the desktop
+// success screen. The navbar is a layout concern, not a page concern.
 import SuccessLeftPanel from './SuccessLeftPanel';
 import SuccessRightPanel from './SuccessRightPanel';
 import ToolsQuickBar from './ToolsQuickBar';
@@ -30,7 +34,7 @@ export default function SuccessScreenV2({ config }: Props) {
     extraAction,
   } = config;
 
-  // ⭐ NEW: PDF Gallery viewer state
+  // ⭐ PDF Gallery viewer state
   const [pdfGalleryOpen, setPdfGalleryOpen] = useState(false);
 
   // ⭐ Find the first file with onPreview (for PDF preview)
@@ -52,19 +56,19 @@ export default function SuccessScreenV2({ config }: Props) {
     : undefined;
 
   // ⭐ Detect if we have PDF blob data for the gallery
-  // Check if config has previewData (from V1 configs) or if files have blob URLs
   const pdfPreviewUrl = firstPreviewableFile?.onPreview
     ? (() => {
-        // Try to get URL from the download action's closure
-        // We'll pass it via a new config property
         return (config as any).pdfPreviewUrl || null;
       })()
     : null;
 
   return (
+    /*
+     * REMOVED: <LandingNavbar /> was here.
+     * It was duplicating the navbar already rendered by tools/layout.tsx.
+     * The outer layout-level min-h-screen wrapper handles the page shell.
+     */
     <div className="min-h-screen bg-[#F8F9FB] flex flex-col">
-      <LandingNavbar />
-
       <div className="flex-1 py-5 px-6">
         <div className="max-w-[1280px] mx-auto">
 
