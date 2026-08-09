@@ -11,8 +11,8 @@ export default function MobileCompressingScreen({
   title = 'Compressing...',
   subtitle = 'Almost done',
 }: MobileCompressingScreenProps) {
-  return (
-    <div className="flex flex-col h-full bg-gradient-to-b from-[#F8FAFC] to-white overflow-hidden">
+return (
+  <div className="flex flex-col min-h-[calc(100vh-72px)] bg-gradient-to-b from-[#F8FAFC] to-white overflow-hidden">
       <div className="flex-1 flex flex-col items-center justify-center px-8">
 
         {/* ═══════════ Animated Icon ═══════════ */}

@@ -1,10 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import {
   Download, Eye, RotateCcw, Check, CheckCircle2,
-  FileText, ChevronLeft, Home, ChevronDown,
+  FileText, ChevronDown,
 } from 'lucide-react';
 
 // ============ TYPES ============
@@ -34,10 +33,11 @@ export interface MobileFileItem {
 }
 
 interface MobileSuccessScreenProps {
-  toolIcon?: React.ReactNode;
-  toolName?: string;
-  toolColor?: string;
-  onBack?: () => void;
+  toolIcon?: React.ReactNode;   // ignored (deprecated)
+  toolName?: string;            // ignored (deprecated)
+  toolColor?: string;           // ignored (deprecated)
+  onBack?: () => void;          // ignored (deprecated)
+
   title: string;
   subtitle: string;
   files?: MobileFileItem[];
@@ -56,10 +56,6 @@ interface MobileSuccessScreenProps {
 
 // ============ MAIN COMPONENT ============
 export default function MobileSuccessScreen({
-  toolIcon,
-  toolName,
-  toolColor = '#6366F1',
-  onBack,
   title,
   subtitle,
   files,
@@ -121,38 +117,7 @@ export default function MobileSuccessScreen({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-[#FAFBFC] top-[64px]">
-
-{/* ═══════════ HEADER BAR (always visible) ═══════════ */}
-<div className="flex items-center justify-between px-4 py-3 bg-white border-b border-slate-100 shrink-0">
-  <button
-    onClick={onBack || onStartOver}
-    className="w-9 h-9 rounded-lg flex items-center justify-center"
-    aria-label="Back"
-  >
-    <ChevronLeft size={22} className="text-slate-800" strokeWidth={2.5} />
-  </button>
-  <div className="flex items-center gap-2">
-    {toolIcon ? (
-      <div
-        className="w-7 h-7 rounded-lg flex items-center justify-center"
-        style={{ background: toolColor, color: '#FFFFFF' }}
-      >
-        <div className="scale-[0.6]">{toolIcon}</div>
-      </div>
-    ) : (
-      <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-indigo-600">
-        <Check size={14} className="text-white" strokeWidth={3} />
-      </div>
-    )}
-    <span className="text-[15px] font-bold text-slate-900">
-      {toolName || 'Complete'}
-    </span>
-  </div>
-  <Link href="/" className="w-9 h-9 rounded-lg flex items-center justify-center" aria-label="Home">
-    <Home size={20} className="text-slate-800" strokeWidth={2} />
-  </Link>
-</div>
+    <div className="fixed inset-0 z-30 flex flex-col bg-[#FAFBFC] top-[72px]">
 
       {/* ═══════════ SCROLLABLE CONTENT ═══════════ */}
       <div className="flex-1 overflow-y-auto">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileToolHeader from '../../_components/MobileToolHeader';
@@ -82,41 +83,64 @@ export default function MobileView() {
     setShowSuccess(false);
   };
 
-  // ═══════════════════════════════════════════
-  // LOADING SCREEN — first upload
-  // ═══════════════════════════════════════════
-  if (isLoading) {
-    return (
-      <ToolShellMobile fixedHeight={true}>
-        <MobileLoadingScreen
-          fadeOut={loadingFadeOut}
-          title="Preparing your images"
-          subtitle="Setting up the compressor"
-        />
-      </ToolShellMobile>
-    );
-  }
-
-  // ═══════════════════════════════════════════
-  // COMPRESSING SCREEN — during processing
-  // ═══════════════════════════════════════════
-  const isTransitioningToSuccess =
+/*
+  Determine which screen to show. Only one is active at a time,
+  and AnimatePresence below crossfades between them so transitions
+  aren't abrupt.
+*/
+const isTransitioningToSuccess =
   hasCompleted &&
   completedCount === files.length &&
   files.length > 0 &&
   !showSuccess;
 
-if (processing || isTransitioningToSuccess) {
+const screen: 'loading' | 'compressing' | 'main' =
+  isLoading
+    ? 'loading'
+    : processing || isTransitioningToSuccess
+    ? 'compressing'
+    : 'main';
+
+// Full-screen wrappers for loading and compressing states.
+if (screen === 'loading' || screen === 'compressing') {
   return (
     <ToolShellMobile fixedHeight={true}>
-      <MobileCompressingScreen
-        title="Compressing images"
-        subtitle="This will only take a moment..."
-      />
-
-      </ToolShellMobile>
-    );
-  }
+      <AnimatePresence mode="wait">
+        {screen === 'loading' && (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="h-full"
+          >
+            <MobileLoadingScreen
+              fadeOut={loadingFadeOut}
+              title="Preparing your images"
+              subtitle="Setting up the compressor"
+            />
+          </motion.div>
+        )}
+        {screen === 'compressing' && (
+          <motion.div
+            key="compressing"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="h-full"
+          >
+            <MobileCompressingScreen
+              title="Compressing images"
+              subtitle="This will only take a moment..."
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </ToolShellMobile>
+  );
+}
 
   // ═══════════════════════════════════════════
   // MAIN RENDER
@@ -142,44 +166,76 @@ if (processing || isTransitioningToSuccess) {
         </div>
       )}
 
-      {/* Success Screen */}
-      {showSuccess && hasCompleted && files[0]?.compressed && files[0]?.compressedSize ? (
-        <MobileSuccessScreen
-          toolIcon={tool.icon}
-          toolName="Compress Image"
-          toolColor="#F59E0B"
-          onBack={handleStartOver}
-          title={completedCount === 1 ? 'Image Compressed!' : `${completedCount} Images Compressed!`}
-          subtitle={completedCount === 1 ? 'Your image is ready to download' : 'Your images are ready to download'}
-          filename={files[0].original.name}
-          files={files.map((f) => ({
-            id: f.id,
-            name: f.original.name,
-            size: formatBytes(f.compressedSize || f.original.size || 0),
-            onDownload: () => handleDownloadSingle(f),
-          }))}
-          compressionStats={{
-            originalSize: formatBytes(totalOriginalSize),
-            compressedSize: formatBytes(totalCompressedSize),
-            savedPercentage: totalReduction,
-            savedBytes: formatBytes(totalOriginalSize - totalCompressedSize),
-            format: files[0].compressed?.type.split('/')[1]?.toUpperCase(),
-          }}
-          downloadLabel={completedCount === 1 ? 'Download Image' : `Download All (${completedCount}) as ZIP`}
-          onDownload={handleDownloadAll}
-          onPreview={
-            files[0].compressedUrl
-              ? () => window.open(files[0].compressedUrl, '_blank')
-              : undefined
-          }
-          onStartOver={handleStartOver}
-        />
-      ) : files.length === 0 ? (
-        <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
-      ) : (
-        <>
-          {/* Header — drops down from top */}
-          <div className="animate-mobile-toolbar">
+{/*
+  AnimatePresence crossfades success screen ↔ file list ↔ empty
+  state. Combined with the loading/compressing AnimatePresence
+  above, the full flow becomes:
+    loading → compressing → success
+  with each transition fading smoothly instead of hard-cutting.
+*/}
+<AnimatePresence mode="wait">
+{showSuccess && hasCompleted && files[0]?.compressed && files[0]?.compressedSize ? (
+  <motion.div
+    key="success"
+    initial={{ opacity: 0, y: 8 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.35, ease: 'easeOut' }}
+    className="h-full"
+  >
+    <MobileSuccessScreen
+      toolIcon={tool.icon}
+      toolName="Compress Image"
+      toolColor="#F59E0B"
+      onBack={handleStartOver}
+      title={completedCount === 1 ? 'Image Compressed!' : `${completedCount} Images Compressed!`}
+      subtitle={completedCount === 1 ? 'Your image is ready to download' : 'Your images are ready to download'}
+      filename={files[0].original.name}
+      files={files.map((f) => ({
+        id: f.id,
+        name: f.original.name,
+        size: formatBytes(f.compressedSize || f.original.size || 0),
+        onDownload: () => handleDownloadSingle(f),
+      }))}
+      compressionStats={{
+        originalSize: formatBytes(totalOriginalSize),
+        compressedSize: formatBytes(totalCompressedSize),
+        savedPercentage: totalReduction,
+        savedBytes: formatBytes(totalOriginalSize - totalCompressedSize),
+        format: files[0].compressed?.type.split('/')[1]?.toUpperCase(),
+      }}
+      downloadLabel={completedCount === 1 ? 'Download Image' : `Download All (${completedCount}) as ZIP`}
+      onDownload={handleDownloadAll}
+      onPreview={
+        files[0].compressedUrl
+          ? () => window.open(files[0].compressedUrl, '_blank')
+          : undefined
+      }
+      onStartOver={handleStartOver}
+    />
+  </motion.div>
+) : files.length === 0 ? (
+  <motion.div
+    key="empty"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.2 }}
+    className="h-full"
+  >
+    <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
+  </motion.div>
+) : (
+  <motion.div
+    key="list"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.2 }}
+    className="h-full flex flex-col"
+  >
+    {/* Header — drops down from top */}
+    <div className="animate-mobile-toolbar">
             <MobileToolHeader
               filename={filename}
               onFilenameChange={setFilename}
@@ -237,14 +293,15 @@ if (processing || isTransitioningToSuccess) {
             <MobileSettingsSheet />
           </div>
 
-          {/* Action Bar — slides up from bottom */}
-          <div className="animate-mobile-bottom">
-            <MobileActionBar />
-          </div>
-        </>
-      )}
+        {/* Action Bar — slides up from bottom */}
+        <div className="animate-mobile-bottom">
+          <MobileActionBar />
+        </div>
+  </motion.div>
+)}
+</AnimatePresence>
 
-      {/* Comparison Modal */}
+    {/* Comparison Modal */}
       {comparingFile && comparingFile.compressedUrl && comparingFile.compressedSize && (
         <ComparisonSlider
           originalUrl={comparingFile.originalUrl}

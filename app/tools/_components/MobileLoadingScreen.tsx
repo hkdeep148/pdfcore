@@ -11,12 +11,12 @@ export default function MobileLoadingScreen({
   title = 'Preparing your files',
   subtitle = 'Setting things up...',
 }: MobileLoadingScreenProps) {
-  return (
-    <div
-      className={`flex flex-col h-full overflow-hidden bg-gradient-to-b from-[#F8FAFC] to-white transition-opacity duration-300 ${
-        fadeOut ? 'opacity-0' : 'opacity-100'
-      }`}
-    >
+return (
+  <div
+    className={`flex flex-col min-h-[calc(100vh-72px)] overflow-hidden bg-gradient-to-b from-[#F8FAFC] to-white transition-opacity duration-300 ${
+      fadeOut ? 'opacity-0' : 'opacity-100'
+    }`}
+  >
       <div className="flex-1 flex items-center justify-center px-8">
         <div className="flex flex-col items-center gap-6">
 
