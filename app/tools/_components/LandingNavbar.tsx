@@ -164,7 +164,7 @@ export default function LandingNavbar() {
       logo height). "by PDFCore" is absolutely positioned so it
       doesn't affect the title's vertical alignment.
     */}
-    <span className="text-[16px] font-bold text-[#07122E] truncate">
+    <span className="text-[18px] font-bold text-[#07122E] truncate">
       {currentTool.label}
     </span>
     <span className="absolute top-full right-0 text-[8px] font-normal text-[#8A93A3] truncate leading-none -mt-2">
@@ -172,7 +172,7 @@ export default function LandingNavbar() {
     </span>
   </div>
 ) : (
-  <span className="lg:hidden text-[16px] font-bold text-[#07122E] truncate">
+  <span className="lg:hidden text-[18px] font-bold text-[#07122E] truncate">
     PDF Core
   </span>
 )}
