@@ -14,19 +14,19 @@ export default function ToolsLayout({
   const isToolsIndexPage = pathname === '/tools' || pathname === '/tools/';
 
   // Tools index page
-  if (isToolsIndexPage) {
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] font-['Inter',sans-serif] overflow-x-hidden">
-        <LandingNavbar />
-        <main>{children}</main>
-        <LandingFooter />
-      </div>
-    );
-  }
-
-  // Individual tool pages
+if (isToolsIndexPage) {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-['Inter',sans-serif]">
+    <div className="min-h-screen bg-[#F8FAFC] font-['Source_Sans_3','Adjusted_Arial_Fallback',sans-serif] overflow-x-hidden">
+      <LandingNavbar />
+      <main>{children}</main>
+      <LandingFooter />
+    </div>
+  );
+}
+
+// Individual tool pages
+return (
+  <div className="min-h-screen bg-[#F8FAFC] font-['Source_Sans_3','Adjusted_Arial_Fallback',sans-serif]">
       {/*
         LandingNavbar handles its own responsive logic:
         - Desktop: original navbar

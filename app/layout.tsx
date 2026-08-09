@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono, Inter } from 'next/font/google';
+import { Geist, Geist_Mono, Inter, Source_Sans_3 } from 'next/font/google';
 import './globals.css';
 import CookieBanner from './tools/_components/CookieBanner';
 import { PendingFileProvider } from './_context/PendingFileContext';
@@ -20,6 +20,12 @@ const geistMono = Geist_Mono({
 
 const inter = Inter({
   variable: '--font-inter',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+});
+
+const sourceSans3 = Source_Sans_3({
+  variable: '--font-source-sans-3',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
 });
@@ -205,10 +211,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
-    >
+<html
+  lang="en"
+  className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${sourceSans3.variable} h-full antialiased`}
+>
       <head>
         {/* Structured Data — WebSite (identifies site + enables search box) */}
         <script

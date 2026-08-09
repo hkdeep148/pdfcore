@@ -68,7 +68,7 @@ export default function SuccessScreenV2({ config }: Props) {
      * It was duplicating the navbar already rendered by tools/layout.tsx.
      * The outer layout-level min-h-screen wrapper handles the page shell.
      */
-    <div className="min-h-screen bg-[#F8F9FB] flex flex-col">
+<div className="bg-[#F8F9FB] flex flex-col">
       <div className="flex-1 py-5 px-6">
         <div className="max-w-[1280px] mx-auto">
 

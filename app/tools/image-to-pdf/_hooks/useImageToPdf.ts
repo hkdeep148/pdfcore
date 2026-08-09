@@ -25,8 +25,23 @@ export function useImageToPdf() {
 
   // ============ STATE ============
   const [images, setImages] = useState<ImageItem[]>([]);
-  const [pageSize, setPageSize] = useState<PageSize>('A4');
-  const [orientation, setOrientation] = useState<Orientation>('Portrait');
+const [pageSize, setPageSize] = useState<PageSize>('A4');
+/*
+  orientationMode tracks the user's INTENT:
+    'Auto'      — each image derives its own orientation from its aspect ratio
+    'Portrait'  — force all images to portrait
+    'Landscape' — force all images to landscape
+  Default is 'Auto' so first-time users get sensible per-image layout.
+*/
+const [orientationMode, setOrientationMode] =
+  useState<'Auto' | Orientation>('Auto');
+/*
+  orientation stays typed as Orientation (portrait/landscape only) —
+  this is the FALLBACK value used when an image has no per-image
+  override. In Auto mode we still keep this at 'Portrait' as a
+  neutral default; the per-image overrides drive the actual layout.
+*/
+const [orientation, setOrientation] = useState<Orientation>('Portrait');
   const [pageFit, setPageFit] = useState<PageFit>('Fit to page');
   const [margins, setMargins] = useState<Margins>('Normal');
   const [quality, setQuality] = useState<ImageQuality>('High quality');
@@ -80,19 +95,34 @@ export function useImageToPdf() {
     validFiles.forEach((file) => {
       const preview = URL.createObjectURL(file);
       const img = new Image();
-      img.onload = () => {
-        const newItem: ImageItem = {
-          id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
-          file,
-          preview,
-          sizeMB: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-          width: img.naturalWidth,
-          height: img.naturalHeight,
-          rotation: 0,
-          scale: 1,
-        };
-        setImages((prev) => [...prev, newItem]);
-      };
+img.onload = () => {
+  /*
+    If Auto mode is active, stamp the new image with its natural
+    orientation right away. This way per-image previews reflect
+    Auto behavior immediately — no extra user action needed.
+  */
+  const autoOrientation: Orientation =
+    orientationMode === 'Auto'
+      ? img.naturalWidth > img.naturalHeight
+        ? 'Landscape'
+        : 'Portrait'
+      : undefined as unknown as Orientation;
+
+  const newItem: ImageItem = {
+    id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`,
+    file,
+    preview,
+    sizeMB: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+    width: img.naturalWidth,
+    height: img.naturalHeight,
+    rotation: 0,
+    scale: 1,
+    ...(orientationMode === 'Auto'
+      ? { pageSize, orientation: autoOrientation }
+      : {}),
+  };
+  setImages((prev) => [...prev, newItem]);
+};
       img.onerror = () => {
         URL.revokeObjectURL(preview);
         console.error(`Failed to load image: ${file.name}`);
@@ -125,19 +155,69 @@ export function useImageToPdf() {
     setIsReady(false);
   }, []);
 
-  const updateImageSize = useCallback(
-    (id: string, pageSize?: PageSize, orientation?: Orientation) => {
-      setImages((prev) =>
-        prev.map((item) =>
-          item.id === id
-            ? { ...item, pageSize, orientation }
-            : item
-        )
-      );
-      setIsReady(false);
-    },
-    []
+const updateImageSize = useCallback(
+  (id: string, pageSize?: PageSize, orientation?: Orientation) => {
+    setImages((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, pageSize, orientation }
+          : item
+      )
+    );
+    setIsReady(false);
+  },
+  []
+);
+
+/*
+  Apply Auto orientation to every image based on its own aspect ratio.
+  Landscape-shaped images get Landscape; portrait/square get Portrait.
+  Called automatically whenever new images arrive AND Auto mode is on.
+*/
+const applyAutoOrientationToAll = useCallback(() => {
+  setImages((prev) =>
+    prev.map((item) => ({
+      ...item,
+      pageSize,
+      orientation: item.width > item.height ? 'Landscape' : 'Portrait',
+    }))
   );
+  setIsReady(false);
+}, [pageSize]);
+
+/*
+  Wrapper the UI calls when the user picks from the orientation
+  dropdown. Handles the 'Auto' branch centrally so mobile and desktop
+  behave the same way.
+*/
+const setOrientationChoice = useCallback(
+  (choice: 'Auto' | Orientation) => {
+    setOrientationMode(choice);
+    setIsReady(false);
+    if (choice === 'Auto') {
+      // Apply per-image auto to existing images immediately
+      setImages((prev) =>
+        prev.map((item) => ({
+          ...item,
+          pageSize,
+          orientation: item.width > item.height ? 'Landscape' : 'Portrait',
+        }))
+      );
+    } else {
+      // Explicit choice — clear per-image overrides so the global
+      // orientation value drives every image.
+      setOrientation(choice);
+      setImages((prev) =>
+        prev.map((item) => ({
+          ...item,
+          pageSize: undefined,
+          orientation: undefined,
+        }))
+      );
+    }
+  },
+  [pageSize]
+);
 
   const clearAll = useCallback(() => {
     images.forEach((i) => URL.revokeObjectURL(i.preview));
@@ -156,10 +236,27 @@ export function useImageToPdf() {
     setIsReady(false);
   }, []);
 
-  // ⭐ Reset ready state when toggling mode
-  useEffect(() => {
-    setIsReady(false);
-  }, [createSeparate]);
+// ⭐ Reset ready state when toggling mode
+useEffect(() => {
+  setIsReady(false);
+}, [createSeparate]);
+
+/*
+  When pageSize changes while in Auto mode, re-stamp existing
+  images so their per-image pageSize stays in sync.
+*/
+useEffect(() => {
+  if (orientationMode !== 'Auto') return;
+  setImages((prev) =>
+    prev.map((item) => ({
+      ...item,
+      pageSize,
+      orientation: item.width > item.height ? 'Landscape' : 'Portrait',
+    }))
+  );
+  setIsReady(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [pageSize, orientationMode]);
 
   // ═════════ SINGLE PDF ═════════
   const createSinglePdf = useCallback(async (): Promise<string | null> => {
@@ -291,11 +388,12 @@ export function useImageToPdf() {
     if (url) window.open(url, '_blank');
   }, [lastPdfUrl, isReady, isZip, createPdf, downloadPdf]);
 
-  return {
-    // State
+return {
+  // State
     images,
     pageSize,
     orientation,
+    orientationMode,      // ⭐ 'Auto' | 'Portrait' | 'Landscape'
     pageFit,
     margins,
     quality,
@@ -318,6 +416,7 @@ export function useImageToPdf() {
     // Setters
     setPageSize,
     setOrientation,
+    setOrientationChoice,   // ⭐ unified setter — use this from UI
     setPageFit,
     setMargins,
     setQuality,

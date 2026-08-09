@@ -161,37 +161,10 @@ export function CompressImageProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setError(null);
+setError(null);
 
-    if (validFiles.length === 0) return;
-
-    setFiles((prev) => {
-      const isFirstUpload = prev.length === 0;
-
-      if (isFirstUpload) {
-        // Show loading animation only on first upload
-        setIsLoading(true);
-        setLoadingFadeOut(false);
-
-        if (timerRef.current) clearTimeout(timerRef.current);
-
-        timerRef.current = setTimeout(() => {
-          setFiles((current) => [...current, ...validFiles]);
-
-          // Fade out smoothly
-          setLoadingFadeOut(true);
-          timerRef.current = setTimeout(() => {
-            setIsLoading(false);
-            setLoadingFadeOut(false);
-          }, 300);
-        }, 800);
-
-        return prev;
-      }
-
-      // Add more files instantly — no loading screen
-      return [...prev, ...validFiles];
-    });
+if (validFiles.length === 0) return;
+setFiles((prev) => [...prev, ...validFiles]);
   }, []);
 
   const handleRemoveFile = useCallback((id: string) => {

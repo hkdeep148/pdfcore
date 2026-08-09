@@ -78,17 +78,6 @@ export default function DesktopView() {
     return 'IMG';
   };
 
-  // ============ LOADING SCREEN (initial page load) ============
-  if (isLoading) {
-    return (
-      <DesktopLoadingScreen
-        fadeOut={loadingFadeOut}
-        title="Preparing your images"
-        subtitle="Setting up the compressor"
-      />
-    );
-  }
-
   // ============ UPLOAD SCREEN ============
   if (files.length === 0) {
     return (

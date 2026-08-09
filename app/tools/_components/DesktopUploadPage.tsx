@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import LandingNavbar from './LandingNavbar';
 import { Upload, Zap, Shield, Package } from 'lucide-react';
 import { validateFiles } from '../_utils/fileValidation';
 import { useToast } from './ToastProvider';
@@ -122,24 +121,20 @@ export default function DesktopUploadPage({
   const beforeAccent = nameParts[0] || '';
   const afterAccent = nameParts.length > 1 ? nameParts[1] : '';
 
-  return (
-    // ⭐ FIX: Changed `hidden lg:flex h-full` → `flex min-h-screen`
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-[#F8FAFC] to-white">
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        onChange={handleFileInput}
-        className="hidden"
-        multiple={multiple}
-      />
+return (
+  <div className="flex flex-col min-h-[calc(100vh-72px)] bg-gradient-to-b from-[#F8FAFC] to-white">
+    {/* Hidden file input */}
+    <input
+      ref={fileInputRef}
+      type="file"
+      onChange={handleFileInput}
+      className="hidden"
+      multiple={multiple}
+    />
 
-      {/* ⭐ HOMEPAGE NAVBAR */}
-      <LandingNavbar />
-
-      {/* ⭐ CENTERED UPLOAD CONTENT */}
-      <div
-        className="flex-1 flex items-center justify-center p-8"
+    {/* ⭐ CENTERED UPLOAD CONTENT */}
+    <div
+      className="flex-1 flex items-center justify-center p-8"
         onDrop={handleDrop}
         onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
         onDragLeave={() => setIsDragging(false)}

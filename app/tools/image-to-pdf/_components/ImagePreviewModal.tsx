@@ -1,14 +1,27 @@
 'use client';
 
-import { X, Download, ZoomIn, ZoomOut } from 'lucide-react';
+import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { PageFit, PageBackground } from '../../_types';
+import { PAGE_BACKGROUND_HEX } from '../_utils/pdfGenerator';
 
 interface ImagePreviewModalProps {
   isOpen: boolean;
   imageUrl: string;
   imageName?: string;
   onClose: () => void;
+  /*
+    Page-level preview settings.
+    When these are supplied, the modal renders a paper-page preview
+    with the image inside — matching the desktop PageCard output.
+    All are optional so existing call sites still work.
+  */
+  pageRatio?: number;         // width / height, e.g. 595/842 for A4 portrait
+  marginPercent?: number;     // 0–20 or so
+  pageFit?: PageFit;          // 'Fill page' | 'Fit to page' etc.
+  pageBackground?: PageBackground;
+  rotation?: number;          // per-image rotation in degrees
 }
 
 export default function ImagePreviewModal({
@@ -16,6 +29,11 @@ export default function ImagePreviewModal({
   imageUrl,
   imageName = 'image',
   onClose,
+  pageRatio,
+  marginPercent = 0,
+  pageFit = 'Fit to page',
+  pageBackground = 'White',
+  rotation = 0,
 }: ImagePreviewModalProps) {
   const [zoom, setZoom] = useState(1);
 
@@ -31,17 +49,15 @@ export default function ImagePreviewModal({
     };
   }, [isOpen]);
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = imageName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.2, 3));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.2, 1));
+
+  const showPagePreview = typeof pageRatio === 'number';
+  const bgHex = PAGE_BACKGROUND_HEX[pageBackground];
+  const pageBgClass =
+    bgHex === null
+      ? 'bg-[repeating-conic-gradient(#f0f0f5_0%_25%,white_0%_50%)] [background-size:14px_14px]'
+      : '';
 
   return (
     <AnimatePresence>
@@ -65,7 +81,6 @@ export default function ImagePreviewModal({
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
             onClick={onClose}
           >
-            {/* Content box */}
             <div
               className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden"
               onClick={(e) => e.stopPropagation()}
@@ -96,13 +111,6 @@ export default function ImagePreviewModal({
                     <ZoomIn size={18} className="text-[#6B7280]" />
                   </button>
                   <button
-                    onClick={handleDownload}
-                    className="p-2 hover:bg-[#F5F7FB] rounded-lg transition-colors"
-                    title="Download"
-                  >
-                    <Download size={18} className="text-[#6366F1]" />
-                  </button>
-                  <button
                     onClick={onClose}
                     className="p-2 hover:bg-[#F5F7FB] rounded-lg transition-colors"
                     title="Close"
@@ -112,18 +120,67 @@ export default function ImagePreviewModal({
                 </div>
               </div>
 
-              {/* Image container with scroll */}
-              <div className="flex-1 overflow-auto flex items-center justify-center bg-[#F5F5FA]">
+              {/*
+                Preview area.
+                - If pageRatio is provided, render a paper-page preview
+                  with margins, fit, background, and rotation exactly
+                  matching how the PDF will look.
+                - Otherwise fall back to the plain image preview
+                  (backward compatible).
+              */}
+              <div className="flex-1 overflow-auto flex items-center justify-center bg-[#F5F5FA] p-6">
                 <motion.div
                   animate={{ scale: zoom }}
                   transition={{ type: 'spring', damping: 20, stiffness: 300 }}
                   className="flex items-center justify-center"
                 >
-                  <img
-                    src={imageUrl}
-                    alt={imageName}
-                    className="max-w-full max-h-full object-contain rounded-lg"
-                  />
+                  {showPagePreview ? (
+                    <div
+                      className={`relative border border-[#E2E2EE] shadow-lg overflow-hidden ${
+                        bgHex === '#000000'
+                          ? 'bg-black'
+                          : bgHex === '#FFFFFF'
+                          ? 'bg-white'
+                          : pageBgClass
+                      }`}
+                      style={{
+                        aspectRatio: pageRatio,
+                        // Size the paper to fill most of the modal
+                        width: 'min(80vw, 700px)',
+                        maxHeight: '70vh',
+                      }}
+                    >
+                      <div
+                        className="absolute flex items-center justify-center overflow-hidden"
+                        style={{
+                          left: `${marginPercent}%`,
+                          top: `${marginPercent}%`,
+                          right: `${marginPercent}%`,
+                          bottom: `${marginPercent}%`,
+                        }}
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={imageName}
+                          draggable={false}
+                          style={{
+                            width: pageFit === 'Fill page' ? '100%' : 'auto',
+                            height: pageFit === 'Fill page' ? '100%' : 'auto',
+                            maxWidth: '100%',
+                            maxHeight: '100%',
+                            objectFit: pageFit === 'Fill page' ? 'cover' : 'contain',
+                            transform: `rotate(${rotation}deg)`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <img
+                      src={imageUrl}
+                      alt={imageName}
+                      className="max-w-full max-h-full object-contain rounded-lg"
+                    />
+                  )}
                 </motion.div>
               </div>
             </div>

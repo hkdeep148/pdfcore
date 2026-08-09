@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import LandingNavbar from './LandingNavbar';
 
 export interface ProcessingScreenProps {
   /** Main title, e.g., "Compressing your PDF" */
@@ -58,17 +57,28 @@ export default function DesktopProcessingScreen({
     return () => cancelAnimationFrame(raf);
   }, [progressDuration]);
 
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className="min-h-screen bg-gradient-to-br from-[#F8F9FB] via-[#F8F9FB] to-[#EEF0F8] flex flex-col"
-    >
-      <LandingNavbar />
-
-      <div className="flex-1 flex items-center justify-center px-6">
+return (
+  /*
+   * REMOVED: <LandingNavbar /> — was duplicating the navbar already
+   * rendered by tools/layout.tsx (caused 2 stacked navbars).
+   *
+   * REMOVED: min-h-screen — the outer tools/layout.tsx already
+   * provides min-h-screen. A second min-h-screen here would make
+   * the total page = navbar (72px) + 100vh, forcing an unnecessary
+   * scrollbar and empty space below the fold.
+   *
+   * min-h-[calc(100vh-72px)] fills the viewport minus the navbar
+   * height so the loading card stays vertically centered without
+   * causing any overflow.
+   */
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    transition={{ duration: 0.3 }}
+    className="min-h-[calc(100vh-72px)] bg-gradient-to-br from-[#F8F9FB] via-[#F8F9FB] to-[#EEF0F8] flex flex-col"
+  >
+    <div className="flex-1 flex items-center justify-center px-6">
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}

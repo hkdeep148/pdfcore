@@ -93,17 +93,24 @@ export default function PdfGalleryViewer({
 
     let cancelled = false;
 
-    async function renderPage() {
-      if (!pdfDoc) return;
+async function renderPage() {
+  if (!pdfDoc) return;
 
-      try {
-        const page = await pdfDoc.getPage(currentPage);
-        if (cancelled) return;
+  try {
+    const page = await pdfDoc.getPage(currentPage);
+    if (cancelled) return;
 
-        const dpr = window.devicePixelRatio || 1;
-        const baseScale = 2.0; // High quality rendering
-        const scale = baseScale * (zoom / 100) * dpr;
-        const viewport = page.getViewport({ scale });
+    /*
+      Render scale reasoning:
+        - 1.5 is enough for crisp text at 100% zoom
+        - Multiplying by zoom/100 makes zoom actually visible
+        - devicePixelRatio removed — it was making the canvas
+          physically huge, then CSS was shrinking it back down,
+          which is why zoom appeared to do nothing.
+    */
+    const baseScale = 1.5;
+    const scale = baseScale * (zoom / 100);
+    const viewport = page.getViewport({ scale });
 
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -321,70 +328,89 @@ export default function PdfGalleryViewer({
             </div>
           </div>
 
-          {/* ═══════════ MAIN PAGE AREA ═══════════ */}
-          <div
-            className="flex-1 flex items-center justify-center p-8 relative min-h-0 overflow-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Prev button */}
-            {totalPages > 1 && (
-              <button
-                onClick={goToPrev}
-                className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all backdrop-blur-sm z-10"
-                title="Previous page (←)"
-              >
-                <ChevronLeft size={24} strokeWidth={2.5} />
-              </button>
-            )}
+{/* ═══════════ MAIN PAGE AREA ═══════════ */}
+{/*
+  overflow-auto on this wrapper allows the zoomed page to scroll
+  both horizontally and vertically when it exceeds the viewport.
+  The prev/next buttons are absolutely positioned so they stay
+  fixed on screen while the page scrolls behind them.
+*/}
+<div
+  className="flex-1 relative min-h-0 overflow-auto"
+  onClick={(e) => e.stopPropagation()}
+>
+  {/* Prev button */}
+  {totalPages > 1 && (
+    <button
+      onClick={goToPrev}
+      className="fixed left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all backdrop-blur-sm z-10"
+      title="Previous page (←)"
+    >
+      <ChevronLeft size={24} strokeWidth={2.5} />
+    </button>
+  )}
 
-            {/* Page display */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentPage}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-                className="max-w-full max-h-full flex items-center justify-center"
-              >
-                {isLoading ? (
-                  <div className="bg-white rounded-lg w-[400px] h-[560px] flex items-center justify-center shadow-2xl">
-                    <div className="animate-pulse space-y-4 w-3/4">
-                      <div className="h-5 bg-slate-200 rounded w-3/4" />
-                      <div className="h-3 bg-slate-200 rounded w-full" />
-                      <div className="h-3 bg-slate-200 rounded w-5/6" />
-                      <div className="h-3 bg-slate-200 rounded w-4/6" />
-                      <div className="h-32 bg-slate-100 rounded mt-6" />
-                    </div>
-                  </div>
-                ) : pageImageUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={pageImageUrl}
-                    alt={`Page ${currentPage}`}
-                    className="max-w-full max-h-full object-contain rounded-lg shadow-2xl bg-white"
-                    style={{ maxHeight: 'calc(100vh - 220px)' }}
-                  />
-                ) : (
-                  <div className="text-white/40 text-center">
-                    <FileText size={48} className="mx-auto mb-3 opacity-30" />
-                    <p>Failed to render page</p>
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Next button */}
-            {totalPages > 1 && (
-              <button
-                onClick={goToNext}
-                className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all backdrop-blur-sm z-10"
-                title="Next page (→)"
-              >
-                <ChevronRight size={24} strokeWidth={2.5} />
-              </button>
-            )}
+  {/*
+    Inner flex container sized to at least fill the viewport so the
+    page is vertically + horizontally centered when zoom <= 100%.
+    When zoom > 100% and the image outgrows the container, the outer
+    overflow-auto takes over and lets the user scroll around.
+  */}
+  <div className="min-w-full min-h-full flex items-center justify-center p-8">
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={currentPage}
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.15 }}
+        className="flex items-center justify-center"
+      >
+        {isLoading ? (
+          <div className="bg-white rounded-lg w-[400px] h-[560px] flex items-center justify-center shadow-2xl">
+            <div className="animate-pulse space-y-4 w-3/4">
+              <div className="h-5 bg-slate-200 rounded w-3/4" />
+              <div className="h-3 bg-slate-200 rounded w-full" />
+              <div className="h-3 bg-slate-200 rounded w-5/6" />
+              <div className="h-3 bg-slate-200 rounded w-4/6" />
+              <div className="h-32 bg-slate-100 rounded mt-6" />
+            </div>
           </div>
+        ) : pageImageUrl ? (
+          /*
+            No max-w / max-h on the image — the pdf.js render scale
+            already produces a canvas at the correct zoom size, so
+            we let the <img> render at its natural pixel dimensions.
+            The parent overflow-auto handles anything that exceeds
+            the viewport.
+          */
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={pageImageUrl}
+            alt={`Page ${currentPage}`}
+            className="rounded-lg shadow-2xl bg-white block"
+          />
+        ) : (
+          <div className="text-white/40 text-center">
+            <FileText size={48} className="mx-auto mb-3 opacity-30" />
+            <p>Failed to render page</p>
+          </div>
+        )}
+      </motion.div>
+    </AnimatePresence>
+  </div>
+
+  {/* Next button */}
+  {totalPages > 1 && (
+    <button
+      onClick={goToNext}
+      className="fixed right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all backdrop-blur-sm z-10"
+      title="Next page (→)"
+    >
+      <ChevronRight size={24} strokeWidth={2.5} />
+    </button>
+  )}
+</div>
 
           {/* ═══════════ FOOTER (Page info + thumbnails) ═══════════ */}
           <div

@@ -1,13 +1,10 @@
 // components/LandingNavbar.tsx
-// CHANGES:
-//   1. Removed MobileToolNavbar local component
-//   2. Removed isToolPage / currentTool detection
-//   3. Removed conditional hiding of main <nav> on tool pages
-//   4. Removed isToolPage branch in mobile actions
-//   5. Removed Home icon (no longer needed in navbar)
-//   6. Removed getToolByPath import
-//   7. Mobile overlay top is now always '72px'
-//   8. Desktop behavior: zero changes
+// CHANGES IN THIS VERSION:
+//   - Desktop menu now shows: Home | Tools ▾ | Merge ▾ | Convert ▾ | Blog | Security | About
+//   - Merge and Convert are new category-specific dropdowns
+//   - Three small helper components (NavDropdown, NavToolItem, NavDropdownFooter)
+//     eliminate duplication across the three dropdowns
+//   - Mobile navbar and mobile menu overlay are unchanged
 
 'use client';
 
@@ -18,7 +15,7 @@ import { Search, Zap, Menu } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 import { tools, getToolByPath } from '../_config/tools';
 
-// Group tools by category (for organized dropdown)
+// Group tools by category (for organized Tools dropdown)
 const toolsByCategory = {
   Convert: tools.filter(t => t.category === 'convert'),
   Organize: tools.filter(t => t.category === 'organize'),
@@ -47,18 +44,31 @@ const quickCompressTools = [
   },
 ];
 
+/*
+  Simple flat links — no dropdown.
+  Home added at the front; FAQ removed from top-level nav
+  (still accessible via /faq direct link and mobile menu).
+*/
 const simpleLinks = [
+  { label: 'Home', href: '/' },
   { label: 'Blog', href: '/blog' },
-  { label: 'FAQ', href: '/faq' },
   { label: 'Security', href: '/security' },
   { label: 'About', href: '/about' },
 ];
 
+/*
+  Category-specific dropdown lists — shown as their own top-level
+  navbar buttons alongside the full "Tools" dropdown. These give
+  users one-click access to the most common tool categories.
+*/
+const mergeTools = tools.filter((t) => t.category === 'organize');
+const convertTools = tools.filter((t) => t.category === 'convert');
+
 export default function LandingNavbar() {
   const pathname = usePathname();
 
-  // Detect current tool — used ONLY to swap the "PDF Core" text
-  // with the tool name on mobile. Desktop still shows "PDF Core".
+  // Detect current tool — used to swap the logo icon and text with
+  // the tool's own icon + name on tool pages (both mobile and desktop).
   const currentTool = getToolByPath(pathname);
   const isToolPage = !!currentTool && pathname.startsWith('/tools/');
 
@@ -92,193 +102,194 @@ export default function LandingNavbar() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  /*
+    Shared open/close handlers for the three category dropdowns.
+    Using the same closeTimeoutRef ensures switching between dropdowns
+    doesn't leave one lingering open.
+  */
+  const openNavDropdown = (name: string) => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    setOpenDropdown(name);
+  };
+  const closeNavDropdown = () => {
+    closeTimeoutRef.current = setTimeout(() => setOpenDropdown(null), 150);
+  };
+
   return (
     <>
       {/* ═══════════ MAIN NAVBAR — universal, all pages ═══════════ */}
       <nav
         ref={navRef}
         className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-[#5B4EF5]/10"
+        style={{
+          fontFamily:
+            '"Source Sans 3", "Adjusted Arial Fallback", sans-serif',
+        }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/*
+          Full-width padding on all pages so the logo always sits at
+          the viewport's left edge, aligned with the tool sidebar below.
+        */}
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[72px]">
 
-{/* ============ LOGO ============ */}
-{/*
-  On mobile tool pages, the logo text swaps from "PDF Core" to the
-  current tool name (e.g., "Image to PDF"). This lets us remove the
-  in-page tool title entirely without losing context.
-  Desktop always shows "PDF Core" — unchanged.
-  The icon/logo image stays the same everywhere for brand consistency.
-*/}
-<Link href="/" className="flex items-center gap-2.5 flex-shrink-0 min-w-0">
-  {/*
-    Logo icon.
-    - Desktop: always shows the PDF Core purple gradient icon
-    - Mobile on tool pages: shows the tool's own icon + color
-    - Mobile elsewhere: shows the PDF Core purple gradient icon
-  */}
+            {/* ============ LOGO ============ */}
+            <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 min-w-0">
 
-  {/* Desktop logo — always PDF Core branding */}
-  <div className="hidden lg:flex w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] items-center justify-center shadow-[0_4px_12px_-2px_rgba(99,102,241,0.4)] flex-shrink-0">
-    <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-    </svg>
-  </div>
-
-  {/* Mobile logo on tool pages — tool's own icon and color */}
-  {isToolPage && currentTool ? (
-    <div
-      className="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-white"
-      style={{
-        background: `linear-gradient(135deg, ${currentTool.color}dd 0%, ${currentTool.color} 100%)`,
-        boxShadow: `0 4px 12px -2px ${currentTool.color}66`,
-      }}
-    >
-      <div className="scale-[0.65]">{currentTool.icon}</div>
-    </div>
-  ) : (
-    /* Mobile logo elsewhere — PDF Core branding */
-    <div className="lg:hidden w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shadow-[0_4px_12px_-2px_rgba(99,102,241,0.4)] flex-shrink-0">
-      <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-      </svg>
-    </div>
-  )}
-
-  {/* Desktop: always "PDF Core" */}
-  <span className="hidden lg:inline text-[18px] font-bold text-[#07122E]">
-    PDF Core
-  </span>
-
-{/*
-  Mobile logo text.
-  - On tool pages: tool name (bold) + "by PDFCore" subtitle in muted grey
-  - Elsewhere: just "PDF Core"
-*/}
-{isToolPage && currentTool ? (
-  <div className="lg:hidden relative flex items-center min-w-0 h-10">
-    {/*
-      Title is vertically centered with the logo (h-10 matches the
-      logo height). "by PDFCore" is absolutely positioned so it
-      doesn't affect the title's vertical alignment.
-    */}
-    <span className="text-[18px] font-bold text-[#07122E] truncate">
-      {currentTool.label}
-    </span>
-    <span className="absolute top-full right-0 text-[8px] font-normal text-[#8A93A3] truncate leading-none -mt-2">
-      by PDFCore
-    </span>
-  </div>
-) : (
-  <span className="lg:hidden text-[18px] font-bold text-[#07122E] truncate">
-    PDF Core
-  </span>
-)}
-</Link>
-
-            {/* ============ DESKTOP MENU (Centered) ============ */}
-            <div className="hidden lg:flex items-center gap-1 flex-1 justify-center">
-
-              {/* Tools Dropdown */}
-              <div
-                className="relative"
-                onMouseEnter={() => {
-                  if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-                  setOpenDropdown('Tools');
-                }}
-                onMouseLeave={() => {
-                  closeTimeoutRef.current = setTimeout(() => setOpenDropdown(null), 150);
-                }}
-              >
-                <button
-                  type="button"
-                  className={`flex items-center gap-1 px-5 py-2 text-[15px] font-medium transition-colors ${
-                    openDropdown === 'Tools'
-                      ? 'text-[#5B4EF5]'
-                      : 'text-[#26324B] hover:text-[#5B4EF5]'
-                  }`}
+              {/* ─── DESKTOP LOGO ICON ─── */}
+              {isToolPage && currentTool ? (
+                <div
+                  className="hidden lg:flex w-10 h-10 rounded-xl items-center justify-center flex-shrink-0 text-white"
+                  style={{
+                    background: `linear-gradient(135deg, ${currentTool.color}dd 0%, ${currentTool.color} 100%)`,
+                    boxShadow: `0 4px 12px -2px ${currentTool.color}66`,
+                  }}
                 >
-                  Tools
-                  <svg
-                    viewBox="0 0 24 24"
-                    className={`w-3.5 h-3.5 transition-transform ${
-                      openDropdown === 'Tools' ? 'rotate-180' : ''
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="6 9 12 15 18 9" />
+                  <div className="scale-[0.65]">{currentTool.icon}</div>
+                </div>
+              ) : (
+                <div className="hidden lg:flex w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] items-center justify-center shadow-[0_4px_12px_-2px_rgba(99,102,241,0.4)] flex-shrink-0">
+                  <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
                   </svg>
-                </button>
+                </div>
+              )}
 
-                {openDropdown === 'Tools' && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[560px] bg-white border border-[#ECEDF3] rounded-2xl shadow-[0_20px_50px_-12px_rgba(20,30,60,0.18)] overflow-hidden">
-                    <div className="p-5 grid grid-cols-2 gap-x-6 gap-y-1">
-                      {Object.entries(toolsByCategory).map(([category, items]) => (
-                        items.length > 0 && (
-                          <div key={category} className="min-w-0">
-                            <p className="text-[10.5px] font-extrabold uppercase tracking-[0.15em] text-[#5B4EF5] mb-2 mt-3 first:mt-0">
-                              {category}
-                            </p>
-                            <div className="space-y-0.5">
-                              {items.map((tool: any) => (
-                                <Link
-                                  key={tool.href}
-                                  href={tool.href}
-                                  className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-semibold text-[#26324B] hover:bg-[#F5F3FF] hover:text-[#6366F1] transition-colors group"
-                                >
-                                  <div
-                                    className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
-                                    style={{
-                                      backgroundColor: tool.bgColor,
-                                      color: tool.color,
-                                    }}
-                                  >
-                                    <div className="scale-[0.55]">{tool.icon}</div>
-                                  </div>
-                                  <span>{tool.label}</span>
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        )
-                      ))}
-                    </div>
+              {/* ─── MOBILE LOGO ICON (unchanged) ─── */}
+              {isToolPage && currentTool ? (
+                <div
+                  className="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-white"
+                  style={{
+                    background: `linear-gradient(135deg, ${currentTool.color}dd 0%, ${currentTool.color} 100%)`,
+                    boxShadow: `0 4px 12px -2px ${currentTool.color}66`,
+                  }}
+                >
+                  <div className="scale-[0.65]">{currentTool.icon}</div>
+                </div>
+              ) : (
+                <div className="lg:hidden w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shadow-[0_4px_12px_-2px_rgba(99,102,241,0.4)] flex-shrink-0">
+                  <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                </div>
+              )}
 
-                    <div className="border-t border-slate-100 px-5 py-3 bg-slate-50">
-                      <Link
-                        href="/tools"
-                        className="flex items-center justify-center gap-1.5 text-[13px] font-bold text-[#5B4EF5] hover:gap-2 transition-all"
-                      >
-                        <span>View All Tools</span>
-                        <svg
-                          viewBox="0 0 24 24"
-                          className="w-3.5 h-3.5"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                          <polyline points="12 5 19 12 12 19" />
-                        </svg>
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
+              {/* ─── DESKTOP LOGO TEXT ─── */}
+              {isToolPage && currentTool ? (
+                <div className="hidden lg:flex flex-col justify-center items-start min-w-0 h-10 pb-1">
+                  <span className="text-[18px] font-bold text-[#07122E] leading-tight truncate">
+                    {currentTool.label}
+                  </span>
+                  <span className="text-[10px] font-normal text-[#8A93A3] leading-[1.3] truncate mt-[2px]">
+                    by PDFCore
+                  </span>
+                </div>
+              ) : (
+                <span className="hidden lg:inline text-[18px] font-bold text-[#07122E]">
+                  PDF Core
+                </span>
+              )}
 
-              {simpleLinks.map((link) => (
+              {/* ─── MOBILE LOGO TEXT (unchanged) ─── */}
+              {isToolPage && currentTool ? (
+                <div className="lg:hidden relative flex items-center min-w-0 h-10">
+                  <span className="text-[18px] font-bold text-[#07122E] truncate">
+                    {currentTool.label}
+                  </span>
+                  <span className="absolute top-full right-0 text-[8px] font-normal text-[#8A93A3] truncate leading-none -mt-2">
+                    by PDFCore
+                  </span>
+                </div>
+              ) : (
+                <span className="lg:hidden text-[18px] font-bold text-[#07122E] truncate">
+                  PDF Core
+                </span>
+              )}
+            </Link>
+
+            {/*
+              ============ DESKTOP MENU ============
+              Layout order (left → right):
+                Home | Tools ▾ | Merge ▾ | Convert ▾ | Blog | Security | About
+              All items use the same minimal pill hover style.
+            */}
+            <div className="hidden lg:flex items-center gap-1 flex-1 justify-start ml-8">
+
+              {/* Home — first flat link */}
+              <Link
+                href="/"
+                className="px-3.5 py-1.5 rounded-lg text-[17px] font-medium text-[#26324B] hover:bg-[#F5F7FB] hover:text-[#5B4EF5] transition-all duration-150"
+              >
+                Home
+              </Link>
+
+              {/* Tools (full category grid) */}
+              <NavDropdown
+                label="Tools"
+                isOpen={openDropdown === 'Tools'}
+                onOpen={() => openNavDropdown('Tools')}
+                onClose={closeNavDropdown}
+                width={560}
+              >
+                <div className="p-5 grid grid-cols-2 gap-x-6 gap-y-1">
+                  {Object.entries(toolsByCategory).map(([category, items]) => (
+                    items.length > 0 && (
+                      <div key={category} className="min-w-0">
+                        <p className="text-[10.5px] font-extrabold uppercase tracking-[0.15em] text-[#5B4EF5] mb-2 mt-3 first:mt-0">
+                          {category}
+                        </p>
+                        <div className="space-y-0.5">
+                          {items.map((tool: any) => (
+                            <NavToolItem key={tool.href} tool={tool} />
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  ))}
+                </div>
+                <NavDropdownFooter />
+              </NavDropdown>
+
+              {/* Merge (organize category) */}
+              <NavDropdown
+                label="Merge"
+                isOpen={openDropdown === 'Merge'}
+                onOpen={() => openNavDropdown('Merge')}
+                onClose={closeNavDropdown}
+                width={280}
+              >
+                <div className="p-2">
+                  {mergeTools.map((tool: any) => (
+                    <NavToolItem key={tool.href} tool={tool} />
+                  ))}
+                </div>
+                <NavDropdownFooter />
+              </NavDropdown>
+
+              {/* Convert (convert category) */}
+              <NavDropdown
+                label="Convert"
+                isOpen={openDropdown === 'Convert'}
+                onOpen={() => openNavDropdown('Convert')}
+                onClose={closeNavDropdown}
+                width={280}
+              >
+                <div className="p-2">
+                  {convertTools.map((tool: any) => (
+                    <NavToolItem key={tool.href} tool={tool} />
+                  ))}
+                </div>
+                <NavDropdownFooter />
+              </NavDropdown>
+
+              {/* Blog / Security / About — flat links (Home is rendered above) */}
+              {simpleLinks.filter((l) => l.label !== 'Home').map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="relative px-5 py-2 text-[15px] font-medium text-[#26324B] hover:text-[#5B4EF5] transition-colors"
+                  className="px-3.5 py-1.5 rounded-lg text-[17px] font-medium text-[#26324B] hover:bg-[#F5F7FB] hover:text-[#5B4EF5] transition-all duration-150"
                 >
                   {link.label}
                 </Link>
@@ -440,11 +451,7 @@ export default function LandingNavbar() {
               </button>
             </div>
 
-            {/* ============ MOBILE ACTIONS ============ */}
-            {/*
-              Universal mobile actions — same on every page.
-              No tool-specific branching.
-            */}
+            {/* ============ MOBILE ACTIONS (unchanged) ============ */}
             <div className="lg:hidden flex items-center gap-1">
               <Link
                 href="/tools/compress-image"
@@ -509,7 +516,7 @@ export default function LandingNavbar() {
         </div>
       </nav>
 
-      {/* ═══════════ MOBILE MENU OVERLAY ═══════════ */}
+      {/* ═══════════ MOBILE MENU OVERLAY (unchanged) ═══════════ */}
       <>
         {/* Backdrop */}
         <div
@@ -637,5 +644,121 @@ export default function LandingNavbar() {
       {/* ============ GLOBAL SEARCH MODAL ============ */}
       <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * NavDropdown — reusable minimal dropdown wrapper for nav items.
+ * Handles the button, chevron rotation, hover open/close, and the
+ * dropdown card container. Children render inside the card.
+ * ═══════════════════════════════════════════════════════════════ */
+function NavDropdown({
+  label,
+  isOpen,
+  onOpen,
+  onClose,
+  children,
+  width = 560,
+}: {
+  label: string;
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+  children: React.ReactNode;
+  width?: number;
+}) {
+  return (
+    <div
+      className="relative"
+      onMouseEnter={onOpen}
+      onMouseLeave={onClose}
+    >
+      <button
+        type="button"
+        className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[17px] font-medium transition-all duration-150 ${
+          isOpen
+            ? 'bg-[#F5F3FF] text-[#5B4EF5]'
+            : 'text-[#26324B] hover:bg-[#F5F7FB] hover:text-[#5B4EF5]'
+        }`}
+      >
+        {label}
+        <svg
+          viewBox="0 0 24 24"
+          className={`w-3 h-3 transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-[#5B4EF5]' : 'text-[#8A93A3]'
+          }`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div
+          className="absolute top-full left-0 mt-1 bg-white border border-[#ECEDF3] rounded-2xl shadow-[0_20px_50px_-12px_rgba(20,30,60,0.18)] overflow-hidden"
+          style={{ width: `${width}px` }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * NavToolItem — single tool row shown inside a NavDropdown.
+ * Same visual style used by both Tools (grid) and Merge/Convert
+ * (single column) dropdowns.
+ * ═══════════════════════════════════════════════════════════════ */
+function NavToolItem({ tool }: { tool: any }) {
+  return (
+    <Link
+      href={tool.href}
+      className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-semibold text-[#26324B] hover:bg-[#F5F3FF] hover:text-[#6366F1] transition-colors group"
+    >
+      <div
+        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
+        style={{
+          backgroundColor: tool.bgColor,
+          color: tool.color,
+        }}
+      >
+        <div className="scale-[0.55]">{tool.icon}</div>
+      </div>
+      <span>{tool.label}</span>
+    </Link>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+ * NavDropdownFooter — "View All Tools" footer used in all three
+ * category dropdowns for consistency.
+ * ═══════════════════════════════════════════════════════════════ */
+function NavDropdownFooter() {
+  return (
+    <div className="border-t border-slate-100 px-5 py-3 bg-slate-50">
+      <Link
+        href="/tools"
+        className="flex items-center justify-center gap-1.5 text-[13px] font-bold text-[#5B4EF5] hover:gap-2 transition-all"
+      >
+        <span>View All Tools</span>
+        <svg
+          viewBox="0 0 24 24"
+          className="w-3.5 h-3.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      </Link>
+    </div>
   );
 }
