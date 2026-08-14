@@ -27,44 +27,40 @@ const staticPages = [
   { loc: '/terms/', priority: '0.5', changefreq: 'monthly' },
 ];
 
-// Folders to skip when scanning blog directory
-const EXCLUDED_FOLDERS = ['[slug]', 'components', 'utils', 'lib', '_components'];
+// Auto-detect blog posts from posts.ts by parsing slugs and publishedAt dates
+function getBlogPosts() {
+  const postsFile = path.join(__dirname, '../app/blog/_config/posts.ts');
 
-// Auto-detect blog posts from folder names
-function getBlogSlugs() {
-  const blogDir = path.join(__dirname, '../app/blog');
-
-  if (!fs.existsSync(blogDir)) {
-    console.log('⚠️  No blog directory found');
+  if (!fs.existsSync(postsFile)) {
+    console.log('⚠️  posts.ts not found');
     return [];
   }
 
-  return fs.readdirSync(blogDir)
-    .filter(folder => {
-      const fullPath = path.join(blogDir, folder);
+  const content = fs.readFileSync(postsFile, 'utf-8');
 
-      // Must be a directory
-      if (!fs.statSync(fullPath).isDirectory()) return false;
+  // Extract all blog post objects using regex
+  // Matches: slug: 'value' or slug: "value"
+  const slugRegex = /slug:\s*['"]([^'"]+)['"]/g;
+  const dateRegex = /publishedAt:\s*['"]([^'"]+)['"]/g;
 
-      // Skip excluded folders
-      if (EXCLUDED_FOLDERS.includes(folder)) return false;
+  const slugs = [];
+  const dates = [];
 
-      // Skip folders starting with _ or . (Next.js private folders)
-      if (folder.startsWith('_') || folder.startsWith('.')) return false;
+  let match;
+  while ((match = slugRegex.exec(content)) !== null) {
+    slugs.push(match[1]);
+  }
+  while ((match = dateRegex.exec(content)) !== null) {
+    dates.push(match[1]);
+  }
 
-      // Must contain page.tsx or page.jsx or page.mdx
-      const hasPage =
-        fs.existsSync(path.join(fullPath, 'page.tsx')) ||
-        fs.existsSync(path.join(fullPath, 'page.jsx')) ||
-        fs.existsSync(path.join(fullPath, 'page.mdx'));
-
-      return hasPage;
-    })
-    .map(slug => ({
-      loc: `/blog/${slug}/`,
-      priority: '0.7',
-      changefreq: 'monthly',
-    }));
+  // Pair each slug with its publishedAt date
+  return slugs.map((slug, index) => ({
+    loc: `/blog/${slug}/`,
+    priority: '0.7',
+    changefreq: 'monthly',
+    lastmod: dates[index] || null,
+  }));
 }
 
 // Remove duplicates by URL
@@ -92,17 +88,17 @@ function escapeXml(unsafe) {
 
 // Build sitemap XML
 function generateSitemap() {
-  const blogPages = getBlogSlugs();
+  const blogPages = getBlogPosts();
   const allPages = deduplicateUrls([...staticPages, ...blogPages]);
-  const lastmod = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  const defaultLastmod = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-  allPages.forEach(({ loc, priority, changefreq }) => {
+  allPages.forEach(({ loc, priority, changefreq, lastmod }) => {
     xml += `  <url>\n`;
     xml += `    <loc>${escapeXml(BASE_URL + loc)}</loc>\n`;
-    xml += `    <lastmod>${lastmod}</lastmod>\n`;
+    xml += `    <lastmod>${lastmod || defaultLastmod}</lastmod>\n`;
     xml += `    <changefreq>${changefreq}</changefreq>\n`;
     xml += `    <priority>${priority}</priority>\n`;
     xml += `  </url>\n`;
@@ -122,11 +118,10 @@ function generateSitemap() {
 
   if (blogPages.length > 0) {
     console.log('\n📄 Blog Posts:');
-    blogPages.forEach(p => console.log(`   ✓ ${p.loc}`));
+    blogPages.forEach(p => console.log(`   ✓ ${p.loc} (${p.lastmod})`));
   }
 
-  console.log(`\n📁 Output: public/sitemap.xml`);
-  console.log('');
+  console.log(`\n📁 Output: public/sitemap.xml\n`);
 }
 
 generateSitemap();
