@@ -1,75 +1,140 @@
 'use client';
 
+import { useState } from 'react';
+import { Check, Trash2, FileText, X } from 'lucide-react';
+import MobileListView from '../../_components/MobileListView';
 import { usePdfToImageContext } from '../_context/PdfToImageContext';
 
 export default function PageGrid() {
-  const { pages, selectedIds, toggleSelect, removePage, downloadOne, isProcessing } = usePdfToImageContext();
+  const {
+    pages,
+    selectedIds,
+    toggleSelect,
+    removePage,
+    reorderPages,
+  } = usePdfToImageContext();
+
+  const [previewPage, setPreviewPage] = useState<{
+    preview: string;
+    label: string;
+    pdfName: string;
+  } | null>(null);
 
   return (
-    <div className="flex-1 overflow-y-auto px-3 pb-3">
-      <div className="grid grid-cols-2 gap-3">
-        {pages.map((page, index) => {
-          const isSelected = selectedIds.has(page.id);
-          return (
-            <div
-              key={page.id}
-              onClick={() => toggleSelect(page.id)}
-              className={`relative bg-white rounded-xl border-2 p-2 transition-all ${
-                isSelected ? 'border-[#2563EB] shadow-md' : 'border-[#E8E8F0]'
-              }`}
-            >
-              <div className={`absolute top-1.5 left-1.5 z-10 w-5 h-5 rounded border-2 flex items-center justify-center ${
-                isSelected ? 'bg-[#2563EB] border-[#2563EB]' : 'bg-white border-[#D1D5DB]'
-              }`}>
-                {isSelected && (
-                  <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                )}
-              </div>
+    <>
+      {/*
+        ═══════════ SELECTION HEADER ═══════════
+        Matches image-to-pdf style: rounded-lg bg-[#F8FAFC] border.
+      */}
+      <div className="mb-3 px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] rounded-lg flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded flex items-center justify-center bg-[#2563EB]">
+            <Check size={13} className="text-white" strokeWidth={3} />
+          </div>
+          <span className="text-[13px] font-semibold text-[#0F172A]">
+            {selectedIds.size} of {pages.length} selected
+          </span>
+        </div>
+        <span className="text-[11px] text-[#94A3B8] font-medium">
+          Tap thumbnail to preview
+        </span>
+      </div>
 
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); removePage(page.id); }}
-                className="absolute top-1.5 right-1.5 z-10 w-6 h-6 rounded-full bg-[#EF4444] flex items-center justify-center"
-                aria-label="Remove"
-              >
-                <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
+      {/*
+        ═══════════ UNIVERSAL LIST ═══════════
+        All row structure, drag handles, selection checkbox,
+        thumbnail tap, and trailing actions handled by
+        MobileListView. Only tool-specific bits live here.
+      */}
+      <MobileListView
+        items={pages}
+        onReorder={reorderPages}
+        selectedIds={selectedIds}
+        onToggleSelect={toggleSelect}
+        accentColor="#2563EB"
+        renderThumbnail={(page) => (
+          <img
+            src={page.preview}
+            alt=""
+            draggable={false}
+            className="max-w-full max-h-full object-contain select-none"
+          />
+        )}
+        onThumbnailTap={(page) =>
+          setPreviewPage({
+            preview: page.preview,
+            label: `Page ${page.pageIndex + 1}`,
+            pdfName: page.pdfName,
+          })
+        }
+        renderPrimaryText={(page) => `Page ${page.pageIndex + 1}`}
+        renderSecondaryText={(page) => page.pdfName}
+        actions={(page) => [
+          {
+            icon: <Trash2 size={15} strokeWidth={1.8} />,
+            ariaLabel: 'Remove page',
+            onClick: () => removePage(page.id),
+            variant: 'danger',
+          },
+        ]}
+      />
 
-              <div className="w-full aspect-[1/1.414] bg-[#F5F5FA] rounded-lg overflow-hidden flex items-center justify-center mt-6">
-                <img
-                  src={page.preview}
-                  alt={`Page ${index + 1}`}
-                  className="max-w-full max-h-full object-contain"
-                  draggable={false}
-                />
-              </div>
+      {/* Full-screen preview modal */}
+      {previewPage && (
+        <PagePreviewModal
+          preview={previewPage.preview}
+          label={previewPage.label}
+          pdfName={previewPage.pdfName}
+          onClose={() => setPreviewPage(null)}
+        />
+      )}
+    </>
+  );
+}
 
-              <div className="mt-2">
-                <p className="text-[10px] font-semibold text-[#5B6472] mb-1.5 text-center">
-                  Page {page.pageIndex + 1}
-                </p>
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); downloadOne(page.id); }}
-                  disabled={isProcessing}
-                  className="w-full flex items-center justify-center gap-1 py-1.5 rounded-lg bg-[#10B981] text-white text-[10px] font-semibold disabled:opacity-40 active:scale-95"
-                >
-                  <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Save
-                </button>
-              </div>
-            </div>
-          );
-        })}
+// ═══════════════════════════════════════════════════════════════
+// PagePreviewModal
+// ═══════════════════════════════════════════════════════════════
+function PagePreviewModal({
+  preview,
+  label,
+  pdfName,
+  onClose,
+}: {
+  preview: string;
+  label: string;
+  pdfName: string;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-4 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+            <FileText size={15} className="text-white" strokeWidth={2} />
+          </div>
+          <div>
+            <p className="text-[14px] font-bold text-white">{label}</p>
+            <p className="text-[11px] text-white/60">{pdfName}</p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:scale-90 transition"
+          aria-label="Close preview"
+        >
+          <X size={20} className="text-white" strokeWidth={2} />
+        </button>
+      </div>
+
+      {/* Image */}
+      <div className="flex-1 flex items-center justify-center p-4 min-h-0">
+        <img
+          src={preview}
+          alt={label}
+          className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+        />
       </div>
     </div>
   );

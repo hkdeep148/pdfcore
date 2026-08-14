@@ -1,11 +1,3 @@
-// components/ToolShellMobile.tsx
-// CHANGE: removed pt-[64px]
-// REASON: The MobileToolNavbar was `position: fixed` (out of flow).
-//         ToolShellMobile needed pt-[64px] to push its content below it.
-//         The universal LandingNavbar is `sticky` (in flow), so it naturally
-//         pushes all content below it — no padding offset is needed here.
-// DESKTOP: unchanged — ToolShellMobile is lg:hidden so desktop unaffected.
-
 'use client';
 
 import { ReactNode } from 'react';
@@ -20,10 +12,20 @@ export default function ToolShellMobile({
   fixedHeight = false,
 }: ToolShellMobileProps) {
   return (
+    /*
+      fixedHeight=true: fill the viewport minus the 72px sticky
+      navbar so the shell has a concrete height. This allows any
+      internal flex-1 + sticky bottom bar to actually stick to
+      the viewport bottom instead of floating with content.
+
+      fixedHeight=false: shell grows to fit its content — used
+      when the tool has no fixed viewport UI (e.g., long-scroll
+      pages like empty states).
+    */
     <div
       className={`lg:hidden flex flex-col bg-[#F5F5FA] w-full ${
         fixedHeight
-          ? 'h-full min-h-0 overflow-hidden'
+          ? 'h-[calc(100vh-72px)] min-h-0 overflow-hidden'
           : 'min-h-full'
       }`}
     >

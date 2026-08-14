@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import type {
   PdfImageFile,
   PdfImagePage,
@@ -52,12 +52,11 @@ const [convertedImages, setConvertedImages] = useState<Array<{
   blob: Blob;
 }>>([]);
 
-  // Auto-select all pages when they load
-  useEffect(() => {
-    if (pages.length > 0 && selectedIds.size === 0) {
-      setSelectedIds(new Set(pages.map((p) => p.id)));
-    }
-  }, [pages, selectedIds.size]);
+// NOTE: Auto-select of newly added pages happens directly inside
+// `addPdfs` (see below). We intentionally do NOT use a useEffect
+// here — a separate effect that re-selects when selectedIds.size
+// becomes 0 races with the user's "Deselect all" action and makes
+// the select/deselect toggle appear broken.
 
   // ============ ACTIONS ============
   const addPdfs = useCallback(async (newFiles: File[]) => {
@@ -76,6 +75,12 @@ const [convertedImages, setConvertedImages] = useState<Array<{
         const { fileItem, pages: newPages } = await loadPdfPages(validFiles[i]);
         setFiles((prev) => [...prev, fileItem]);
         setPages((prev) => [...prev, ...newPages]);
+        // Auto-select newly added pages so they're ready to convert
+        setSelectedIds((prev) => {
+          const next = new Set(prev);
+          newPages.forEach((p) => next.add(p.id));
+          return next;
+        });
         setLoadProgress(((i + 1) / validFiles.length) * 100);
       }
     } catch (err) {
@@ -106,25 +111,36 @@ const [convertedImages, setConvertedImages] = useState<Array<{
     clearStaleResult();
   }, [clearStaleResult]);
 
-  const toggleSelect = useCallback((id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-    clearStaleResult();
-  }, [clearStaleResult]);
+const toggleSelect = useCallback((id: string) => {
+  setSelectedIds((prev) => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
+  clearStaleResult();
+}, [clearStaleResult]);
 
-  const selectAll = useCallback(() => {
-    setSelectedIds(new Set(pages.map((p) => p.id)));
-    clearStaleResult();
-  }, [pages, clearStaleResult]);
+const selectAll = useCallback(() => {
+  setSelectedIds(new Set(pages.map((p) => p.id)));
+  clearStaleResult();
+}, [pages, clearStaleResult]);
 
-  const clearSelection = useCallback(() => {
-    setSelectedIds(new Set());
-    clearStaleResult();
-  }, [clearStaleResult]);
+const clearSelection = useCallback(() => {
+  setSelectedIds(new Set());
+  clearStaleResult();
+}, [clearStaleResult]);
+
+/*
+  Reorder pages via drag-and-drop. Accepts the fully reordered
+  array from the UI (e.g., framer-motion Reorder.Group).
+  Doesn't touch selection state — selectedIds still refer to the
+  same page.id values regardless of position.
+*/
+const reorderPages = useCallback((newOrder: PdfImagePage[]) => {
+  setPages(newOrder);
+  clearStaleResult();
+}, [clearStaleResult]);
 
 const clearAll = useCallback(() => {
   if (conversionResult) URL.revokeObjectURL(conversionResult.blobUrl);
@@ -320,25 +336,26 @@ if (selectedPages.length === 1) {
     }
   }, [conversionResult]);
 
-  return {
-    // State
-    files, pages, selectedIds, format, resolution,
-    isLoadingPdf, loadProgress, isProcessing, processProgress, errorMessage,
-    conversionResult,
-    downloadingPageId,      
-    convertedImages,        // 🆕 EXPORT THIS
-    // Setters
-    setFormat: setFormatWithClear,
-    setResolution: setResolutionWithClear,
-    setErrorMessage,
-    // Actions
-    addPdfs, removePage, toggleSelect, selectAll, clearSelection,
-    clearAll, downloadOne,
-    convertAndPrepare,
-    downloadConvertedFile,
-    previewConvertedFile,
-    resetConversion,
-  };
+return {
+  // State
+  files, pages, selectedIds, format, resolution,
+  isLoadingPdf, loadProgress, isProcessing, processProgress, errorMessage,
+  conversionResult,
+  downloadingPageId,
+  convertedImages,
+  // Setters
+  setFormat: setFormatWithClear,
+  setResolution: setResolutionWithClear,
+  setErrorMessage,
+  // Actions
+  addPdfs, removePage, toggleSelect, selectAll, clearSelection,
+  reorderPages,
+  clearAll, downloadOne,
+  convertAndPrepare,
+  downloadConvertedFile,
+  previewConvertedFile,
+  resetConversion,
+};
 }
 
 export type PdfToImageState = ReturnType<typeof usePdfToImage>;

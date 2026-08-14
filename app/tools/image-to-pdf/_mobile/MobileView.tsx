@@ -3,11 +3,11 @@
 import { useRef, useState, useMemo, useEffect } from 'react';
 import {
   Plus, RotateCw, RotateCcw, Trash2, ChevronDown, Check,
-  ArrowDownAZ, ArrowRight, GripVertical, FileText, Lock,
+  ArrowDownAZ, ArrowRight, FileText, Lock,
 } from 'lucide-react';
-import { Reorder, useDragControls } from 'framer-motion';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
+import MobileListView from '../../_components/MobileListView';
 import ImagePreviewModal from '../_components/ImagePreviewModal';
 import { getToolByPath } from '../../_config/tools';
 import { useImageToPdfContext } from '../_context/ImageToPdfContext';
@@ -49,24 +49,34 @@ const ORIENTATION_SHORT: Record<Orientation, string> = {
   Landscape: 'Landscape',
 };
 
+// Same page-size table as desktop PageCard so per-image overrides
+// (item.pageSize + item.orientation) produce the correct ratio.
+const PAGE_ASPECT_RATIOS: Record<PageSize, number> = {
+  A4: 595.28 / 841.89,
+  A3: 841.89 / 1190.55,
+  A5: 419.53 / 595.28,
+  Letter: 612 / 792,
+  Legal: 612 / 1008,
+};
+
 // ═══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════
 export default function MobileView() {
-const {
-  images, addImages, removeImage, rotateImage, reorderImages,
-  createPdf, downloadPdf, previewPdf,
-  isConverting, isReady, lastPdfSize, pdfFilename,
-  errorMessage, setErrorMessage, clearAll,
-  pageSize, setPageSize, orientation, setOrientation,
-  orientationMode, setOrientationChoice,
-  margins, setMargins,
-  updateImageSize,
-  createSeparate, setCreateSeparate, isZip,
-  // Live-preview settings — used to render page-accurate thumbnails
-  // in ImageRow and the big preview in ImagePreviewModal.
-  currentPageRatio, marginPercent, pageFit, pageBackground,
-} = useImageToPdfContext();
+  const {
+    images, addImages, removeImage, rotateImage, reorderImages,
+    createPdf, downloadPdf, previewPdf,
+    isConverting, isReady, lastPdfSize, pdfFilename,
+    errorMessage, setErrorMessage, clearAll,
+    pageSize, setPageSize, orientation, setOrientation,
+    orientationMode, setOrientationChoice,
+    margins, setMargins,
+    updateImageSize,
+    createSeparate, setCreateSeparate, isZip,
+    // Live-preview settings — used to render page-accurate thumbnails
+    // in the list and the big preview modal.
+    currentPageRatio, marginPercent, pageFit, pageBackground,
+  } = useImageToPdfContext();
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [sheet, setSheet] = useState<null | 'size' | 'orientation' | 'margin'>(null);
@@ -103,13 +113,13 @@ const {
     setPreviewState({ isOpen: true, imageUrl, imageName });
   };
 
-/*
-  Delegates to the unified hook helper so mobile and desktop both
-  use the same Auto/Portrait/Landscape behavior.
-*/
-const handleOrientationChange = (value: 'Auto' | Orientation) => {
-  setOrientationChoice(value);
-};
+  /*
+    Delegates to the unified hook helper so mobile and desktop both
+    use the same Auto/Portrait/Landscape behavior.
+  */
+  const handleOrientationChange = (value: 'Auto' | Orientation) => {
+    setOrientationChoice(value);
+  };
 
   const displayImages = useMemo(() => {
     if (!sortAsc) return images;
@@ -247,8 +257,6 @@ const handleOrientationChange = (value: 'Auto' | Orientation) => {
         </div>
       )}
 
-
-
       {/*
         ⭐ TOP TOOLBAR — Row 1 only (Actions)
         The dropdown row was moved to the sticky bottom bar so the
@@ -329,33 +337,46 @@ const handleOrientationChange = (value: 'Auto' | Orientation) => {
         </button>
       </div>
 
-      {/* ⭐ IMAGE LIST */}
-      <div className="mx-4 border border-[#F1F5F9] rounded-b-lg overflow-hidden">
-        <Reorder.Group
-          axis="y"
-          values={displayImages}
-          onReorder={sortAsc ? () => {} : reorderImages}
-          className="list-none p-0 m-0"
-        >
-{displayImages.map((item, index) => (
-  <ImageRow
-    key={item.id}
-    item={item}
-    index={index}
-    selected={selectedIds.has(item.id)}
-    onToggleSelect={() => toggleSelect(item.id)}
-    onRotate={() => rotateImage(item.id, 'right')}
-    onRemove={() => removeImage(item.id)}
-    onPreview={() => handlePreviewImage(item.preview, item.file.name)}
-    dragEnabled={!sortAsc}
-    /* Live-preview settings so thumbnails reflect current PDF settings */
-    globalRatio={currentPageRatio}
-    marginPercent={marginPercent}
-    pageFit={pageFit}
-    pageBackground={pageBackground}
-  />
-))}
-        </Reorder.Group>
+      {/*
+        ⭐ IMAGE LIST (universal MobileListView)
+        Reorder is enabled only when sort is NOT active — when the user
+        sorts by name, drag-to-reorder is disabled to prevent conflict.
+        Live PDF-page preview (with page ratio, margins, fit) is rendered
+        as a custom thumbnail so it reflects current settings in real time.
+      */}
+      <div className="mx-4">
+        <MobileListView
+          items={displayImages}
+          onReorder={sortAsc ? undefined : reorderImages}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
+          accentColor="#2563EB"
+          renderThumbnail={(item) => (
+            <LivePagePreviewThumbnail
+              item={item}
+              globalRatio={currentPageRatio}
+              marginPercent={marginPercent}
+              pageFit={pageFit}
+              pageBackground={pageBackground}
+            />
+          )}
+          onThumbnailTap={(item) => handlePreviewImage(item.preview, item.file.name)}
+          renderPrimaryText={(item) => item.file.name}
+          renderSecondaryText={(item) => item.sizeMB}
+          actions={(item) => [
+            {
+              icon: <RotateCw size={15} strokeWidth={1.8} />,
+              ariaLabel: 'Rotate',
+              onClick: () => rotateImage(item.id, 'right'),
+            },
+            {
+              icon: <Trash2 size={15} strokeWidth={1.8} />,
+              ariaLabel: 'Delete',
+              onClick: () => removeImage(item.id),
+              variant: 'danger',
+            },
+          ]}
+        />
       </div>
 
       {/* ⭐ ADD MORE IMAGES */}
@@ -403,15 +424,15 @@ const handleOrientationChange = (value: 'Auto' | Orientation) => {
             }
           />
           <ToolbarDivider />
-<ChipCell
-  label="Orientation"
-  value={
-    orientationMode === 'Auto'
-      ? 'Auto'
-      : ORIENTATION_SHORT[orientationMode]
-  }
-  onClick={() => setSheet('orientation')}
-  icon={
+          <ChipCell
+            label="Orientation"
+            value={
+              orientationMode === 'Auto'
+                ? 'Auto'
+                : ORIENTATION_SHORT[orientationMode]
+            }
+            onClick={() => setSheet('orientation')}
+            icon={
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="6" y="3" width="12" height="18" rx="1.5" />
                 <line x1="9" y1="7" x2="15" y2="7" />
@@ -463,7 +484,7 @@ const handleOrientationChange = (value: 'Auto' | Orientation) => {
         <button
           onClick={handleCreatePdf}
           disabled={isConverting || images.length === 0}
-          className="w-full flex items-center justify-center gap-2 py-4 rounded-lg bg-[#2563EB] text-white font-bold text-[16px] shadow-[0_6px_20px_-4px_rgba(37,99,235,0.5)] active:scale-[0.98] transition disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-2 py-4 rounded-lg bg-gradient-to-r from-[#4F46E5] to-[#6D5DF6] text-white font-bold text-[16px] shadow-[0_6px_20px_-4px_rgba(79,70,229,0.5)] active:scale-[0.98] transition disabled:opacity-60"
         >
           {isConverting
             ? (createSeparate ? 'Creating ZIP...' : 'Creating...')
@@ -481,14 +502,14 @@ const handleOrientationChange = (value: 'Auto' | Orientation) => {
         onChange={(v) => { setPageSize(v); setSheet(null); }}
         onClose={() => setSheet(null)}
       />
-<OptionSheet
-  open={sheet === 'orientation'}
-  title="Orientation"
-  options={ORIENTATION_OPTIONS}
-  value={orientationMode}
-  onChange={(v) => { handleOrientationChange(v as 'Auto' | Orientation); setSheet(null); }}
-  onClose={() => setSheet(null)}
-/>
+      <OptionSheet
+        open={sheet === 'orientation'}
+        title="Orientation"
+        options={ORIENTATION_OPTIONS}
+        value={orientationMode}
+        onChange={(v) => { handleOrientationChange(v as 'Auto' | Orientation); setSheet(null); }}
+        onClose={() => setSheet(null)}
+      />
       <OptionSheet
         open={sheet === 'margin'}
         title="Page Margin"
@@ -498,24 +519,24 @@ const handleOrientationChange = (value: 'Auto' | Orientation) => {
         onClose={() => setSheet(null)}
       />
 
-{/*
-  Preview modal now receives the live page settings so the big
-  preview shows exactly how the image will appear in the PDF.
-  We also look up the per-image rotation from the images array.
-*/}
-<ImagePreviewModal
-  isOpen={previewState.isOpen}
-  imageUrl={previewState.imageUrl}
-  imageName={previewState.imageName}
-  onClose={() => setPreviewState(prev => ({ ...prev, isOpen: false }))}
-  pageRatio={currentPageRatio}
-  marginPercent={marginPercent}
-  pageFit={pageFit}
-  pageBackground={pageBackground}
-  rotation={
-    images.find((i) => i.preview === previewState.imageUrl)?.rotation ?? 0
-  }
-/>
+      {/*
+        Preview modal now receives the live page settings so the big
+        preview shows exactly how the image will appear in the PDF.
+        We also look up the per-image rotation from the images array.
+      */}
+      <ImagePreviewModal
+        isOpen={previewState.isOpen}
+        imageUrl={previewState.imageUrl}
+        imageName={previewState.imageName}
+        onClose={() => setPreviewState(prev => ({ ...prev, isOpen: false }))}
+        pageRatio={currentPageRatio}
+        marginPercent={marginPercent}
+        pageFit={pageFit}
+        pageBackground={pageBackground}
+        rotation={
+          images.find((i) => i.preview === previewState.imageUrl)?.rotation ?? 0
+        }
+      />
     </div>
   );
 }
@@ -611,44 +632,24 @@ function ChipCell({
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ImageRow — mobile list item with a live PDF-page thumbnail.
-// Thumbnail matches desktop PageCard behavior: uses page ratio,
-// margins, page background, page fit, and rotation.
+// LivePagePreviewThumbnail — image inside a page-shaped preview
+// that reflects current page size, orientation, margins, and fit.
+// Renders inside MobileListView's 34×44 thumbnail slot.
 // ═══════════════════════════════════════════════════════════════
-interface ImageRowProps {
+function LivePagePreviewThumbnail({
+  item,
+  globalRatio,
+  marginPercent,
+  pageFit,
+  pageBackground,
+}: {
   item: ImageItem;
-  index: number;
-  selected: boolean;
-  onToggleSelect: () => void;
-  onRotate: () => void;
-  onRemove: () => void;
-  onPreview: () => void;
-  dragEnabled: boolean;
   globalRatio: number;
   marginPercent: number;
   pageFit: import('../../_types').PageFit;
   pageBackground: import('../../_types').PageBackground;
-}
-
-// Same page-size table as desktop PageCard so per-image overrides
-// (item.pageSize + item.orientation) produce the correct ratio.
-const PAGE_ASPECT_RATIOS: Record<PageSize, number> = {
-  A4: 595.28 / 841.89,
-  A3: 841.89 / 1190.55,
-  A5: 419.53 / 595.28,
-  Letter: 612 / 792,
-  Legal: 612 / 1008,
-};
-
-function ImageRow({
-  item, selected, onToggleSelect, onRotate, onRemove, onPreview, dragEnabled,
-  globalRatio, marginPercent, pageFit, pageBackground,
-}: ImageRowProps) {
-  const dragControls = useDragControls();
-  const [isDragging, setIsDragging] = useState(false);
-
-  // Per-image override takes priority over global settings — same
-  // logic desktop PageCard uses so the thumbnail is consistent.
+}) {
+  // Per-image override takes priority over global settings.
   const previewRatio =
     item.orientation && item.pageSize
       ? (() => {
@@ -663,123 +664,40 @@ function ImageRow({
       ? 'bg-[repeating-conic-gradient(#f0f0f5_0%_25%,white_0%_50%)] [background-size:6px_6px]'
       : '';
 
-  // Thumbnail is sized by width; height comes from aspect-ratio.
-  const THUMB_WIDTH = 38;
-
   return (
-    <Reorder.Item
-      value={item}
-      id={item.id}
-      dragListener={false}
-      dragControls={dragControls}
-      onDragStart={() => setIsDragging(true)}
-      onDragEnd={() => setIsDragging(false)}
-      style={{
-        position: 'relative',
-        zIndex: isDragging ? 40 : 0,
-        boxShadow: isDragging ? '0 12px 32px rgba(0,0,0,0.12)' : 'none',
-        backgroundColor: '#ffffff',
-      }}
-      whileDrag={{ scale: 1.02 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-      className="border-b border-[#F1F5F9] px-3 py-2.5 flex items-center gap-2"
+    <div
+      className={`relative w-full h-full overflow-hidden ${
+        bgHex === '#000000'
+          ? 'bg-black'
+          : bgHex === '#FFFFFF'
+          ? 'bg-white'
+          : pageBgClass
+      }`}
+      style={{ aspectRatio: previewRatio }}
     >
       <div
-        onPointerDown={(e) => {
-          if (!dragEnabled) return;
-          e.preventDefault();
-          dragControls.start(e);
-        }}
-        className={`w-5 flex items-center justify-center py-2 -my-2 text-[#CBD5E1] ${
-          dragEnabled ? 'cursor-grab active:cursor-grabbing touch-none' : 'opacity-30'
-        }`}
-        style={{ touchAction: dragEnabled ? 'none' : 'auto' }}
-        aria-label="Reorder"
-      >
-        <GripVertical size={16} strokeWidth={2} />
-      </div>
-
-      <button
-        onClick={(e) => { e.stopPropagation(); onToggleSelect(); }}
-        onPointerDown={(e) => e.stopPropagation()}
-        className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 transition ${
-          selected ? 'bg-[#2563EB]' : 'border-2 border-[#CBD5E1] bg-white'
-        }`}
-        aria-label="Select"
-      >
-        {selected && <Check size={13} className="text-white" strokeWidth={3} />}
-      </button>
-
-      {/*
-        Page-preview thumbnail — replaces the old plain image.
-        Aspect ratio reflects current page size + orientation.
-        Inner div applies the margin as inset padding, matching
-        exactly how PageCard renders on desktop.
-      */}
-      <div
-        className={`relative flex-shrink-0 border border-[#E2E8F0] overflow-hidden cursor-pointer ${
-          bgHex === '#000000'
-            ? 'bg-black'
-            : bgHex === '#FFFFFF'
-            ? 'bg-white'
-            : pageBgClass
-        }`}
+        className="absolute flex items-center justify-center overflow-hidden"
         style={{
-          width: THUMB_WIDTH,
-          aspectRatio: previewRatio,
+          left: `${marginPercent}%`,
+          top: `${marginPercent}%`,
+          right: `${marginPercent}%`,
+          bottom: `${marginPercent}%`,
         }}
-        onClick={(e) => { e.stopPropagation(); onPreview(); }}
       >
-        <div
-          className="absolute flex items-center justify-center overflow-hidden"
+        <img
+          src={item.preview}
+          alt=""
+          draggable={false}
           style={{
-            left: `${marginPercent}%`,
-            top: `${marginPercent}%`,
-            right: `${marginPercent}%`,
-            bottom: `${marginPercent}%`,
+            width: pageFit === 'Fill page' ? '100%' : 'auto',
+            height: pageFit === 'Fill page' ? '100%' : 'auto',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            objectFit: pageFit === 'Fill page' ? 'cover' : 'contain',
+            transform: `rotate(${item.rotation}deg)`,
           }}
-        >
-          <img
-            src={item.preview}
-            alt=""
-            draggable={false}
-            style={{
-              width: pageFit === 'Fill page' ? '100%' : 'auto',
-              height: pageFit === 'Fill page' ? '100%' : 'auto',
-              maxWidth: '100%',
-              maxHeight: '100%',
-              objectFit: pageFit === 'Fill page' ? 'cover' : 'contain',
-              transform: `rotate(${item.rotation}deg)`,
-            }}
-          />
-        </div>
+        />
       </div>
-
-      <div className="flex-1 min-w-0 ml-1">
-        <p className="text-[13px] font-medium text-[#0F172A] truncate leading-tight">
-          {item.file.name}
-        </p>
-        <p className="text-[11px] text-[#94A3B8] mt-0.5">{item.sizeMB}</p>
-      </div>
-
-      <div className="flex items-center gap-0.5 flex-shrink-0">
-        <button
-          onClick={(e) => { e.stopPropagation(); onRotate(); }}
-          onPointerDown={(e) => e.stopPropagation()}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-[#64748B] active:bg-[#F1F5F9] transition"
-          aria-label="Rotate"
-        >
-          <RotateCw size={15} strokeWidth={1.8} />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-          onPointerDown={(e) => e.stopPropagation()}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-[#64748B] active:bg-[#FEF2F2] active:text-[#EF4444] transition"
-          aria-label="Delete"
-        >
-          <Trash2 size={15} strokeWidth={1.8} />
-        </button>
-      </div>
-    </Reorder.Item>
+    </div>
   );
 }

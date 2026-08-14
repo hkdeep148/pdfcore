@@ -16,7 +16,7 @@ export default function ToolsLayout({
   // Tools index page
 if (isToolsIndexPage) {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-['Source_Sans_3','Adjusted_Arial_Fallback',sans-serif] overflow-x-hidden">
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0B1526] font-['Source_Sans_3','Adjusted_Arial_Fallback',sans-serif] overflow-x-hidden">
       <LandingNavbar />
       <main>{children}</main>
       <LandingFooter />
