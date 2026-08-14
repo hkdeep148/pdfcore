@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-// 👇 Required for static export
+// Required for static export
 export const dynamic = 'force-static';
 
 export default function robots(): MetadataRoute.Robots {
@@ -12,8 +12,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/api/',
           '/_next/',
-          '/blog/',       // 🚫 Blog hidden until content is SEO-ready
-          '/tools/create-pdf/',  // 🚫 Coming-soon page shouldn't be indexed
+          '/tools/create-pdf/', // Coming-soon page shouldn't be indexed
         ],
       },
     ],
