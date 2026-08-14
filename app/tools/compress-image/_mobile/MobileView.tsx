@@ -226,14 +226,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   if (files.length === 0) {
     return (
       <div className="flex-1 overflow-y-auto bg-white min-h-0">
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="hidden"
-          onChange={handleFileChange}
-          multiple
-          accept="image/*"
-        />
+<input
+  ref={fileInputRef}
+  type="file"
+  className="hidden"
+  onChange={handleFileChange}
+  multiple
+  accept="image/*"
+/>
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
       </div>
     );
@@ -243,14 +243,13 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   return (
     <>
       <div className="flex-1 flex flex-col bg-white min-h-0">
-// ✅ CHANGE TO
 <input
   ref={fileInputRef}
   type="file"
   className="hidden"
   onChange={handleFileChange}
   multiple
-  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/bmp"
+  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp"
 />
 
         {/* ═══ SECTION 1: FIXED TOP ═══ */}
