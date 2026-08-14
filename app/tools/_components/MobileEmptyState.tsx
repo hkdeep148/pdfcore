@@ -33,8 +33,8 @@ export default function MobileEmptyState({
   const line2After = line2Parts[1] || '';
 
   return (
-    <div className="lg:hidden flex-1 bg-[#F8F9FC] font-['Inter',sans-serif] text-[#07122E]">
-      <main className="max-w-lg mx-auto px-4 pt-6 pb-8">
+<div className="lg:hidden flex-1 flex flex-col bg-[#F8F9FC] font-['Inter',sans-serif] text-[#07122E] min-h-0">
+  <main className="max-w-lg mx-auto w-full px-4 pt-6 pb-4 flex-1">
         
         {/* ============ COMPACT HEADER ============ */}
         <motion.div
