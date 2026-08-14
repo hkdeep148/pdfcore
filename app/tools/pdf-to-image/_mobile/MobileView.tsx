@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useStickyBottomSpace } from '../../_hooks/useStickyBottomSpace';
 import { Plus, Trash2, FileText, Image as ImageIcon, Lock } from 'lucide-react';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
@@ -12,6 +13,10 @@ import BottomToolbar from './BottomToolbar';
 export default function MobileView() {
   const {
     pages,
+    selectedIds,
+    selectAll,
+    clearSelection,
+    removePage,
     addPdfs,
     clearAll,
     isLoadingPdf,
@@ -27,6 +32,8 @@ export default function MobileView() {
 
   const tool = getToolByPath('/tools/pdf-to-image')!;
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bottomBarRef = useRef<HTMLDivElement>(null);
+  const bottomSpace = useStickyBottomSpace(bottomBarRef);
   const [showSuccess, setShowSuccess] = useState(false);
 
   // Auto-show success screen when conversion is done
@@ -54,6 +61,19 @@ export default function MobileView() {
   };
 
   const hasPages = pages.length > 0;
+  const allSelected = hasPages && selectedIds.size === pages.length;
+
+  const handleToggleSelectAll = () => {
+    if (allSelected) clearSelection();
+    else selectAll();
+  };
+
+  const handleDeleteSelected = () => {
+    const targets = pages.filter((p) => selectedIds.has(p.id));
+    if (targets.length === 0) return;
+    if (!confirm(`Remove ${targets.length} page${targets.length > 1 ? 's' : ''}?`)) return;
+    targets.forEach((p) => removePage(p.id));
+  };
 
   // ═════════ SUCCESS SCREEN ═════════
   if (showSuccess && conversionResult) {
@@ -133,7 +153,7 @@ export default function MobileView() {
 
   // ═════════ MAIN VIEW ═════════
   return (
-    <div className="min-h-screen bg-white pb-[220px] overflow-x-hidden">
+    <div className="min-h-[100dvh] bg-white overflow-x-hidden" style={{ paddingBottom: bottomSpace }}>
       <input
         ref={fileInputRef}
         type="file"
@@ -176,7 +196,7 @@ export default function MobileView() {
       )}
 
       {/*
-        ⭐ TOP TOOLBAR — Add PDF + batch actions
+        ⭐ TOP TOOLBAR — Add PDF + Select/Deselect all + Delete selected
       */}
       <div className="px-4 mt-3">
         <div className="flex items-center rounded-md bg-white border border-[#E2E8F0] min-w-0 overflow-hidden">
@@ -187,9 +207,25 @@ export default function MobileView() {
             icon={<Plus size={20} strokeWidth={2.2} />}
           />
           <ToolbarDivider />
-          <SelectToggleAction />
+          <ActionIcon
+            onClick={handleToggleSelectAll}
+            disabled={pages.length === 0}
+            ariaLabel={allSelected ? 'Deselect all' : 'Select all'}
+            icon={
+              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 11 12 14 22 4" />
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+              </svg>
+            }
+          />
           <ToolbarDivider />
-          <ClearAction />
+          <ActionIcon
+            onClick={handleDeleteSelected}
+            disabled={selectedIds.size === 0}
+            ariaLabel="Remove selected"
+            variant="danger"
+            icon={<Trash2 size={18} strokeWidth={2} />}
+          />
         </div>
       </div>
 
@@ -224,7 +260,7 @@ export default function MobileView() {
       {/*
         ⭐ STICKY BOTTOM — Format + Quality chips + Convert button
       */}
-      <BottomToolbar onAddPdfs={openFilePicker} />
+      <BottomToolbar onAddPdfs={openFilePicker} barRef={bottomBarRef} />
     </div>
   );
 }
@@ -266,49 +302,4 @@ function ActionIcon({
 
 function ToolbarDivider() {
   return <div className="w-px h-6 bg-[#E2E8F0] flex-shrink-0" />;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SelectToggleAction — one button that toggles between
-// "Select all" and "Deselect all" based on current state.
-// ═══════════════════════════════════════════════════════════════
-function SelectToggleAction() {
-  const { pages, selectedIds, selectAll, clearSelection } = usePdfToImageContext();
-  const allSelected = pages.length > 0 && selectedIds.size === pages.length;
-
-  return (
-    <ActionIcon
-      onClick={allSelected ? clearSelection : selectAll}
-      disabled={pages.length === 0}
-      ariaLabel={allSelected ? 'Deselect all' : 'Select all'}
-      icon={
-        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="9 11 12 14 22 4" />
-          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-        </svg>
-      }
-    />
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ClearAction — delete selected pages only (matches image-to-pdf)
-// ═══════════════════════════════════════════════════════════════
-function ClearAction() {
-  const { pages, selectedIds, removePage } = usePdfToImageContext();
-  const handleDeleteSelected = () => {
-    const targets = pages.filter((p) => selectedIds.has(p.id));
-    if (targets.length === 0) return;
-    if (!confirm(`Remove ${targets.length} page${targets.length > 1 ? 's' : ''}?`)) return;
-    targets.forEach((p) => removePage(p.id));
-  };
-  return (
-    <ActionIcon
-      onClick={handleDeleteSelected}
-      disabled={selectedIds.size === 0}
-      ariaLabel="Remove selected"
-      variant="danger"
-      icon={<Trash2 size={18} strokeWidth={2} />}
-    />
-  );
 }

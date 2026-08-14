@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useStickyBottomSpace } from '../../_hooks/useStickyBottomSpace';
 import { motion, AnimatePresence } from 'framer-motion';
 import ToolShellMobile from '../../_components/ToolShellMobile';
 import MobileEmptyState from '../../_components/MobileEmptyState';
@@ -47,6 +48,8 @@ export default function MobileView() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [filename, setFilename] = useState('compressed-image');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bottomBarRef = useRef<HTMLDivElement>(null);
+  const bottomSpace = useStickyBottomSpace(bottomBarRef);
   const tool = getToolByPath('/tools/compress-image')!;
 
   // Update filename when files change
@@ -244,7 +247,7 @@ if (screen === 'loading' || screen === 'compressing') {
           </div>
 
           {/* Main Content — rises up from middle */}
-          <div className="flex-1 overflow-y-auto px-4 pt-2 pb-[140px] bg-[#F5F5FA] animate-mobile-content">
+          <div className="flex-1 overflow-y-auto px-4 pt-2 bg-[#F5F5FA] animate-mobile-content" style={{ paddingBottom: bottomSpace }}>
 
             {/* Toolbar Row */}
             <div className="flex items-center justify-between mb-3">
@@ -295,7 +298,7 @@ if (screen === 'loading' || screen === 'compressing') {
 
         {/* Action Bar — slides up from bottom */}
         <div className="animate-mobile-bottom">
-          <MobileActionBar />
+          <MobileActionBar barRef={bottomBarRef} />
         </div>
   </motion.div>
 )}

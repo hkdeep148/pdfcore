@@ -46,7 +46,7 @@ const SIZE_PRESETS = [
   { label: '50 MB', value: 50 },
 ];
 
-export default function BottomToolbar() {
+export default function BottomToolbar({ barRef }: { barRef?: React.RefObject<HTMLDivElement | null> }) {
   const {
     file, mode, setMode,
     rangeInput, setRangeInput, rangeError,
@@ -61,7 +61,11 @@ export default function BottomToolbar() {
   if (!file) return null;
 
   return (
-    <div className="flex-shrink-0 bg-white border-t border-[#E8E8F0] px-3 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] space-y-2.5">
+    <div
+      ref={barRef}
+      className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] space-y-2.5"
+      style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
+    >
       {/* Mode tabs */}
       <div>
         <p className="text-[10px] font-semibold text-[#8A93A3] mb-1 uppercase tracking-wide">Mode</p>
@@ -241,7 +245,7 @@ export default function BottomToolbar() {
         type="button"
         onClick={splitAndPrepare}
         disabled={!canSplit || isProcessing}
-        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#2563EB] text-white text-[15px] font-bold shadow-[0_8px_24px_-4px_rgba(37,99,235,0.4)] active:scale-[0.98] transition-transform disabled:opacity-60"
+        className="w-full flex items-center justify-center gap-2 py-4 rounded-lg bg-gradient-to-r from-[#4F46E5] to-[#6D5DF6] text-white text-[16px] font-bold shadow-[0_6px_20px_-4px_rgba(79,70,229,0.5)] active:scale-[0.98] transition disabled:opacity-60"
       >
         {isProcessing ? (
           <>

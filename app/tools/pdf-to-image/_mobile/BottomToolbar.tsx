@@ -7,6 +7,7 @@ import type { ImageFormat, ImageResolution } from '../../_types';
 
 interface BottomToolbarProps {
   onAddPdfs: () => void;
+  barRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const FORMAT_LABELS: Record<ImageFormat, string> = {
@@ -33,7 +34,7 @@ const RESOLUTION_OPTIONS: { id: ImageResolution; label: string; hint: string }[]
   { id: 'ultra', label: 'Ultra', hint: '216 DPI' },
 ];
 
-export default function BottomToolbar({ onAddPdfs }: BottomToolbarProps) {
+export default function BottomToolbar({ onAddPdfs, barRef }: BottomToolbarProps) {
   const {
     selectedIds,
     format,
@@ -49,6 +50,7 @@ export default function BottomToolbar({ onAddPdfs }: BottomToolbarProps) {
 
   return (
     <div
+      ref={barRef}
       className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
       style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
     >

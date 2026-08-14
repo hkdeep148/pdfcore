@@ -1,6 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { Check, FileText, X, MoveVertical } from 'lucide-react';
+import MobileListView from '../../_components/MobileListView';
 import { useSplitPdfContext } from '../_context/SplitPdfContext';
 import { GROUP_COLORS } from '../_desktop/PageThumbnail';
 
@@ -12,8 +14,15 @@ export default function PageGrid() {
     extractMode,
     selectedPages,
     togglePageSelection,
+    reorderPages,
   } = useSplitPdfContext();
 
+  const [previewPage, setPreviewPage] = useState<{
+    preview: string;
+    label: string;
+  } | null>(null);
+
+  // Map page index → group index for grouped modes
   const pageToGroup = useMemo(() => {
     const map = new Map<number, number>();
     pageGroups.forEach((group, groupIdx) => {
@@ -22,182 +31,178 @@ export default function PageGrid() {
     return map;
   }, [pageGroups]);
 
-  // ⭐ Is selection mode active?
-  const isSelectMode = mode === 'pages' && extractMode === 'select';
-
-  return (
-    <div className="flex-1 overflow-y-auto px-3 pb-3">
-      {/* Hint banner when in select mode */}
-      {isSelectMode && selectedPages.size === 0 && (
-        <div className="mb-3 px-3 py-2 bg-[#F0FDF4] border border-[#BBF7D0] rounded-xl flex items-center gap-2">
-          <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#10B981] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 11l3 3L22 4" />
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-          </svg>
-          <p className="text-[11px] text-[#166534] font-semibold">
-            Tap pages to select them
-          </p>
-        </div>
-      )}
-
-      {isSelectMode && selectedPages.size > 0 && (
-        <div className="mb-3 px-3 py-2 bg-[#EFF3FF] border border-[#DBEAFE] rounded-xl flex items-center justify-between">
-          <p className="text-[11px] text-[#1E40AF] font-bold">
-            {selectedPages.size} page{selectedPages.size === 1 ? '' : 's'} selected
-          </p>
-        </div>
-      )}
-
-      <div className="grid grid-cols-3 gap-2.5">
-        {pages.map((page) => {
-          // ⭐ Select mode: use selection state
-          if (isSelectMode) {
-            const isSelected = selectedPages.has(page.pageIndex);
-            return (
-              <SelectableMobileCard
-                key={page.id}
-                pageIndex={page.pageIndex}
-                preview={page.preview}
-                isSelected={isSelected}
-                onToggle={() => togglePageSelection(page.pageIndex)}
-              />
-            );
-          }
-
-          // Default mode: use group coloring
-          const groupIdx = pageToGroup.get(page.pageIndex);
-          const isIncluded = groupIdx !== undefined;
-          const groupColor = isIncluded
-            ? GROUP_COLORS[groupIdx! % GROUP_COLORS.length]
-            : '#ECEDF3';
-
-          return (
-            <GroupedMobileCard
-              key={page.id}
-              pageIndex={page.pageIndex}
-              preview={page.preview}
-              isIncluded={isIncluded}
-              groupIdx={groupIdx}
-              groupColor={groupColor}
-            />
-          );
-        })}
-      </div>
-    </div>
+  // Bridge: convert selectedPages (Set<number>) to selectedIds (Set<string>)
+  // for MobileListView, and vice versa for toggle.
+  const selectedIds = useMemo(
+    () => new Set(pages.filter((p) => selectedPages.has(p.pageIndex)).map((p) => p.id)),
+    [pages, selectedPages],
   );
-}
 
-// ============ ⭐ SELECTABLE CARD (for select mode) ============
+  const handleToggleSelect = (id: string) => {
+    const page = pages.find((p) => p.id === id);
+    if (page) togglePageSelection(page.pageIndex);
+  };
 
-interface SelectableMobileCardProps {
-  pageIndex: number;
-  preview: string;
-  isSelected: boolean;
-  onToggle: () => void;
-}
+  const isSelectMode = mode === 'pages' && extractMode === 'select';
+  const allSelected = pages.length > 0 && selectedPages.size === pages.length;
 
-function SelectableMobileCard({
-  pageIndex,
-  preview,
-  isSelected,
-  onToggle,
-}: SelectableMobileCardProps) {
+  const handleToggleSelectAll = () => {
+    if (allSelected) {
+      // Deselect all
+      pages.forEach((p) => {
+        if (selectedPages.has(p.pageIndex)) togglePageSelection(p.pageIndex);
+      });
+    } else {
+      // Select all
+      pages.forEach((p) => {
+        if (!selectedPages.has(p.pageIndex)) togglePageSelection(p.pageIndex);
+      });
+    }
+  };
+
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className={`relative bg-white rounded-lg border-2 p-1.5 transition-all cursor-pointer active:scale-95 ${
-        isSelected
-          ? 'border-[#10B981] shadow-md shadow-[#10B981]/20'
-          : 'border-[#ECEDF3] hover:border-[#10B981]/50'
-      }`}
-    >
-      {/* ⭐ Green checkmark badge when selected */}
-      {isSelected && (
-        <div className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-[#10B981] flex items-center justify-center shadow-md z-10 pointer-events-none">
-          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </div>
-      )}
-
-      {/* Preview */}
-      <div className="w-full aspect-[1/1.414] bg-[#F5F5FA] rounded overflow-hidden flex items-center justify-center">
-        <img
-          src={preview}
-          alt={`Page ${pageIndex + 1}`}
-          className="max-w-full max-h-full object-contain pointer-events-none"
-          draggable={false}
-        />
-      </div>
-
-      {/* Page number pill */}
-      <div className="mt-1 text-center">
-        <span
-          className={`inline-block px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
-            isSelected
-              ? 'bg-[#10B981] text-white'
-              : 'bg-[#F1F5F9] text-[#5B6472]'
-          }`}
-        >
-          {pageIndex + 1}
+    <>
+      {/* Top header — same style as Organize */}
+      <div className="mb-3 px-3 py-2 bg-[#EEF2FF] border border-[#E0E7FF] rounded-md flex items-center gap-2">
+        <MoveVertical size={15} className="text-[#4F46E5]" strokeWidth={2.2} />
+        <span className="text-[12.5px] font-semibold text-[#3730A3]">
+          Drag the handle to reorder
         </span>
       </div>
-    </button>
+
+      {/*
+        ═══════════ SELECTION HEADER ═══════════
+        Matches image-to-pdf style: rounded-lg bg-[#F8FAFC] border.
+        Tap to select all / deselect all.
+      */}
+      {isSelectMode && (
+        <button
+          onClick={handleToggleSelectAll}
+          disabled={pages.length === 0}
+          className="mb-3 w-full px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] rounded-lg flex items-center justify-between active:bg-[#F1F5F9] transition"
+        >
+          <span className="flex items-center gap-2">
+            <span
+              className={`w-5 h-5 rounded flex items-center justify-center transition ${
+                allSelected || selectedPages.size > 0
+                  ? 'bg-[#2563EB]'
+                  : 'border-2 border-[#CBD5E1] bg-white'
+              }`}
+            >
+              {(allSelected || selectedPages.size > 0) && (
+                <Check size={13} className="text-white" strokeWidth={3} />
+              )}
+            </span>
+            <span className="text-[13px] font-semibold text-[#0F172A]">
+              {selectedPages.size} of {pages.length} selected
+            </span>
+          </span>
+          <span className="text-[11px] text-[#2563EB] font-semibold">
+            {allSelected ? 'Deselect all' : 'Select all'}
+          </span>
+        </button>
+      )}
+
+      <MobileListView
+        items={pages}
+        onReorder={reorderPages}
+        selectedIds={selectedIds}
+        onToggleSelect={isSelectMode ? handleToggleSelect : undefined}
+        accentColor="#2563EB"
+        thumbnailSize={{ width: 50, height: 64 }}
+        renderThumbnail={(page) => (
+          <img
+            src={page.preview}
+            alt={`Page ${page.pageIndex + 1}`}
+            draggable={false}
+            className="max-w-full max-h-full object-contain select-none"
+          />
+        )}
+        onThumbnailTap={(page) =>
+          setPreviewPage({
+            preview: page.preview,
+            label: `Page ${page.pageIndex + 1}`,
+          })
+        }
+        renderThumbnailBadge={(page) => {
+          // In grouped modes, show group number badge
+          if (!isSelectMode) {
+            const groupIdx = pageToGroup.get(page.pageIndex);
+            if (groupIdx !== undefined) {
+              const color = GROUP_COLORS[groupIdx % GROUP_COLORS.length];
+              return (
+                <div
+                  className="w-5 h-5 rounded-full text-white text-[9px] font-bold flex items-center justify-center shadow-sm border-2 border-white"
+                  style={{ backgroundColor: color }}
+                >
+                  {groupIdx + 1}
+                </div>
+              );
+            }
+          }
+          return null;
+        }}
+        renderPrimaryText={(page) => `Page ${page.pageIndex + 1}`}
+        renderSecondaryText={(page) => {
+          if (!isSelectMode) {
+            const groupIdx = pageToGroup.get(page.pageIndex);
+            if (groupIdx !== undefined) return `Group ${groupIdx + 1}`;
+            return 'Not included';
+          }
+          return '';
+        }}
+      />
+
+      {/* Full-screen preview modal */}
+      {previewPage && (
+        <PagePreviewModal
+          preview={previewPage.preview}
+          label={previewPage.label}
+          onClose={() => setPreviewPage(null)}
+        />
+      )}
+    </>
   );
 }
 
-// ============ GROUPED CARD (for range/size modes) ============
-
-interface GroupedMobileCardProps {
-  pageIndex: number;
-  preview: string;
-  isIncluded: boolean;
-  groupIdx: number | undefined;
-  groupColor: string;
-}
-
-function GroupedMobileCard({
-  pageIndex,
+// ═══════════════════════════════════════════════════════════════
+// PagePreviewModal — full-screen preview thumbnail
+// ═══════════════════════════════════════════════════════════════
+function PagePreviewModal({
   preview,
-  isIncluded,
-  groupIdx,
-  groupColor,
-}: GroupedMobileCardProps) {
+  label,
+  onClose,
+}: {
+  preview: string;
+  label: string;
+  onClose: () => void;
+}) {
   return (
-    <div className="relative">
-      <div
-        className={`relative bg-white rounded-lg border-2 p-1.5 transition-all ${
-          isIncluded ? 'shadow-sm' : 'opacity-40'
-        }`}
-        style={{ borderColor: groupColor }}
-      >
-        {/* Group number badge */}
-        {isIncluded && (
-          <div
-            className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full text-white text-[9px] font-bold flex items-center justify-center shadow-sm z-10"
-            style={{ backgroundColor: groupColor }}
-          >
-            {groupIdx! + 1}
+    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-4 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+            <FileText size={15} className="text-white" strokeWidth={2} />
           </div>
-        )}
-
-        {/* Preview */}
-        <div className="w-full aspect-[1/1.414] bg-[#F5F5FA] rounded overflow-hidden flex items-center justify-center">
-          <img
-            src={preview}
-            alt={`Page ${pageIndex + 1}`}
-            className="max-w-full max-h-full object-contain"
-            draggable={false}
-          />
+          <p className="text-[14px] font-bold text-white">{label}</p>
         </div>
+        <button
+          onClick={onClose}
+          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:scale-90 transition"
+          aria-label="Close preview"
+        >
+          <X size={20} className="text-white" strokeWidth={2} />
+        </button>
+      </div>
 
-        {/* Page number */}
-        <div className="mt-1 text-center">
-          <span className="text-[9px] font-semibold text-[#5B6472]">
-            {pageIndex + 1}
-          </span>
-        </div>
+      {/* Image */}
+      <div className="flex-1 flex items-center justify-center p-4 min-h-0">
+        <img
+          src={preview}
+          alt={label}
+          className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+        />
       </div>
     </div>
   );

@@ -1,219 +1,9 @@
 'use client';
 
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  rectSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { useRef } from 'react';
+import { useState } from 'react';
+import { RotateCcw, RotateCw, Trash2, FileText, X } from 'lucide-react';
+import MobileListView from '../../_components/MobileListView';
 import { useOrganizePdfContext } from '../_context/OrganizePdfContext';
-import type { OrganizePdfPage } from '../../_types';
-
-interface MobileCardProps {
-  page: OrganizePdfPage;
-  index: number;
-  isSelected: boolean;
-  onToggleSelect: (id: string) => void;
-  onDelete: (id: string) => void;
-  onRotate: (id: string, direction: 'left' | 'right') => void;
-}
-
-function MobileCard({
-  page,
-  index,
-  isSelected,
-  onToggleSelect,
-  onDelete,
-  onRotate,
-}: MobileCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: page.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 999 : 1,
-  };
-
-  // ⭐ Track pointer to distinguish tap from drag
-  const pointerStartRef = useRef({ x: 0, y: 0, time: 0 });
-
-  const handlePointerDown = (e: React.PointerEvent) => {
-    pointerStartRef.current = {
-      x: e.clientX,
-      y: e.clientY,
-      time: Date.now(),
-    };
-  };
-
-  const handleClick = (e: React.MouseEvent) => {
-    if (isDragging) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-
-    const dx = Math.abs(e.clientX - pointerStartRef.current.x);
-    const dy = Math.abs(e.clientY - pointerStartRef.current.y);
-    const duration = Date.now() - pointerStartRef.current.time;
-
-    if (dx > 10 || dy > 10 || duration > 250) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-
-    onToggleSelect(page.id);
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={`relative bg-white rounded-xl border-2 p-2 transition-colors select-none ${
-        isSelected
-          ? 'border-[#2563EB] shadow-md'
-          : 'border-[#E8E8F0]'
-      } ${isDragging ? 'shadow-2xl scale-105 border-[#2563EB] touch-none' : ''}`}
-      // ⭐ REMOVED: touch-none class (only when dragging)
-    >
-      {/* Order badge */}
-      <div
-        className={`absolute -top-1.5 -left-1.5 z-10 w-5 h-5 rounded-full text-white text-[9px] font-bold flex items-center justify-center shadow-sm pointer-events-none ${
-          isSelected ? 'bg-[#2563EB]' : 'bg-[#5B6472]'
-        }`}
-      >
-        {index + 1}
-      </div>
-
-      {/* Drag indicator icon */}
-      <div className="absolute top-1 right-1 z-10 text-[#B0B7C3] pointer-events-none opacity-40">
-        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor">
-          <circle cx="9" cy="6" r="1.5" />
-          <circle cx="9" cy="12" r="1.5" />
-          <circle cx="9" cy="18" r="1.5" />
-          <circle cx="15" cy="6" r="1.5" />
-          <circle cx="15" cy="12" r="1.5" />
-          <circle cx="15" cy="18" r="1.5" />
-        </svg>
-      </div>
-
-      {/* Rotation badge */}
-      {page.userRotation !== 0 && (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10 px-1.5 py-0.5 rounded-full bg-[#F59E0B] text-white text-[9px] font-bold pointer-events-none">
-          {page.userRotation}°
-        </div>
-      )}
-
-      {/* Preview - Smart tap/drag detection */}
-      <div
-        onPointerDown={handlePointerDown}
-        onClick={handleClick}
-        className="w-full aspect-[1/1.414] bg-[#F5F5FA] rounded overflow-hidden flex items-center justify-center mt-4"
-      >
-        <img
-          src={page.preview}
-          alt={`Page ${index + 1}`}
-          className="max-w-full max-h-full object-contain transition-transform duration-300 pointer-events-none"
-          style={{ transform: `rotate(${page.userRotation}deg)` }}
-          draggable={false}
-        />
-      </div>
-
-      {/* Selection indicator */}
-      {isSelected && (
-        <div className="absolute inset-0 bg-[#2563EB]/10 rounded-xl pointer-events-none flex items-center justify-center">
-          <div className="w-8 h-8 rounded-full bg-[#2563EB] flex items-center justify-center shadow-lg">
-            <svg
-              viewBox="0 0 24 24"
-              className="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
-        </div>
-      )}
-
-      {/* Action buttons */}
-      <div
-        className="flex items-center justify-around mt-1"
-        onPointerDown={(e) => e.stopPropagation()}
-      >
-        <button
-          type="button"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.stopPropagation();
-            onRotate(page.id, 'left');
-          }}
-          className="w-8 h-8 rounded flex items-center justify-center text-[#5B6472] active:bg-[#EFF3FF] active:scale-90 transition-transform"
-          aria-label="Rotate left"
-        >
-          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="1 4 1 10 7 10" />
-            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.stopPropagation();
-            onRotate(page.id, 'right');
-          }}
-          className="w-8 h-8 rounded flex items-center justify-center text-[#5B6472] active:bg-[#EFF3FF] active:scale-90 transition-transform"
-          aria-label="Rotate right"
-        >
-          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="23 4 23 10 17 10" />
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(page.id);
-          }}
-          className="w-8 h-8 rounded flex items-center justify-center text-[#EF4444] active:bg-[#FEE9E9] active:scale-90 transition-transform"
-          aria-label="Delete"
-        >
-          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export default function OrganizeGrid() {
   const {
@@ -223,89 +13,143 @@ export default function OrganizeGrid() {
     toggleSelect,
     deletePage,
     rotatePage,
+    clearSelection,
   } = useOrganizePdfContext();
 
-  // ⭐ CRITICAL FIX: Longer delay + strict tolerance
-  // This lets normal scroll gestures pass through
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        delay: 300,     // Longer press required
-        tolerance: 5,   // Very strict - even small movement cancels drag
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 300,     // ⭐ 300ms long-press for touch
-        tolerance: 5,   // ⭐ If finger moves 5px, it's a scroll not drag
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = pages.findIndex((page) => page.id === active.id);
-      const newIndex = pages.findIndex((page) => page.id === over.id);
-
-      const newPages = [...pages];
-      const [movedItem] = newPages.splice(oldIndex, 1);
-      newPages.splice(newIndex, 0, movedItem);
-
-      reorderPages(newPages);
-    }
-  };
+  const [previewPage, setPreviewPage] = useState<{
+    preview: string;
+    label: string;
+  } | null>(null);
 
   return (
-    <div className="flex-1 overflow-y-auto px-3 pb-3">
-      {/* Drag hint */}
-      <div className="mb-2.5 px-3 py-2 bg-[#EFF6FF] border border-[#DBEAFE] rounded-lg flex items-center gap-2">
-        <svg
-          viewBox="0 0 24 24"
-          className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+    <div className="pb-3">
+      {/* Selection bar — full width, light purple theme */}
+      <div className="mb-3 px-3 py-2 bg-[#EEF2FF] border border-[#E0E7FF] rounded-md flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <FileText size={15} className="text-[#4F46E5]" strokeWidth={2.2} />
+          <span className="text-[12.5px] font-semibold text-[#3730A3]">
+            {selectedIds.size} of {pages.length} selected
+          </span>
+        </div>
+        <button
+          onClick={clearSelection}
+          disabled={selectedIds.size === 0}
+          className="flex items-center gap-1 text-[11px] font-bold text-[#EF4444] active:opacity-60 transition disabled:opacity-40"
         >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="16" x2="12" y2="12" />
-          <line x1="12" y1="8" x2="12.01" y2="8" />
-        </svg>
-        <p className="text-[10.5px] text-[#1E40AF] font-medium leading-tight">
-          <strong>Tap</strong> to select · <strong>Long-press & drag</strong> to reorder · <strong>Swipe</strong> to scroll
-        </p>
+          <Trash2 size={14} strokeWidth={2.2} />
+          Clear all
+        </button>
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={pages.map((p) => p.id)}
-          strategy={rectSortingStrategy}
-        >
-          <div className="grid grid-cols-2 gap-2.5">
-            {pages.map((page, index) => (
-              <MobileCard
-                key={page.id}
-                page={page}
-                index={index}
-                isSelected={selectedIds.has(page.id)}
-                onToggleSelect={toggleSelect}
-                onDelete={deletePage}
-                onRotate={rotatePage}
-              />
-            ))}
+      {/*
+        ═══════════ UNIVERSAL LIST ═══════════
+        Uses the same list view as image-to-pdf / merge-pdf.
+        Thumbnail is slightly bigger (50×64) so page previews
+        are easier to see. Tapping the thumbnail opens a
+        full-screen preview.
+      */}
+      <MobileListView
+        items={pages}
+        onReorder={reorderPages}
+        selectedIds={selectedIds}
+        onToggleSelect={toggleSelect}
+        accentColor="#2563EB"
+        thumbnailSize={{ width: 50, height: 64 }}
+        renderThumbnail={(page, index) => (
+          <img
+            src={page.preview}
+            alt={`Page ${index + 1}`}
+            draggable={false}
+            className="max-w-full max-h-full object-contain select-none"
+            style={{ transform: `rotate(${page.userRotation}deg)` }}
+          />
+        )}
+        onThumbnailTap={(page, index) =>
+          setPreviewPage({
+            preview: page.preview,
+            label: `Page ${index + 1}`,
+          })
+        }
+        renderThumbnailBadge={(_page, index) => (
+          <div className="w-5 h-5 rounded-full bg-[#2563EB] text-white text-[10px] font-bold flex items-center justify-center shadow-sm border-2 border-white">
+            {index + 1}
           </div>
-        </SortableContext>
-      </DndContext>
+        )}
+        renderPrimaryText={(_page, index) => `Page ${index + 1}`}
+        renderSecondaryText={(page) =>
+          page.userRotation !== 0 ? `Rotated ${page.userRotation}°` : ''
+        }
+        actions={(page) => [
+          {
+            icon: <RotateCcw size={15} strokeWidth={1.8} />,
+            ariaLabel: 'Rotate left',
+            onClick: () => rotatePage(page.id, 'left'),
+          },
+          {
+            icon: <RotateCw size={15} strokeWidth={1.8} />,
+            ariaLabel: 'Rotate right',
+            onClick: () => rotatePage(page.id, 'right'),
+          },
+          {
+            icon: <Trash2 size={15} strokeWidth={1.8} />,
+            ariaLabel: 'Delete',
+            onClick: () => deletePage(page.id),
+            variant: 'danger',
+          },
+        ]}
+      />
+
+      {/* Full-screen preview modal */}
+      {previewPage && (
+        <PagePreviewModal
+          preview={previewPage.preview}
+          label={previewPage.label}
+          onClose={() => setPreviewPage(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PagePreviewModal — full-screen preview thumbnail
+// ═══════════════════════════════════════════════════════════════
+function PagePreviewModal({
+  preview,
+  label,
+  onClose,
+}: {
+  preview: string;
+  label: string;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-4 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+            <FileText size={15} className="text-white" strokeWidth={2} />
+          </div>
+          <p className="text-[14px] font-bold text-white">{label}</p>
+        </div>
+        <button
+          onClick={onClose}
+          className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center active:scale-90 transition"
+          aria-label="Close preview"
+        >
+          <X size={20} className="text-white" strokeWidth={2} />
+        </button>
+      </div>
+
+      {/* Image */}
+      <div className="flex-1 flex items-center justify-center p-4 min-h-0">
+        <img
+          src={preview}
+          alt={label}
+          className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+        />
+      </div>
     </div>
   );
 }

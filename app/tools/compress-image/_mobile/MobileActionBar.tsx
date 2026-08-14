@@ -3,7 +3,7 @@
 import { Loader2, Zap, Package, Download, RotateCcw } from 'lucide-react';
 import { useCompressImageContext } from '../_context/CompressImageContext';
 
-export default function MobileActionBar() {
+export default function MobileActionBar({ barRef }: { barRef?: React.RefObject<HTMLDivElement | null> }) {
   const {
     files,
     processing,
@@ -16,7 +16,7 @@ export default function MobileActionBar() {
   } = useCompressImageContext();
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-white via-white to-transparent pt-6">
+    <div ref={barRef} className="absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-white via-white to-transparent pt-6">
       <div className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         {!hasCompleted ? (
           <button

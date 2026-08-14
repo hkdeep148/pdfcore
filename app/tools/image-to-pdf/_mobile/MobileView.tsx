@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useMemo, useEffect } from 'react';
+import { useStickyBottomSpace } from '../../_hooks/useStickyBottomSpace';
 import {
   Plus, RotateCw, RotateCcw, Trash2, ChevronDown, Check,
   ArrowDownAZ, ArrowRight, FileText, Lock,
@@ -92,6 +93,8 @@ export default function MobileView() {
     imageName: '',
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bottomBarRef = useRef<HTMLDivElement>(null);
+  const bottomSpace = useStickyBottomSpace(bottomBarRef);
   const tool = getToolByPath('/tools/image-to-pdf')!;
 
   useEffect(() => {
@@ -234,7 +237,7 @@ export default function MobileView() {
 
   // ═════════ MAIN VIEW ═════════
   return (
-    <div className="min-h-screen bg-white pb-[240px] overflow-x-hidden">
+    <div className="min-h-[100dvh] bg-white overflow-x-hidden" style={{ paddingBottom: bottomSpace }}>
       <input
         ref={fileInputRef}
         type="file"
@@ -407,6 +410,7 @@ export default function MobileView() {
           3. Create PDF button
       */}
       <div
+        ref={bottomBarRef}
         className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
         style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
       >

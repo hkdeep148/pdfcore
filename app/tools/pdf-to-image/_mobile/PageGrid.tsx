@@ -10,6 +10,8 @@ export default function PageGrid() {
     pages,
     selectedIds,
     toggleSelect,
+    selectAll,
+    clearSelection,
     removePage,
     reorderPages,
   } = usePdfToImageContext();
@@ -20,25 +22,40 @@ export default function PageGrid() {
     pdfName: string;
   } | null>(null);
 
+  const allSelected = pages.length > 0 && selectedIds.size === pages.length;
+
   return (
     <>
       {/*
         ═══════════ SELECTION HEADER ═══════════
-        Matches image-to-pdf style: rounded-lg bg-[#F8FAFC] border.
+        Clickable toggle — matches image-to-pdf style:
+        tap to select all / deselect all.
       */}
-      <div className="mb-3 px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] rounded-lg flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded flex items-center justify-center bg-[#2563EB]">
-            <Check size={13} className="text-white" strokeWidth={3} />
-          </div>
+      <button
+        onClick={allSelected ? clearSelection : selectAll}
+        disabled={pages.length === 0}
+        className="mb-3 w-full px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] rounded-lg flex items-center justify-between active:bg-[#F1F5F9] transition"
+      >
+        <span className="flex items-center gap-2">
+          <span
+            className={`w-5 h-5 rounded flex items-center justify-center transition ${
+              allSelected || selectedIds.size > 0
+                ? 'bg-[#2563EB]'
+                : 'border-2 border-[#CBD5E1] bg-white'
+            }`}
+          >
+            {(allSelected || selectedIds.size > 0) && (
+              <Check size={13} className="text-white" strokeWidth={3} />
+            )}
+          </span>
           <span className="text-[13px] font-semibold text-[#0F172A]">
             {selectedIds.size} of {pages.length} selected
           </span>
-        </div>
-        <span className="text-[11px] text-[#94A3B8] font-medium">
-          Tap thumbnail to preview
         </span>
-      </div>
+        <span className="text-[11px] text-[#2563EB] font-semibold">
+          {allSelected ? 'Deselect all' : 'Select all'}
+        </span>
+      </button>
 
       {/*
         ═══════════ UNIVERSAL LIST ═══════════

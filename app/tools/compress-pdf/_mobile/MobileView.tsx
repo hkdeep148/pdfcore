@@ -1,9 +1,9 @@
 'use client';
 
 import { useRef } from 'react';
-import ToolShellMobile from '../../_components/ToolShellMobile';
+import { useStickyBottomSpace } from '../../_hooks/useStickyBottomSpace';
+import { Plus, Lock } from 'lucide-react';
 import MobileEmptyState from '../../_components/MobileEmptyState';
-import MobileToolHeader from '../../_components/MobileToolHeader';
 import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import { getToolByPath } from '../../_config/tools';
 import { useCompressPdfContext } from '../_context/CompressPdfContext';
@@ -26,6 +26,8 @@ export default function MobileView() {
   } = useCompressPdfContext();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bottomBarRef = useRef<HTMLDivElement>(null);
+  const bottomSpace = useStickyBottomSpace(bottomBarRef);
   const tool = getToolByPath('/tools/compress-pdf')!;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,13 +59,13 @@ export default function MobileView() {
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   };
 
-  // ═══════════ SUCCESS SCREEN (renders OUTSIDE ToolShellMobile) ═══════════
+  // ═══════════ SUCCESS SCREEN ═══════════
   if (allDone) {
     return (
       <MobileSuccessScreen
         toolIcon={tool.icon}
         toolName="Compress PDF"
-        toolColor="#F43F5E"
+        toolColor="#2563EB"
         onBack={clearAll}
         title={isAlreadyOptimized ? 'Already Optimized!' : 'Compression Successful!'}
         subtitle={
@@ -101,9 +103,26 @@ export default function MobileView() {
     );
   }
 
-  // ═══════════ NORMAL VIEW (inside ToolShellMobile) ═══════════
+  // ═════════ EMPTY STATE ═════════
+  if (!hasItems) {
+    return (
+      <div className="min-h-screen bg-white overflow-x-hidden">
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          multiple
+          onChange={handleFileChange}
+          accept="application/pdf"
+        />
+        <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
+      </div>
+    );
+  }
+
+  // ═════════ MAIN VIEW ═════════
   return (
-    <ToolShellMobile fixedHeight={hasItems}>
+    <div className="min-h-[100dvh] bg-white overflow-x-hidden" style={{ paddingBottom: bottomSpace }}>
       <input
         ref={fileInputRef}
         type="file"
@@ -113,11 +132,15 @@ export default function MobileView() {
         accept="application/pdf"
       />
 
+      {/* Error */}
       {errorMessage && (
-        <div className="mx-4 mt-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between z-50">
+        <div className="mx-4 mt-3 mb-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
           <span className="text-[13px] text-red-600 font-medium">{errorMessage}</span>
-          <button onClick={() => setErrorMessage(null)} className="text-red-400">
-            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+          <button
+            onClick={() => setErrorMessage(null)}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-100 active:scale-90 transition"
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -125,22 +148,54 @@ export default function MobileView() {
         </div>
       )}
 
-      {!hasItems ? (
-        <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
-      ) : (
-        <div className="flex flex-col h-full bg-[#F4F5F7]">
-          <MobileToolHeader
-            filename={`${items.length} PDF${items.length > 1 ? 's' : ''}`}
-            onFilenameChange={() => {}}
-            editable={false}
-            onBack={clearAll}
-          />
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <PdfList />
+      {/* ⭐ SELECTION HEADER */}
+      <div className="mt-3 mx-4 px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] rounded-lg flex items-center justify-between">
+        <span className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded flex items-center justify-center bg-[#2563EB]">
+            <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </span>
+          <span className="text-[13px] font-semibold text-[#0F172A]">
+            {items.length} PDF{items.length > 1 ? 's' : ''}
+          </span>
+        </span>
+        <span className="text-[11px] text-[#94A3B8] font-medium">
+          {items.every((it) => it.status === 'done') ? 'All compressed' : 'Ready to compress'}
+        </span>
+      </div>
+
+      {/*
+        ⭐ PDF LIST
+      */}
+      <div className="mx-4 mt-2">
+        <PdfList />
+      </div>
+
+      {/* ⭐ ADD MORE PDFs */}
+      <div className="mx-4 mt-2.5">
+        <button
+          onClick={openFilePicker}
+          className="w-full py-3 rounded-lg border border-dashed border-[#BFDBFE] bg-[#F5F9FF] flex flex-col items-center justify-center gap-0.5 active:scale-[0.98] active:bg-[#EFF6FF] transition"
+        >
+          <div className="flex items-center gap-1.5 text-[#2563EB]">
+            <Plus size={16} strokeWidth={2.5} />
+            <span className="text-[13px] font-semibold">Add more PDFs</span>
           </div>
-          <BottomToolbar onAddPdfs={openFilePicker} />
-        </div>
-      )}
-    </ToolShellMobile>
+          <p className="text-[10px] text-[#94A3B8]">PDF • Max 50 files</p>
+        </button>
+      </div>
+
+      {/* Security footer */}
+      <div className="mt-3 mb-1 px-4 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]">
+        <Lock size={11} />
+        Your files are 100% secure. We never store your data.
+      </div>
+
+      {/*
+        ⭐ STICKY BOTTOM — Compression level + Compress button
+      */}
+      <BottomToolbar onAddPdfs={openFilePicker} barRef={bottomBarRef} />
+    </div>
   );
 }

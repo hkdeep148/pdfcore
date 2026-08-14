@@ -164,6 +164,11 @@ export function useSplitPdf() {
     });
   }, [updateInputFromSelection]);
 
+  // ⭐ Reorder pages (for mobile list view)
+  const reorderPages = useCallback((newOrder: typeof pages) => {
+    setPages(newOrder);
+  }, []);
+
   // Sync input → selected pages
   useEffect(() => {
     if (mode !== 'pages' || extractMode !== 'select' || !file) return;
@@ -410,6 +415,7 @@ export function useSplitPdf() {
     downloadAllAsZip,          // ⭐ NEW: Download all as ZIP
     resetSplit,
     togglePageSelection: handleTogglePage,
+    reorderPages,
     // Utilities
     formatBytes,
     // 🩹 Backward compat for desktop

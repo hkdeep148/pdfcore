@@ -22,6 +22,9 @@ export interface MobileListViewProps<T extends { id: string }> {
   /** Items to render. Each item must have a unique `id`. */
   items: T[];
 
+  /** Optional thumbnail dimensions (width, height in px). Default: 34×44. */
+  thumbnailSize?: { width: number; height: number };
+
   /** Enable drag-to-reorder. If provided, drag handles appear on each row. */
   onReorder?: (newOrder: T[]) => void;
 
@@ -71,6 +74,7 @@ export default function MobileListView<T extends { id: string }>({
   actions,
   accentColor = '#2563EB',
   emptyState,
+  thumbnailSize = { width: 34, height: 44 },
 }: MobileListViewProps<T>) {
   const isReorderable = !!onReorder;
   const isSelectable = !!selectedIds && !!onToggleSelect;
@@ -97,6 +101,7 @@ export default function MobileListView<T extends { id: string }>({
         onThumbnailTap={onThumbnailTap}
         actions={actions}
         accentColor={accentColor}
+        thumbnailSize={thumbnailSize}
       />
     );
   });
@@ -142,6 +147,7 @@ interface MobileListRowProps<T extends { id: string }> {
   onThumbnailTap?: (item: T, index: number) => void;
   actions?: (item: T, index: number) => MobileListAction[];
   accentColor: string;
+  thumbnailSize: { width: number; height: number };
 }
 
 function MobileListRow<T extends { id: string }>({
@@ -158,6 +164,7 @@ function MobileListRow<T extends { id: string }>({
   onThumbnailTap,
   actions,
   accentColor,
+  thumbnailSize,
 }: MobileListRowProps<T>) {
   const dragControls = useDragControls();
   const [isDragging, setIsDragging] = useState(false);
@@ -224,7 +231,7 @@ function MobileListRow<T extends { id: string }>({
             }}
             onPointerDown={(e) => e.stopPropagation()}
             className="block bg-[#F8FAFC] border border-[#E2E8F0] rounded overflow-hidden flex items-center justify-center active:opacity-70 transition"
-            style={{ width: 34, height: 44 }}
+            style={{ width: thumbnailSize.width, height: thumbnailSize.height }}
             aria-label="Preview"
           >
             {renderThumbnail(item, index)}
@@ -232,7 +239,7 @@ function MobileListRow<T extends { id: string }>({
         ) : (
           <div
             className="bg-[#F8FAFC] border border-[#E2E8F0] rounded overflow-hidden flex items-center justify-center"
-            style={{ width: 34, height: 44 }}
+            style={{ width: thumbnailSize.width, height: thumbnailSize.height }}
           >
             {renderThumbnail(item, index)}
           </div>

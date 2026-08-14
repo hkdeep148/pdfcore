@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useMemo } from 'react';
+import { useStickyBottomSpace } from '../../_hooks/useStickyBottomSpace';
 import { Plus, RotateCw, Trash2, ArrowDownAZ, ArrowRight, FileText, Layers, Lock } from 'lucide-react';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
@@ -33,6 +34,8 @@ export default function MobileView() {
   } = useMergePdfContext();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bottomBarRef = useRef<HTMLDivElement>(null);
+  const bottomSpace = useStickyBottomSpace(bottomBarRef);
   const tool = getToolByPath('/tools/merge-pdf')!;
 
   const [showSuccess, setShowSuccess] = useState(false);
@@ -183,7 +186,7 @@ export default function MobileView() {
   // ═════════ MAIN VIEW ═════════
   return (
     <>
-      <div className="min-h-screen bg-white pb-[220px] overflow-x-hidden">
+      <div className="min-h-[100dvh] bg-white overflow-x-hidden" style={{ paddingBottom: bottomSpace }}>
         <input
           ref={fileInputRef}
           type="file"
@@ -355,6 +358,7 @@ export default function MobileView() {
           ⭐ STICKY BOTTOM — Merge button
         */}
         <div
+          ref={bottomBarRef}
           className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
           style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
         >
