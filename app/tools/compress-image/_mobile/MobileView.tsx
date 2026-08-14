@@ -232,7 +232,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   className="hidden"
   onChange={handleFileChange}
   multiple
-  accept="image/*"
+  accept="application/octet-stream,image/*"
 />
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
       </div>
@@ -249,7 +249,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   className="hidden"
   onChange={handleFileChange}
   multiple
-  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif,image/bmp"
+  accept="application/octet-stream,image/*"
 />
 
         {/* ═══ SECTION 1: FIXED TOP ═══ */}
