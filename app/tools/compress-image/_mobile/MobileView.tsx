@@ -76,10 +76,39 @@ export default function MobileView() {
 
   useToolFileReceiver((received: File[]) => handleFiles(received));
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.length) handleFiles(Array.from(e.target.files));
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const fileList = e.target.files;
+  if (!fileList || fileList.length === 0) {
     e.target.value = '';
-  };
+    return;
+  }
+
+  // Filter out any files that aren't valid images (Samsung Gallery sometimes returns weird files)
+  const validFiles = Array.from(fileList).filter(file => {
+    // Check MIME type
+    if (!file.type.startsWith('image/')) {
+      return false;
+    }
+    // Check file size > 0
+    if (file.size === 0) {
+      return false;
+    }
+    return true;
+  });
+
+  if (validFiles.length === 0) {
+    setError('No valid image files selected. Please try again from Files or Photos.');
+    e.target.value = '';
+    return;
+  }
+
+  if (validFiles.length < fileList.length) {
+    setError(`${fileList.length - validFiles.length} file(s) skipped (invalid format).`);
+  }
+
+  handleFiles(validFiles);
+  e.target.value = '';
+};
 
   const openFilePicker = () => fileInputRef.current?.click();
   const handleStartOver = () => { handleClearAll(); setShowSuccess(false); };
@@ -214,14 +243,15 @@ export default function MobileView() {
   return (
     <>
       <div className="flex-1 flex flex-col bg-white min-h-0">
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="hidden"
-          onChange={handleFileChange}
-          multiple
-          accept="image/*"
-        />
+// ✅ CHANGE TO
+<input
+  ref={fileInputRef}
+  type="file"
+  className="hidden"
+  onChange={handleFileChange}
+  multiple
+  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif,image/bmp"
+/>
 
         {/* ═══ SECTION 1: FIXED TOP ═══ */}
         <div className="flex-shrink-0">
