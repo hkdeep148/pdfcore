@@ -1,0 +1,24 @@
+name = "pdfcore"
+
+[build]
+command = "npm run build"
+cwd = "."
+
+[build.upload]
+format = "service-worker"
+
+[env.production]
+routes = [
+  { pattern = "pdfcore.online", zone_name = "pdfcore.online" }
+]
+
+# Make sure sitemap and robots.txt are served with correct MIME types
+[[routes]]
+pattern = "https://pdfcore.online/sitemap.xml"
+zone_name = "pdfcore.online"
+custom_domain = true
+
+[[routes]]
+pattern = "https://pdfcore.online/robots.txt"
+zone_name = "pdfcore.online"
+custom_domain = true

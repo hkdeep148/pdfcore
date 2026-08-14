@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+Disallow: /tools/create-pdf/
+
+Sitemap: https://pdfcore.online/sitemap.xml
