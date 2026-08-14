@@ -51,7 +51,7 @@ export default function BottomToolbar({ onAddPdfs, barRef }: BottomToolbarProps)
   return (
     <div
       ref={barRef}
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
+      className="flex-shrink-0 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
       style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
     >
       {/* ═══════════ CHIP ROW ═══════════ */}

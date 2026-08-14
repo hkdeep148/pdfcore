@@ -2,10 +2,8 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, Droplet } from 'lucide-react';
-import ToolShellMobile from '../../_components/ToolShellMobile';
+import { FileText, Droplet, Edit3, ChevronUp, ChevronDown } from 'lucide-react';
 import MobileEmptyState from '../../_components/MobileEmptyState';
-import MobileToolHeader from '../../_components/MobileToolHeader';
 import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import { getToolByPath } from '../../_config/tools';
 import { useAddWatermarkContext } from '../_context/AddWatermarkContext';
@@ -36,23 +34,23 @@ export default function MobileView() {
   } = useAddWatermarkContext();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const tool = getToolByPath('/tools/add-watermark')!;
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [filename, setFilename] = useState('Watermarked_Document');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // Sync filename with file
   useEffect(() => {
     if (file?.name) {
       setFilename(file.name.replace(/\.pdf$/i, '') + '-watermarked');
     }
   }, [file?.name]);
 
-  // Auto-show success screen when PDF is ready
   useEffect(() => {
     if (watermarkedPdfUrl && !isProcessing) {
       setShowSuccess(true);
-      setIsSheetOpen(false); // Close drawer if open
+      setIsSheetOpen(false);
     }
   }, [watermarkedPdfUrl, isProcessing]);
 
@@ -94,8 +92,38 @@ export default function MobileView() {
   const watermarkedCount = pages.filter((_, i) => willBeWatermarked(i)).length;
   const hasWatermarkText = settings.text.trim().length > 0;
 
+  const handleScroll = () => {
+    const el = scrollAreaRef.current;
+    if (!el) return;
+    const pageElements = el.querySelectorAll('[data-page-index]');
+    const scrollTop = el.scrollTop;
+    const containerCenter = scrollTop + el.clientHeight / 2;
+
+    let closestIndex = 0;
+    let closestDistance = Infinity;
+    pageElements.forEach((page, idx) => {
+      const rect = page as HTMLElement;
+      const pageCenter = rect.offsetTop + rect.offsetHeight / 2;
+      const distance = Math.abs(pageCenter - containerCenter);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = idx;
+      }
+    });
+    setCurrentPage(closestIndex + 1);
+  };
+
+  const scrollToPage = (pageNum: number) => {
+    const el = scrollAreaRef.current;
+    if (!el) return;
+    const target = el.querySelector(`[data-page-index="${pageNum - 1}"]`);
+    if (target) {
+      (target as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <ToolShellMobile fixedHeight={file !== null}>
+    <div className="flex-1 flex flex-col bg-white min-h-0 relative">
       <input
         ref={fileInputRef}
         type="file"
@@ -144,121 +172,81 @@ export default function MobileView() {
           onStartOver={handleStartOver}
           summaryTitle="Watermark Summary"
           summaryRows={[
-            {
-              icon: <Droplet size={13} />,
-              iconBg: '#EEF2FF',
-              iconColor: '#4F46E5',
-              label: 'Text',
-              value: hasWatermarkText ? `"${settings.text.substring(0, 15)}${settings.text.length > 15 ? '...' : ''}"` : 'N/A',
-            },
-            {
-              icon: <FileText size={13} />,
-              iconBg: '#EDE9FE',
-              iconColor: '#8B5CF6',
-              label: 'Pages Watermarked',
-              value: `${watermarkedCount} of ${file?.totalPages}`,
-            },
-            {
-              icon: <FileText size={13} />,
-              iconBg: '#D1FAE5',
-              iconColor: '#10B981',
-              label: 'File Size',
-              value: watermarkedPdfSize || '—',
-              valueColor: '#10B981',
-            },
-            {
-              icon: <FileText size={13} />,
-              iconBg: '#FEF3C7',
-              iconColor: '#F59E0B',
-              label: 'Format',
-              value: 'PDF',
-            },
+            { icon: <Droplet size={13} />, iconBg: '#EEF2FF', iconColor: '#4F46E5', label: 'Text', value: hasWatermarkText ? `"${settings.text.substring(0, 15)}${settings.text.length > 15 ? '...' : ''}"` : 'N/A' },
+            { icon: <FileText size={13} />, iconBg: '#EDE9FE', iconColor: '#8B5CF6', label: 'Pages Watermarked', value: `${watermarkedCount} of ${file?.totalPages}` },
+            { icon: <FileText size={13} />, iconBg: '#D1FAE5', iconColor: '#10B981', label: 'File Size', value: watermarkedPdfSize || '—', valueColor: '#10B981' },
+            { icon: <FileText size={13} />, iconBg: '#FEF3C7', iconColor: '#F59E0B', label: 'Format', value: 'PDF' },
           ]}
         />
       ) : !file && !isLoadingPdf ? (
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
       ) : file && (
         <>
-          {/* Shared Header with filename editor */}
-          <motion.div
-            animate={{ paddingRight: isSheetOpen ? `${DRAWER_WIDTH}px` : '0px' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-          >
-            <MobileToolHeader
-              filename={filename}
-              onFilenameChange={setFilename}
-              onBack={clearFile}
-            />
-          </motion.div>
-
-          {/* Info banner */}
+          {/* ═══ PDF PREVIEW HEADER (top) ═══ */}
           <motion.div
             animate={{ paddingRight: isSheetOpen ? `${DRAWER_WIDTH + 12}px` : '12px' }}
             transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-            className="pl-3 pb-2 shrink-0"
+            className="pl-3 pt-3 pb-2 shrink-0"
           >
-            <div className="px-3 py-2 bg-[#EEF2FF] border border-[#C7D2FE] rounded-xl flex items-center justify-between">
+            <div className="px-3 py-2.5 bg-white border border-[#E2E8F0] rounded-md flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-                  hasWatermarkText ? 'bg-[#4F46E5]' : 'bg-[#94A3B8]'
-                }`}>
-                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                  </svg>
+                <div className="w-8 h-8 rounded-lg bg-[#EEF2FF] flex items-center justify-center">
+                  <FileText size={16} className="text-[#4F46E5]" strokeWidth={2} />
                 </div>
                 <div>
-                  <p className="text-[11px] font-bold text-[#3730A3] leading-tight">
-                    {hasWatermarkText ? `"${settings.text}"` : 'No watermark yet'}
-                  </p>
-                  <p className="text-[9px] text-[#6366F1]">
-                    {hasWatermarkText
-                      ? `→ ${watermarkedCount} of ${file.totalPages} pages`
-                      : 'Tap "Add Watermark" to start'}
-                  </p>
+                  <p className="text-[13px] font-bold text-[#0F172A] leading-tight">PDF Preview</p>
+                  <p className="text-[10px] text-[#94A3B8]">Swipe up/down to view all pages</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-bold text-[#0F172A] bg-[#F1F5F9] px-2 py-1 rounded-md">
+                  {currentPage}/{pages.length}
+                </span>
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => scrollToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="w-6 h-4 rounded border border-[#E2E8F0] flex items-center justify-center text-[#64748B] active:bg-[#F1F5F9] disabled:opacity-40"
+                    aria-label="Previous page"
+                  >
+                    <ChevronUp size={10} strokeWidth={2.5} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollToPage(currentPage + 1)}
+                    disabled={currentPage === pages.length}
+                    className="w-6 h-4 rounded border border-[#E2E8F0] flex items-center justify-center text-[#64748B] active:bg-[#F1F5F9] disabled:opacity-40"
+                    aria-label="Next page"
+                  >
+                    <ChevronDown size={10} strokeWidth={2.5} />
+                  </button>
                 </div>
               </div>
             </div>
           </motion.div>
 
-          {/* PDF Preview */}
+          {/* ═══ PDF PAGES PREVIEW (scrollable) ═══ */}
           <motion.div
+            ref={scrollAreaRef}
             animate={{
               paddingLeft: '16px',
               paddingRight: isSheetOpen ? `${DRAWER_WIDTH + 16}px` : '16px',
             }}
             transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-            className="flex-1 overflow-y-auto bg-[#F5F5FA] py-4 pb-[140px]"
+            className="flex-1 overflow-y-auto bg-[#F5F5FA] pt-2 pb-4 min-h-0"
+            onScroll={handleScroll}
           >
             <div className="space-y-4 mx-auto" style={{ maxWidth: isSheetOpen ? '100%' : '400px' }}>
               {pages.map((preview, index) => {
                 const hasWatermark = willBeWatermarked(index) && hasWatermarkText;
                 return (
-                  <div key={index}>
-                    <div className="flex items-center gap-2 mb-2 px-1">
-                      <div className={`w-5 h-5 rounded-full text-white text-[9px] font-bold flex items-center justify-center ${
-                        hasWatermark ? 'bg-[#4F46E5]' : 'bg-[#94A3B8]'
-                      }`}>
-                        {index + 1}
-                      </div>
-                      <span className="text-[11px] font-semibold text-[#5B6472]">Page {index + 1}</span>
-                      {hasWatermark && (
-                        <div className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#DCFCE7] text-[#166534] text-[9px] font-bold">
-                          <svg viewBox="0 0 24 24" className="w-2 h-2" fill="none" stroke="currentColor" strokeWidth="3">
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                          Watermarked
-                        </div>
-                      )}
-                    </div>
-
+                  <div key={index} data-page-index={index}>
                     <div
                       className={`relative bg-white rounded-xl overflow-hidden shadow-md w-full ${
                         hasWatermark ? 'ring-2 ring-[#4F46E5]/20' : ''
                       }`}
-                      style={{
-                        aspectRatio: `${file.pageWidth} / ${file.pageHeight}`,
-                      }}
+                      style={{ aspectRatio: `${file.pageWidth} / ${file.pageHeight}` }}
                     >
                       <img
                         src={preview}
@@ -283,79 +271,102 @@ export default function MobileView() {
                   </div>
                 );
               })}
+
+              {/* Swipe hint */}
+              <div className="flex items-center justify-center gap-1.5 py-3 text-[11px] text-[#94A3B8]">
+                <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5v14M5 12l7-7 7 7" />
+                </svg>
+                Swipe up/down to view next page
+              </div>
             </div>
           </motion.div>
 
-          {/* Bottom Actions */}
+          {/* ═══ STICKY BOTTOM BAR — Info banner + Apply button ═══ */}
           {!isSheetOpen && (
-            <>
-              <div className="absolute bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-white via-white to-transparent pt-6">
-                <div className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-2">
-                  {!hasWatermarkText ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsSheetOpen(true)}
-                      className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-white border-2 border-dashed border-[#4F46E5] text-[#4F46E5] text-[14px] font-bold active:scale-[0.98] transition-transform shadow-lg"
-                    >
-                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                      </svg>
-                      Add Watermark
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={applyAndPrepare}
-                      disabled={isProcessing}
-                      className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gradient-to-br from-[#4F46E5] to-[#6D5DF6] text-white text-[14px] font-bold shadow-[0_8px_24px_-4px_rgba(79,70,229,0.4)] active:scale-[0.98] transition-transform disabled:opacity-60"
-                    >
-                      {isProcessing ? (
-                        <>
-                          <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                          Applying Watermark...
-                        </>
-                      ) : (
-                        <>
-                          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                          </svg>
-                          Apply Watermark
-                        </>
-                      )}
-                    </button>
-                  )}
+            <div className="flex-shrink-0 bg-white border-t border-[#E2E8F0] px-3 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] space-y-2.5"
+              style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
+            >
+              {/* Info banner with Edit button */}
+              <div className="px-3 py-2.5 bg-[#EEF2FF] border border-[#C7D2FE] rounded-md flex items-center justify-between">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    hasWatermarkText ? 'bg-[#4F46E5]' : 'bg-[#94A3B8]'
+                  }`}>
+                    <svg viewBox="0 0 24 24" className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-bold text-[#3730A3] truncate">
+                      {hasWatermarkText ? `"${settings.text}"` : 'No watermark yet'}
+                    </p>
+                    <p className="text-[10px] text-[#6366F1] mt-0.5">
+                      {hasWatermarkText
+                        ? `Applied to ${watermarkedCount} of ${file.totalPages} pages`
+                        : 'Tap "Add Watermark" to start'}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              {hasWatermarkText && (
                 <button
                   type="button"
                   onClick={() => setIsSheetOpen(true)}
-                  className="absolute right-4 bottom-24 z-30 w-14 h-14 rounded-full bg-[#4F46E5] shadow-[0_8px_24px_-4px_rgba(79,70,229,0.5)] flex items-center justify-center active:scale-95 transition-transform"
-                  aria-label="Edit watermark"
+                  className="flex-shrink-0 ml-2 flex items-center gap-1 px-3 py-1.5 rounded-md bg-white border border-[#4F46E5] text-[#4F46E5] text-[11px] font-bold active:scale-95 transition"
                 >
-                  <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                  </svg>
+                  <Edit3 size={12} strokeWidth={2.5} />
+                  {hasWatermarkText ? 'Edit' : 'Add'}
                 </button>
-              )}
-            </>
+              </div>
+
+              {/* Apply Watermark button */}
+              <button
+                type="button"
+                onClick={hasWatermarkText ? applyAndPrepare : () => setIsSheetOpen(true)}
+                disabled={isProcessing}
+                className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[14px] font-bold active:scale-[0.98] transition-transform disabled:opacity-60 ${
+                  hasWatermarkText
+                    ? 'bg-gradient-to-br from-[#4F46E5] to-[#6D5DF6] text-white shadow-[0_8px_24px_-4px_rgba(79,70,229,0.4)]'
+                    : 'bg-white border-2 border-dashed border-[#4F46E5] text-[#4F46E5] shadow-md'
+                }`}
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    Applying Watermark...
+                  </>
+                ) : !hasWatermarkText ? (
+                  <>
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Add Watermark
+                  </>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    Apply Watermark
+                  </>
+                )}
+              </button>
+            </div>
           )}
 
           {/* RIGHT-SIDE DRAWER */}
           <AnimatePresence>
             {isSheetOpen && (
-              <motion.div
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', damping: 30, stiffness: 350 }}
-                className="fixed top-0 right-0 bottom-0 z-50 bg-white shadow-[-10px_0_40px_-10px_rgba(0,0,0,0.15)] flex flex-col"
-                style={{ width: `${DRAWER_WIDTH}px` }}
-              >
+<motion.div
+  initial={{ x: '100%' }}
+  animate={{ x: 0 }}
+  exit={{ x: '100%' }}
+  transition={{ type: 'spring', damping: 30, stiffness: 350 }}
+  className="fixed top-[72px] right-0 bottom-0 z-50 bg-white shadow-[-10px_0_40px_-10px_rgba(0,0,0,0.15)] flex flex-col border-l border-[#E2E8F0]"
+  style={{ width: `${DRAWER_WIDTH}px` }}
+>
                 <div className="flex items-center justify-between px-3 py-2.5 border-b border-[#F1F5F9] flex-shrink-0">
                   <div className="flex items-center gap-1.5">
                     <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#4F46E5]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -522,25 +533,25 @@ export default function MobileView() {
                   </div>
                 </div>
 
-                {/* Footer - Done button (just closes drawer) */}
-<div className="border-t border-[#F1F5F9] px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex-shrink-0">
-  <button
-    type="button"
-    onClick={() => setIsSheetOpen(false)}
-    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-gradient-to-br from-[#4F46E5] to-[#6D5DF6] text-white text-[12px] font-bold active:scale-[0.98] transition-transform shadow-[0_4px_12px_rgba(79,70,229,0.3)]"
-  >
-    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-    Done
-  </button>
-</div>
+                {/* Footer - Done button */}
+                <div className="border-t border-[#F1F5F9] px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsSheetOpen(false)}
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-gradient-to-br from-[#4F46E5] to-[#6D5DF6] text-white text-[12px] font-bold active:scale-[0.98] transition-transform shadow-[0_4px_12px_rgba(79,70,229,0.3)]"
+                  >
+                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Done
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
         </>
       )}
-    </ToolShellMobile>
+    </div>
   );
 }
 

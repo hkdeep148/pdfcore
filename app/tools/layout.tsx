@@ -10,33 +10,22 @@ export default function ToolsLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-
   const isToolsIndexPage = pathname === '/tools' || pathname === '/tools/';
 
-  // Tools index page
-if (isToolsIndexPage) {
-  return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0B1526] font-['Source_Sans_3','Adjusted_Arial_Fallback',sans-serif] overflow-x-hidden">
-      <LandingNavbar />
-      <main>{children}</main>
-      <LandingFooter />
-    </div>
-  );
-}
-
-// Individual tool pages
-return (
-  <div className="min-h-screen bg-[#F8FAFC] font-['Source_Sans_3','Adjusted_Arial_Fallback',sans-serif]">
-      {/*
-        LandingNavbar handles its own responsive logic:
-        - Desktop: original navbar
-        - Mobile: floating tool navbar
-      */}
-      <LandingNavbar />
-
-      <div className="flex flex-col">
-        {children}
+  if (isToolsIndexPage) {
+    return (
+      <div className="min-h-[100dvh] bg-[#F8FAFC] text-[#0B1526] font-['Source_Sans_3','Adjusted_Arial_Fallback',sans-serif] overflow-x-hidden">
+        <LandingNavbar />
+        <main>{children}</main>
+        <LandingFooter />
       </div>
+    );
+  }
+
+  return (
+    <div className="bg-[#F8FAFC] font-['Source_Sans_3','Adjusted_Arial_Fallback',sans-serif]">
+      <LandingNavbar />
+      {children}
     </div>
   );
 }

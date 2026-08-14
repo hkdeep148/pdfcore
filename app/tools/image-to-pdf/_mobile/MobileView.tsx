@@ -38,7 +38,6 @@ const MARGIN_OPTIONS: OptionItem<Margins>[] = [
   { id: 'Large',  label: 'Large'  },
 ];
 
-// Full labels used inside the dropdown cells.
 const MARGIN_SHORT: Record<Margins, string> = {
   None: 'None',
   Small: 'Small',
@@ -50,8 +49,6 @@ const ORIENTATION_SHORT: Record<Orientation, string> = {
   Landscape: 'Landscape',
 };
 
-// Same page-size table as desktop PageCard so per-image overrides
-// (item.pageSize + item.orientation) produce the correct ratio.
 const PAGE_ASPECT_RATIOS: Record<PageSize, number> = {
   A4: 595.28 / 841.89,
   A3: 841.89 / 1190.55,
@@ -74,8 +71,6 @@ export default function MobileView() {
     margins, setMargins,
     updateImageSize,
     createSeparate, setCreateSeparate, isZip,
-    // Live-preview settings — used to render page-accurate thumbnails
-    // in the list and the big preview modal.
     currentPageRatio, marginPercent, pageFit, pageBackground,
   } = useImageToPdfContext();
 
@@ -96,6 +91,7 @@ export default function MobileView() {
   const bottomBarRef = useRef<HTMLDivElement>(null);
   const bottomSpace = useStickyBottomSpace(bottomBarRef);
   const tool = getToolByPath('/tools/image-to-pdf')!;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setSelectedIds(prev => {
@@ -104,6 +100,16 @@ export default function MobileView() {
       return next;
     });
   }, [images]);
+
+  // Auto-scroll to bottom when new images are added
+useEffect(() => {
+  if (scrollContainerRef.current) {
+    scrollContainerRef.current.scrollTo({
+      top: scrollContainerRef.current.scrollHeight,
+      behavior: 'smooth',
+    });
+  }
+}, [images.length]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) addImages(Array.from(e.target.files));
@@ -116,10 +122,6 @@ export default function MobileView() {
     setPreviewState({ isOpen: true, imageUrl, imageName });
   };
 
-  /*
-    Delegates to the unified hook helper so mobile and desktop both
-    use the same Auto/Portrait/Landscape behavior.
-  */
   const handleOrientationChange = (value: 'Auto' | Orientation) => {
     setOrientationChoice(value);
   };
@@ -221,7 +223,7 @@ export default function MobileView() {
   // ═════════ EMPTY STATE ═════════
   if (!hasImages) {
     return (
-      <div className="min-h-screen bg-white overflow-x-hidden">
+<div className="flex-1 overflow-y-auto bg-white min-h-0">
         <input
           ref={fileInputRef}
           type="file"
@@ -235,90 +237,46 @@ export default function MobileView() {
     );
   }
 
-  // ═════════ MAIN VIEW ═════════
-  return (
-    <div className="min-h-[100dvh] bg-white overflow-x-hidden" style={{ paddingBottom: bottomSpace }}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        className="hidden"
-        multiple
-        onChange={handleFileChange}
-        accept="image/jpeg,image/jpg,image/png,image/webp"
-      />
+// ═════════ MAIN VIEW ═════════
+return (
+  <div className="flex-1 flex flex-col bg-white min-h-0">
+    <input
+      ref={fileInputRef}
+      type="file"
+      className="hidden"
+      multiple
+      onChange={handleFileChange}
+      accept="image/jpeg,image/jpg,image/png,image/webp"
+    />
 
-      {/* Error */}
+    {/* ═══ FIXED TOP — toolbar + selection header ═══ */}
+    <div className="flex-shrink-0">
       {errorMessage && (
-        <div className="mx-4 mb-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
+        <div className="mx-4 mt-3 mb-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
           <span className="text-[13px] text-red-600 font-medium">{errorMessage}</span>
-          <button
-            onClick={() => setErrorMessage(null)}
-            className="text-red-400 text-xl leading-none"
-          >
-            ×
-          </button>
+          <button onClick={() => setErrorMessage(null)} className="text-red-400 text-xl leading-none">×</button>
         </div>
       )}
 
-      {/*
-        ⭐ TOP TOOLBAR — Row 1 only (Actions)
-        The dropdown row was moved to the sticky bottom bar so the
-        primary options sit next to the "Create PDF" button.
-      */}
       <div className="px-3 mt-3">
         <div className="flex items-center rounded-md bg-white border border-[#E2E8F0] min-w-0 overflow-hidden">
-          <ActionIcon
-            onClick={openFilePicker}
-            ariaLabel="Add images"
-            variant="primary"
-            icon={<Plus size={20} strokeWidth={2.2} />}
-          />
+          <ActionIcon onClick={openFilePicker} ariaLabel="Add images" variant="primary" icon={<Plus size={20} strokeWidth={2.2} />} />
           <ToolbarDivider />
-          <ActionIcon
-            onClick={handleRotateLeft}
-            disabled={images.length === 0}
-            ariaLabel="Rotate left"
-            icon={<RotateCcw size={18} strokeWidth={2} />}
-          />
+          <ActionIcon onClick={handleRotateLeft} disabled={images.length === 0} ariaLabel="Rotate left" icon={<RotateCcw size={18} strokeWidth={2} />} />
           <ToolbarDivider />
-          <ActionIcon
-            onClick={handleRotateRight}
-            disabled={images.length === 0}
-            ariaLabel="Rotate right"
-            icon={<RotateCw size={18} strokeWidth={2} />}
-          />
+          <ActionIcon onClick={handleRotateRight} disabled={images.length === 0} ariaLabel="Rotate right" icon={<RotateCw size={18} strokeWidth={2} />} />
           <ToolbarDivider />
-          <ActionIcon
-            onClick={handleDeleteSelected}
-            disabled={selectedCount === 0}
-            ariaLabel="Remove"
-            variant="danger"
-            icon={<Trash2 size={18} strokeWidth={2} />}
-          />
+          <ActionIcon onClick={handleDeleteSelected} disabled={selectedCount === 0} ariaLabel="Remove" variant="danger" icon={<Trash2 size={18} strokeWidth={2} />} />
         </div>
       </div>
 
-      {/* ⭐ SELECTION HEADER */}
       <div className="mt-4 mx-4 px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] border-b-0 rounded-t-lg flex items-center justify-between">
-        <button
-          onClick={toggleSelectAll}
-          className="flex items-center gap-2.5 active:opacity-70"
-        >
-          <div
-            className={`w-5 h-5 rounded flex items-center justify-center transition ${
-              allSelected
-                ? 'bg-[#2563EB]'
-                : selectedCount > 0
-                  ? 'bg-[#2563EB]'
-                  : 'border-2 border-[#CBD5E1] bg-white'
-            }`}
-          >
-            {allSelected && (
-              <Check size={13} className="text-white" strokeWidth={3} />
-            )}
-            {!allSelected && selectedCount > 0 && (
-              <div className="w-2.5 h-0.5 bg-white rounded" />
-            )}
+        <button onClick={toggleSelectAll} className="flex items-center gap-2.5 active:opacity-70">
+          <div className={`w-5 h-5 rounded flex items-center justify-center transition ${
+            allSelected ? 'bg-[#2563EB]' : selectedCount > 0 ? 'bg-[#2563EB]' : 'border-2 border-[#CBD5E1] bg-white'
+          }`}>
+            {allSelected && <Check size={13} className="text-white" strokeWidth={3} />}
+            {!allSelected && selectedCount > 0 && <div className="w-2.5 h-0.5 bg-white rounded" />}
           </div>
           <span className="text-[13px] font-semibold text-[#0F172A]">
             {selectedCount > 0
@@ -326,228 +284,122 @@ export default function MobileView() {
               : `${images.length} image${images.length > 1 ? 's' : ''}`}
           </span>
         </button>
-
-        <button
-          onClick={() => setSortAsc(v => !v)}
-          className={`w-8 h-8 rounded-lg border flex items-center justify-center active:scale-95 transition ${
-            sortAsc
-              ? 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]'
-              : 'border-[#E2E8F0] bg-white text-[#64748B]'
-          }`}
-          aria-label="Sort"
-        >
+        <button onClick={() => setSortAsc(v => !v)} className={`w-8 h-8 rounded-lg border flex items-center justify-center active:scale-95 transition ${
+          sortAsc ? 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]' : 'border-[#E2E8F0] bg-white text-[#64748B]'
+        }`} aria-label="Sort">
           <ArrowDownAZ size={16} strokeWidth={2} />
         </button>
       </div>
-
-      {/*
-        ⭐ IMAGE LIST (universal MobileListView)
-        Reorder is enabled only when sort is NOT active — when the user
-        sorts by name, drag-to-reorder is disabled to prevent conflict.
-        Live PDF-page preview (with page ratio, margins, fit) is rendered
-        as a custom thumbnail so it reflects current settings in real time.
-      */}
-      <div className="mx-4">
-        <MobileListView
-          items={displayImages}
-          onReorder={sortAsc ? undefined : reorderImages}
-          selectedIds={selectedIds}
-          onToggleSelect={toggleSelect}
-          accentColor="#2563EB"
-          renderThumbnail={(item) => (
-            <LivePagePreviewThumbnail
-              item={item}
-              globalRatio={currentPageRatio}
-              marginPercent={marginPercent}
-              pageFit={pageFit}
-              pageBackground={pageBackground}
-            />
-          )}
-          onThumbnailTap={(item) => handlePreviewImage(item.preview, item.file.name)}
-          renderPrimaryText={(item) => item.file.name}
-          renderSecondaryText={(item) => item.sizeMB}
-          actions={(item) => [
-            {
-              icon: <RotateCw size={15} strokeWidth={1.8} />,
-              ariaLabel: 'Rotate',
-              onClick: () => rotateImage(item.id, 'right'),
-            },
-            {
-              icon: <Trash2 size={15} strokeWidth={1.8} />,
-              ariaLabel: 'Delete',
-              onClick: () => removeImage(item.id),
-              variant: 'danger',
-            },
-          ]}
-        />
-      </div>
-
-      {/* ⭐ ADD MORE IMAGES */}
-      <div className="mx-4 mt-3">
-        <button
-          onClick={openFilePicker}
-          className="w-full py-3 rounded-md border border-dashed border-[#BFDBFE] bg-[#F5F9FF] flex flex-col items-center justify-center gap-0.5 active:scale-[0.98] transition"
-        >
-          <div className="flex items-center gap-1.5 text-[#2563EB]">
-            <Plus size={16} strokeWidth={2.5} />
-            <span className="text-[13px] font-semibold">Add more images</span>
-          </div>
-          <p className="text-[10px] text-[#94A3B8]">JPG, PNG, WEBP • Max 50 images</p>
-        </button>
-      </div>
-
-      {/* Security footer */}
-      <div className="mt-4 px-4 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]">
-        <Lock size={11} />
-        Your files are 100% secure. We never store your data.
-      </div>
-
-      {/*
-        ⭐ STICKY BOTTOM
-        Contents (top → bottom):
-          1. Dropdowns row (Size / Orientation / Margin)
-          2. Create-separate-PDFs toggle
-          3. Create PDF button
-      */}
-      <div
-        ref={bottomBarRef}
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
-        style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
-      >
-        {/* Dropdowns — sits right above the toggle and Create button */}
-        <div className="flex items-center rounded-md bg-white border border-[#E2E8F0] min-w-0 overflow-hidden mb-3">
-          <ChipCell
-            label="Size"
-            value={pageSize}
-            onClick={() => setSheet('size')}
-            icon={
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-              </svg>
-            }
-          />
-          <ToolbarDivider />
-          <ChipCell
-            label="Orientation"
-            value={
-              orientationMode === 'Auto'
-                ? 'Auto'
-                : ORIENTATION_SHORT[orientationMode]
-            }
-            onClick={() => setSheet('orientation')}
-            icon={
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="6" y="3" width="12" height="18" rx="1.5" />
-                <line x1="9" y1="7" x2="15" y2="7" />
-              </svg>
-            }
-          />
-          <ToolbarDivider />
-          <ChipCell
-            label="Margin"
-            value={MARGIN_SHORT[margins]}
-            onClick={() => setSheet('margin')}
-            icon={
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="1.5" />
-                <rect x="7" y="7" width="10" height="10" rx="0.5" strokeDasharray="2 2" />
-              </svg>
-            }
-          />
-        </div>
-
-        {/* Toggle — above button */}
-        <div className="flex items-center justify-between px-1 pb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-medium text-[#0F172A]">
-              Create separate PDFs
-            </span>
-            {images.length > 1 && createSeparate && (
-              <span className="text-[11px] text-[#94A3B8]">({images.length} files)</span>
-            )}
-          </div>
-          <button
-            onClick={() => setCreateSeparate(!createSeparate)}
-            className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
-              createSeparate ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
-            }`}
-            aria-label="Toggle separate PDFs"
-            role="switch"
-            aria-checked={createSeparate}
-          >
-            <div
-              className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
-                createSeparate ? 'translate-x-[22px]' : 'translate-x-0.5'
-              }`}
-            />
-          </button>
-        </div>
-
-        {/* Create button */}
-        <button
-          onClick={handleCreatePdf}
-          disabled={isConverting || images.length === 0}
-          className="w-full flex items-center justify-center gap-2 py-4 rounded-lg bg-gradient-to-r from-[#4F46E5] to-[#6D5DF6] text-white font-bold text-[16px] shadow-[0_6px_20px_-4px_rgba(79,70,229,0.5)] active:scale-[0.98] transition disabled:opacity-60"
-        >
-          {isConverting
-            ? (createSeparate ? 'Creating ZIP...' : 'Creating...')
-            : (createSeparate ? 'Create ZIP' : 'Create PDF')}
-          {!isConverting && <ArrowRight size={18} strokeWidth={2.2} />}
-        </button>
-      </div>
-
-      {/* Sheets */}
-      <OptionSheet
-        open={sheet === 'size'}
-        title="Page Size"
-        options={PAGE_SIZE_OPTIONS}
-        value={pageSize}
-        onChange={(v) => { setPageSize(v); setSheet(null); }}
-        onClose={() => setSheet(null)}
-      />
-      <OptionSheet
-        open={sheet === 'orientation'}
-        title="Orientation"
-        options={ORIENTATION_OPTIONS}
-        value={orientationMode}
-        onChange={(v) => { handleOrientationChange(v as 'Auto' | Orientation); setSheet(null); }}
-        onClose={() => setSheet(null)}
-      />
-      <OptionSheet
-        open={sheet === 'margin'}
-        title="Page Margin"
-        options={MARGIN_OPTIONS}
-        value={margins}
-        onChange={(v) => { setMargins(v); setSheet(null); }}
-        onClose={() => setSheet(null)}
-      />
-
-      {/*
-        Preview modal now receives the live page settings so the big
-        preview shows exactly how the image will appear in the PDF.
-        We also look up the per-image rotation from the images array.
-      */}
-      <ImagePreviewModal
-        isOpen={previewState.isOpen}
-        imageUrl={previewState.imageUrl}
-        imageName={previewState.imageName}
-        onClose={() => setPreviewState(prev => ({ ...prev, isOpen: false }))}
-        pageRatio={currentPageRatio}
-        marginPercent={marginPercent}
-        pageFit={pageFit}
-        pageBackground={pageBackground}
-        rotation={
-          images.find((i) => i.preview === previewState.imageUrl)?.rotation ?? 0
-        }
-      />
     </div>
-  );
+
+{/* ═══ SCROLLABLE FILE LIST ═══ */}
+<div 
+  ref={scrollContainerRef}
+  className="flex-1 overflow-y-auto min-h-0 mx-4"
+>
+  <MobileListView
+    items={displayImages}
+    onReorder={sortAsc ? undefined : reorderImages}
+    selectedIds={selectedIds}
+    onToggleSelect={toggleSelect}
+    accentColor="#2563EB"
+    renderThumbnail={(item) => (
+      <LivePagePreviewThumbnail item={item} globalRatio={currentPageRatio} marginPercent={marginPercent} pageFit={pageFit} pageBackground={pageBackground} />
+    )}
+    onThumbnailTap={(item) => handlePreviewImage(item.preview, item.file.name)}
+    renderPrimaryText={(item) => item.file.name}
+    renderSecondaryText={(item) => item.sizeMB}
+    actions={(item) => [
+      { icon: <RotateCw size={15} strokeWidth={1.8} />, ariaLabel: 'Rotate', onClick: () => rotateImage(item.id, 'right') },
+      { icon: <Trash2 size={15} strokeWidth={1.8} />, ariaLabel: 'Delete', onClick: () => removeImage(item.id), variant: 'danger' },
+    ]}
+  />
+</div>
+
+{/* ═══ PINNED "ADD MORE" BUTTON — stays above sticky bar ═══ */}
+<div className="flex-shrink-0 mx-4 mt-2 mb-2">
+  <button onClick={openFilePicker} className="w-full py-3 rounded-md border border-dashed border-[#BFDBFE] bg-[#F5F9FF] flex flex-col items-center justify-center gap-0.5 active:scale-[0.98] transition">
+    <div className="flex items-center gap-1.5 text-[#2563EB]">
+      <Plus size={16} strokeWidth={2.5} />
+      <span className="text-[13px] font-semibold">Add more images</span>
+    </div>
+    <p className="text-[10px] text-[#94A3B8]">JPG, PNG, WEBP • Max 50 images</p>
+  </button>
+
+  <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]">
+    <Lock size={11} />
+    Your files are 100% secure. We never store your data.
+  </div>
+</div>
+
+{/* ═══ STICKY BOTTOM BAR ═══ */}
+<div ref={bottomBarRef} className="flex-shrink-0 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
+      style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
+    >
+      <div className="flex items-center rounded-md bg-white border border-[#E2E8F0] min-w-0 overflow-hidden mb-3">
+        <ChipCell label="Size" value={pageSize} onClick={() => setSheet('size')} icon={
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+        } />
+        <ToolbarDivider />
+        <ChipCell label="Orientation" value={orientationMode === 'Auto' ? 'Auto' : ORIENTATION_SHORT[orientationMode]} onClick={() => setSheet('orientation')} icon={
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="6" y="3" width="12" height="18" rx="1.5" />
+            <line x1="9" y1="7" x2="15" y2="7" />
+          </svg>
+        } />
+        <ToolbarDivider />
+        <ChipCell label="Margin" value={MARGIN_SHORT[margins]} onClick={() => setSheet('margin')} icon={
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="1.5" />
+            <rect x="7" y="7" width="10" height="10" rx="0.5" strokeDasharray="2 2" />
+          </svg>
+        } />
+      </div>
+
+      <div className="flex items-center justify-between px-1 pb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] font-medium text-[#0F172A]">Create separate PDFs</span>
+          {images.length > 1 && createSeparate && (
+            <span className="text-[11px] text-[#94A3B8]">({images.length} files)</span>
+          )}
+        </div>
+        <button onClick={() => setCreateSeparate(!createSeparate)} className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
+          createSeparate ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
+        }`} aria-label="Toggle separate PDFs" role="switch" aria-checked={createSeparate}>
+          <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+            createSeparate ? 'translate-x-[22px]' : 'translate-x-0.5'
+          }`} />
+        </button>
+      </div>
+
+      <button onClick={handleCreatePdf} disabled={isConverting || images.length === 0} className="w-full flex items-center justify-center gap-2 py-4 rounded-lg bg-gradient-to-r from-[#4F46E5] to-[#6D5DF6] text-white font-bold text-[16px] shadow-[0_6px_20px_-4px_rgba(79,70,229,0.5)] active:scale-[0.98] transition disabled:opacity-60">
+        {isConverting ? (createSeparate ? 'Creating ZIP...' : 'Creating...') : (createSeparate ? 'Create ZIP' : 'Create PDF')}
+        {!isConverting && <ArrowRight size={18} strokeWidth={2.2} />}
+      </button>
+    </div>
+
+    <OptionSheet open={sheet === 'size'} title="Page Size" options={PAGE_SIZE_OPTIONS} value={pageSize} onChange={(v) => { setPageSize(v); setSheet(null); }} onClose={() => setSheet(null)} />
+    <OptionSheet open={sheet === 'orientation'} title="Orientation" options={ORIENTATION_OPTIONS} value={orientationMode} onChange={(v) => { handleOrientationChange(v as 'Auto' | Orientation); setSheet(null); }} onClose={() => setSheet(null)} />
+    <OptionSheet open={sheet === 'margin'} title="Page Margin" options={MARGIN_OPTIONS} value={margins} onChange={(v) => { setMargins(v); setSheet(null); }} onClose={() => setSheet(null)} />
+
+    <ImagePreviewModal
+      isOpen={previewState.isOpen}
+      imageUrl={previewState.imageUrl}
+      imageName={previewState.imageName}
+      onClose={() => setPreviewState(prev => ({ ...prev, isOpen: false }))}
+      pageRatio={currentPageRatio}
+      marginPercent={marginPercent}
+      pageFit={pageFit}
+      pageBackground={pageBackground}
+      rotation={images.find((i) => i.preview === previewState.imageUrl)?.rotation ?? 0}
+    />
+  </div>
+);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ActionIcon — Row 1 icon button
-// Just an icon centered in a flex-1 slot. No labels, no borders.
 // ═══════════════════════════════════════════════════════════════
 function ActionIcon({
   onClick,
@@ -581,21 +433,10 @@ function ActionIcon({
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ToolbarDivider — thin vertical line between Row 1 icons
-// and between Row 2 dropdown cells.
-// ═══════════════════════════════════════════════════════════════
 function ToolbarDivider() {
   return <div className="w-px h-6 bg-[#E2E8F0] flex-shrink-0" />;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ChipCell — Row 2 dropdown cell (lives inside a bordered row)
-// Layout: [icon] [value ▾]
-//              [ label   ]
-// No individual border or shadow — the parent container provides
-// the border, and ToolbarDivider elements separate the cells.
-// ═══════════════════════════════════════════════════════════════
 function ChipCell({
   label,
   value,
@@ -612,10 +453,8 @@ function ChipCell({
       onClick={onClick}
       className="flex-1 min-w-0 flex items-center gap-2 py-2.5 px-2.5 bg-white active:bg-[#F8FAFC] active:scale-[0.98] transition"
     >
-      {/* Left icon */}
       <span className="w-4 h-4 text-[#6366F1] flex-shrink-0">{icon}</span>
 
-      {/* Right stacked text */}
       <div className="flex-1 min-w-0 flex flex-col items-start leading-tight">
         <div className="flex items-center gap-0.5 max-w-full">
           <span className="text-[12px] font-bold text-[#0F172A] truncate">
@@ -635,11 +474,6 @@ function ChipCell({
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// LivePagePreviewThumbnail — image inside a page-shaped preview
-// that reflects current page size, orientation, margins, and fit.
-// Renders inside MobileListView's 34×44 thumbnail slot.
-// ═══════════════════════════════════════════════════════════════
 function LivePagePreviewThumbnail({
   item,
   globalRatio,
@@ -653,7 +487,6 @@ function LivePagePreviewThumbnail({
   pageFit: import('../../_types').PageFit;
   pageBackground: import('../../_types').PageBackground;
 }) {
-  // Per-image override takes priority over global settings.
   const previewRatio =
     item.orientation && item.pageSize
       ? (() => {

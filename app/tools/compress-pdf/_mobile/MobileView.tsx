@@ -1,7 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
-import { useStickyBottomSpace } from '../../_hooks/useStickyBottomSpace';
+import { useRef, useEffect } from 'react';
 import { Plus, Lock } from 'lucide-react';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
@@ -27,8 +26,18 @@ export default function MobileView() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomBarRef = useRef<HTMLDivElement>(null);
-  const bottomSpace = useStickyBottomSpace(bottomBarRef);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const tool = getToolByPath('/tools/compress-pdf')!;
+
+  // Auto-scroll to bottom when items count changes
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [items.length]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) addPdfs(Array.from(e.target.files));
@@ -59,7 +68,7 @@ export default function MobileView() {
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   };
 
-  // ═══════════ SUCCESS SCREEN ═══════════
+  // ═════════ SUCCESS SCREEN ═════════
   if (allDone) {
     return (
       <MobileSuccessScreen
@@ -106,7 +115,7 @@ export default function MobileView() {
   // ═════════ EMPTY STATE ═════════
   if (!hasItems) {
     return (
-      <div className="min-h-screen bg-white overflow-x-hidden">
+      <div className="flex-1 overflow-y-auto bg-white min-h-0">
         <input
           ref={fileInputRef}
           type="file"
@@ -122,7 +131,7 @@ export default function MobileView() {
 
   // ═════════ MAIN VIEW ═════════
   return (
-    <div className="min-h-[100dvh] bg-white overflow-x-hidden" style={{ paddingBottom: bottomSpace }}>
+    <div className="flex-1 flex flex-col bg-white min-h-0">
       <input
         ref={fileInputRef}
         type="file"
@@ -132,48 +141,47 @@ export default function MobileView() {
         accept="application/pdf"
       />
 
-      {/* Error */}
-      {errorMessage && (
-        <div className="mx-4 mt-3 mb-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
-          <span className="text-[13px] text-red-600 font-medium">{errorMessage}</span>
-          <button
-            onClick={() => setErrorMessage(null)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-100 active:scale-90 transition"
-          >
-            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-      )}
+      {/* ═══ SECTION 1: FIXED TOP (error + selection header) ═══ */}
+      <div className="flex-shrink-0">
+        {errorMessage && (
+          <div className="mx-4 mt-3 mb-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
+            <span className="text-[13px] text-red-600 font-medium">{errorMessage}</span>
+            <button
+              onClick={() => setErrorMessage(null)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-100 active:scale-90 transition"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        )}
 
-      {/* ⭐ SELECTION HEADER */}
-      <div className="mt-3 mx-4 px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] rounded-lg flex items-center justify-between">
-        <span className="flex items-center gap-2">
-          <span className="w-5 h-5 rounded flex items-center justify-center bg-[#2563EB]">
-            <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
+        <div className="mt-3 mx-4 px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] rounded-lg flex items-center justify-between">
+          <span className="flex items-center gap-2">
+            <span className="w-5 h-5 rounded flex items-center justify-center bg-[#2563EB]">
+              <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </span>
+            <span className="text-[13px] font-semibold text-[#0F172A]">
+              {items.length} PDF{items.length > 1 ? 's' : ''}
+            </span>
           </span>
-          <span className="text-[13px] font-semibold text-[#0F172A]">
-            {items.length} PDF{items.length > 1 ? 's' : ''}
+          <span className="text-[11px] text-[#94A3B8] font-medium">
+            {items.every((it) => it.status === 'done') ? 'All compressed' : 'Ready to compress'}
           </span>
-        </span>
-        <span className="text-[11px] text-[#94A3B8] font-medium">
-          {items.every((it) => it.status === 'done') ? 'All compressed' : 'Ready to compress'}
-        </span>
+        </div>
       </div>
 
-      {/*
-        ⭐ PDF LIST
-      */}
-      <div className="mx-4 mt-2">
+      {/* ═══ SECTION 2: SCROLLABLE PDF LIST ═══ */}
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0 mx-4 mt-2">
         <PdfList />
       </div>
 
-      {/* ⭐ ADD MORE PDFs */}
-      <div className="mx-4 mt-2.5">
+      {/* ═══ SECTION 3: PINNED ADD MORE + SECURITY ═══ */}
+      <div className="flex-shrink-0 mx-4 mt-2 mb-2">
         <button
           onClick={openFilePicker}
           className="w-full py-3 rounded-lg border border-dashed border-[#BFDBFE] bg-[#F5F9FF] flex flex-col items-center justify-center gap-0.5 active:scale-[0.98] active:bg-[#EFF6FF] transition"
@@ -184,17 +192,14 @@ export default function MobileView() {
           </div>
           <p className="text-[10px] text-[#94A3B8]">PDF • Max 50 files</p>
         </button>
+
+        <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]">
+          <Lock size={11} />
+          Your files are 100% secure. We never store your data.
+        </div>
       </div>
 
-      {/* Security footer */}
-      <div className="mt-3 mb-1 px-4 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]">
-        <Lock size={11} />
-        Your files are 100% secure. We never store your data.
-      </div>
-
-      {/*
-        ⭐ STICKY BOTTOM — Compression level + Compress button
-      */}
+      {/* ═══ SECTION 4: STICKY BOTTOM BAR ═══ */}
       <BottomToolbar onAddPdfs={openFilePicker} barRef={bottomBarRef} />
     </div>
   );

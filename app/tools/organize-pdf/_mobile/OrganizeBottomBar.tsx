@@ -19,11 +19,11 @@ export default function OrganizeBottomBar({ onAddPdfs, barRef }: OrganizeBottomB
   const allSelected = pages.length > 0 && selectedIds.size === pages.length;
 
   return (
-    <div
-      ref={barRef}
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
-      style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
-    >
+<div
+  ref={barRef}
+  className="flex-shrink-0 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
+  style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
+>
       {/* Selection actions (shown when items selected) */}
       {hasSelection && (
         <div className="mb-2.5 flex items-center gap-1.5 bg-[#EFF3FF] rounded-xl p-2">

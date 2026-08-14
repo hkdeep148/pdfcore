@@ -5,9 +5,6 @@ import CookieBanner from './tools/_components/CookieBanner';
 import { PendingFileProvider } from './_context/PendingFileContext';
 import { ToastProvider } from './tools/_components/ToastProvider';
 
-// ═══════════════════════════════════════════════════════════════
-// FONTS
-// ═══════════════════════════════════════════════════════════════
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -30,12 +27,8 @@ const sourceSans3 = Source_Sans_3({
   weight: ['400', '500', '600', '700'],
 });
 
-// ═══════════════════════════════════════════════════════════════
-// METADATA — SEO OPTIMIZED
-// ═══════════════════════════════════════════════════════════════
 export const metadata: Metadata = {
   metadataBase: new URL('https://pdfcore.online'),
-
   title: {
     default:
       'PDF Core — Free PDF Tools Online | No Signup, No Upload, 100% Private',
@@ -43,72 +36,34 @@ export const metadata: Metadata = {
   },
   description:
     'Free online PDF and image tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. Unlock protected PDFs. Compress and convert images. No signup, no upload, no watermark. Your files never leave your device.',
-
   keywords: [
-    // Primary tools
-    'free pdf tools',
-    'pdf tools online',
-    'pdf editor free',
-    'compress pdf free',
-    'merge pdf online',
-    'split pdf free',
-    'pdf to jpg converter',
-    'image to pdf converter',
-    'sign pdf online free',
-    'unlock pdf free',
-    'rotate pdf online',
-    'add watermark to pdf',
-    'compress image online',
-    'organize pdf pages',
-
-    // Long-tail (easy to rank)
-    'compress pdf without losing quality',
-    'merge pdf files online free no signup',
-    'split pdf into separate files free',
-    'pdf to jpg converter free no watermark',
-    'image to pdf no watermark no signup',
-    'sign pdf online free without registration',
-    'unlock pdf password free online',
-    'rotate pdf pages permanently free',
+    'free pdf tools', 'pdf tools online', 'pdf editor free', 'compress pdf free',
+    'merge pdf online', 'split pdf free', 'pdf to jpg converter', 'image to pdf converter',
+    'sign pdf online free', 'unlock pdf free', 'rotate pdf online', 'add watermark to pdf',
+    'compress image online', 'organize pdf pages',
+    'compress pdf without losing quality', 'merge pdf files online free no signup',
+    'split pdf into separate files free', 'pdf to jpg converter free no watermark',
+    'image to pdf no watermark no signup', 'sign pdf online free without registration',
+    'unlock pdf password free online', 'rotate pdf pages permanently free',
     'compress image without losing quality',
-
-    // Privacy-focused (low competition)
-    'pdf tools no upload',
-    'pdf tools browser based',
-    'pdf tools that dont upload files',
-    'offline pdf editor',
-    'local pdf compressor',
-    'private pdf tools',
+    'pdf tools no upload', 'pdf tools browser based', 'pdf tools that dont upload files',
+    'offline pdf editor', 'local pdf compressor', 'private pdf tools',
     'client side pdf processing',
-
-    // Competitor alternatives (low competition)
-    'ilovepdf alternative',
-    'smallpdf alternative free',
-    'adobe acrobat alternative free',
-    'pdf24 alternative',
-
-    // "Without" modifiers (high intent)
-    'compress pdf without adobe',
-    'merge pdf without signup',
-    'sign pdf without printing',
-    'unlock pdf without software',
-    'pdf tools without watermark',
-    'pdf tools without registration',
-    'pdf editor without subscription',
+    'ilovepdf alternative', 'smallpdf alternative free',
+    'adobe acrobat alternative free', 'pdf24 alternative',
+    'compress pdf without adobe', 'merge pdf without signup', 'sign pdf without printing',
+    'unlock pdf without software', 'pdf tools without watermark',
+    'pdf tools without registration', 'pdf editor without subscription',
   ],
-
   authors: [{ name: 'PDF Core', url: 'https://pdfcore.online' }],
   creator: 'PDF Core',
   publisher: 'PDF Core',
-
-  // ═══════════ Open Graph (Facebook, WhatsApp, LinkedIn) ═══════════
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: 'https://pdfcore.online',
     siteName: 'PDF Core',
-    title:
-      'PDF Core — Free PDF Tools | No Signup, No Upload, 100% Private',
+    title: 'PDF Core — Free PDF Tools | No Signup, No Upload, 100% Private',
     description:
       '11 PDF and image tools that work 100% in your browser. No file uploads, no signup, no watermarks. Compress, merge, convert, sign & more — completely free.',
     images: [
@@ -120,8 +75,6 @@ export const metadata: Metadata = {
       },
     ],
   },
-
-  // ═══════════ Twitter Card ═══════════
   twitter: {
     card: 'summary_large_image',
     title: 'PDF Core — Free PDF Tools, No Signup Required',
@@ -129,8 +82,6 @@ export const metadata: Metadata = {
       '11 browser-based PDF and image tools. No uploads, no signup, no watermarks. 100% free & private.',
     images: ['/twitter-image.png'],
   },
-
-  // ═══════════ Robots ═══════════
   robots: {
     index: true,
     follow: true,
@@ -142,26 +93,17 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-
-  // ═══════════ Icons ═══════════
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
     apple: '/apple-icon.png',
   },
-
-  // ═══════════ Canonical URL ═══════════
   alternates: {
     canonical: 'https://pdfcore.online',
   },
-
-  // ═══════════ Category ═══════════
   category: 'technology',
 };
 
-// ═══════════════════════════════════════════════════════════════
-// VIEWPORT (accessibility-friendly — allows zoom)
-// ═══════════════════════════════════════════════════════════════
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -169,11 +111,6 @@ export const viewport: Viewport = {
   themeColor: '#4F46E5',
 };
 
-// ═══════════════════════════════════════════════════════════════
-// STRUCTURED DATA (JSON-LD) — SITE-WIDE ONLY
-// ═══════════════════════════════════════════════════════════════
-
-// WebSite schema — identifies the site + enables Sitelinks Search Box in Google
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
@@ -191,7 +128,6 @@ const websiteSchema = {
   },
 };
 
-// Organization schema — identifies the brand/company entity
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
@@ -202,28 +138,23 @@ const organizationSchema = {
     'Free online PDF and image tools that respect your privacy. All processing happens in your browser.',
 };
 
-// ═══════════════════════════════════════════════════════════════
-// ROOT LAYOUT
-// ═══════════════════════════════════════════════════════════════
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-<html
-  lang="en"
-  className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${sourceSans3.variable} h-full antialiased`}
->
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${sourceSans3.variable} antialiased`}
+    >
       <head>
-        {/* Structured Data — WebSite (identifies site + enables search box) */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(websiteSchema),
           }}
         />
-        {/* Structured Data — Organization (identifies the brand) */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -231,7 +162,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <PendingFileProvider>
           <ToastProvider>
             {children}

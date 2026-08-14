@@ -61,11 +61,11 @@ export default function BottomToolbar({ barRef }: { barRef?: React.RefObject<HTM
   if (!file) return null;
 
   return (
-    <div
-      ref={barRef}
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] space-y-2.5"
-      style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
-    >
+<div
+  ref={barRef}
+  className="flex-shrink-0 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] space-y-2.5"
+  style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
+>
       {/* Mode tabs */}
       <div>
         <p className="text-[10px] font-semibold text-[#8A93A3] mb-1 uppercase tracking-wide">Mode</p>

@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { SplitPdfProvider } from './_context/SplitPdfContext';
+import MobileToolWrapper from '../_components/MobileToolWrapper';
 
 const DesktopView = dynamic(() => import('./_desktop/DesktopView'), { ssr: false });
 const MobileView = dynamic(() => import('./_mobile/MobileView'), { ssr: false });
@@ -12,9 +13,9 @@ export default function SplitPdfClient() {
       <div className="hidden lg:contents">
         <DesktopView />
       </div>
-      <div className="lg:hidden contents">
+      <MobileToolWrapper>
         <MobileView />
-      </div>
+      </MobileToolWrapper>
     </SplitPdfProvider>
   );
 }

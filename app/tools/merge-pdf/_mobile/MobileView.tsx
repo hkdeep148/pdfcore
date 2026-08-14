@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useState, useEffect, useMemo } from 'react';
-import { useStickyBottomSpace } from '../../_hooks/useStickyBottomSpace';
 import { Plus, RotateCw, Trash2, ArrowDownAZ, ArrowRight, FileText, Layers, Lock } from 'lucide-react';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
@@ -35,16 +34,15 @@ export default function MobileView() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bottomBarRef = useRef<HTMLDivElement>(null);
-  const bottomSpace = useStickyBottomSpace(bottomBarRef);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const tool = getToolByPath('/tools/merge-pdf')!;
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [sortAsc, setSortAsc] = useState(false);
-  // Local visual rotation per PDF (0 / 90 / 180 / 270) — display only.
   const [rotations, setRotations] = useState<Record<string, number>>({});
 
-  // Keep selection in sync with items (drop ids that no longer exist).
+  // Keep selection in sync with items
   useEffect(() => {
     setSelectedIds(prev => {
       const next = new Set<string>();
@@ -52,6 +50,16 @@ export default function MobileView() {
       return next;
     });
   }, [items]);
+
+  // Auto-scroll to bottom when new items added
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [items.length]);
 
   // Auto-show success when merge completes
   useEffect(() => {
@@ -91,6 +99,7 @@ export default function MobileView() {
       return next;
     });
   };
+
   const toggleSelectAll = () => {
     if (allSelected) setSelectedIds(new Set());
     else setSelectedIds(new Set(items.map(i => i.id)));
@@ -129,35 +138,10 @@ export default function MobileView() {
         onPreview={previewMerged}
         summaryTitle="Merge Summary"
         summaryRows={[
-          {
-            icon: <Layers size={13} />,
-            iconBg: '#DBEAFE',
-            iconColor: '#2563EB',
-            label: 'Files Merged',
-            value: `${mergeResult.filesCount} PDFs`,
-          },
-          {
-            icon: <FileText size={13} />,
-            iconBg: '#EDE9FE',
-            iconColor: '#8B5CF6',
-            label: 'Total Pages',
-            value: `${mergeResult.totalPages}`,
-          },
-          {
-            icon: <FileText size={13} />,
-            iconBg: '#D1FAE5',
-            iconColor: '#10B981',
-            label: 'File Size',
-            value: mergeResult.mergedSizeMB,
-            valueColor: '#10B981',
-          },
-          {
-            icon: <FileText size={13} />,
-            iconBg: '#FEF3C7',
-            iconColor: '#F59E0B',
-            label: 'Format',
-            value: 'PDF',
-          },
+          { icon: <Layers size={13} />, iconBg: '#DBEAFE', iconColor: '#2563EB', label: 'Files Merged', value: `${mergeResult.filesCount} PDFs` },
+          { icon: <FileText size={13} />, iconBg: '#EDE9FE', iconColor: '#8B5CF6', label: 'Total Pages', value: `${mergeResult.totalPages}` },
+          { icon: <FileText size={13} />, iconBg: '#D1FAE5', iconColor: '#10B981', label: 'File Size', value: mergeResult.mergedSizeMB, valueColor: '#10B981' },
+          { icon: <FileText size={13} />, iconBg: '#FEF3C7', iconColor: '#F59E0B', label: 'Format', value: 'PDF' },
         ]}
         downloadLabel="Download Merged PDF"
         onDownload={downloadMerged}
@@ -169,7 +153,7 @@ export default function MobileView() {
   // ═════════ EMPTY STATE ═════════
   if (!hasItems && !isLoadingPdf) {
     return (
-      <div className="min-h-screen bg-white overflow-x-hidden">
+      <div className="flex-1 overflow-y-auto bg-white min-h-0">
         <input
           ref={fileInputRef}
           type="file"
@@ -186,7 +170,7 @@ export default function MobileView() {
   // ═════════ MAIN VIEW ═════════
   return (
     <>
-      <div className="min-h-[100dvh] bg-white overflow-x-hidden" style={{ paddingBottom: bottomSpace }}>
+      <div className="flex-1 flex flex-col bg-white min-h-0">
         <input
           ref={fileInputRef}
           type="file"
@@ -196,106 +180,90 @@ export default function MobileView() {
           accept="application/pdf"
         />
 
-        {/* Error */}
-        {errorMessage && (
-          <div className="mx-4 mt-3 mb-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
-            <span className="text-[13px] text-red-600 font-medium">{errorMessage}</span>
-            <button
-              onClick={() => setErrorMessage(null)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-100 active:scale-90 transition"
-            >
-              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-        )}
-
-        {/* Loading indicator */}
-        {isLoadingPdf && (
-          <div className="mx-4 mt-3 mb-2 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-4 h-4 rounded-full border-2 border-[#2563EB]/30 border-t-[#2563EB] animate-spin" />
-              <span className="text-[13px] text-[#1E40AF] font-semibold">Loading PDFs...</span>
+        {/* ═══ SECTION 1: FIXED TOP (error, loading, toolbar, selection header) ═══ */}
+        <div className="flex-shrink-0">
+          {/* Error */}
+          {errorMessage && (
+            <div className="mx-4 mt-3 mb-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
+              <span className="text-[13px] text-red-600 font-medium">{errorMessage}</span>
+              <button
+                onClick={() => setErrorMessage(null)}
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-100 active:scale-90 transition"
+              >
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
             </div>
-            <div className="w-full h-1.5 bg-blue-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#2563EB] transition-all duration-300"
-                style={{ width: `${loadProgress}%` }}
+          )}
+
+          {/* Loading indicator */}
+          {isLoadingPdf && (
+            <div className="mx-4 mt-3 mb-2 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-4 h-4 rounded-full border-2 border-[#2563EB]/30 border-t-[#2563EB] animate-spin" />
+                <span className="text-[13px] text-[#1E40AF] font-semibold">Loading PDFs...</span>
+              </div>
+              <div className="w-full h-1.5 bg-blue-100 rounded-full overflow-hidden">
+                <div className="h-full bg-[#2563EB] transition-all duration-300" style={{ width: `${loadProgress}%` }} />
+              </div>
+            </div>
+          )}
+
+          {/* TOP TOOLBAR */}
+          <div className="px-4 mt-3">
+            <div className="flex items-center rounded-md bg-white border border-[#E2E8F0] min-w-0 overflow-hidden">
+              <ActionIcon
+                onClick={openFilePicker}
+                ariaLabel="Add PDFs"
+                variant="primary"
+                icon={<Plus size={20} strokeWidth={2.2} />}
+              />
+              <ToolbarDivider />
+              <ActionIcon
+                onClick={handleDeleteSelected}
+                disabled={selectedCount === 0}
+                ariaLabel="Remove selected"
+                variant="danger"
+                icon={<Trash2 size={18} strokeWidth={2} />}
               />
             </div>
           </div>
-        )}
 
-        {/*
-          ⭐ TOP TOOLBAR — Add PDF + batch actions
-        */}
-        <div className="px-4 mt-3">
-          <div className="flex items-center rounded-md bg-white border border-[#E2E8F0] min-w-0 overflow-hidden">
-            <ActionIcon
-              onClick={openFilePicker}
-              ariaLabel="Add PDFs"
-              variant="primary"
-              icon={<Plus size={20} strokeWidth={2.2} />}
-            />
-            <ToolbarDivider />
-            <ActionIcon
-              onClick={handleDeleteSelected}
-              disabled={selectedCount === 0}
-              ariaLabel="Remove selected"
-              variant="danger"
-              icon={<Trash2 size={18} strokeWidth={2} />}
-            />
+          {/* SELECTION HEADER */}
+          <div className="mt-3 mx-4 px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] rounded-lg flex items-center justify-between">
+            <button onClick={toggleSelectAll} className="flex items-center gap-2.5 active:opacity-70">
+              <div className={`w-5 h-5 rounded flex items-center justify-center transition ${
+                allSelected || selectedCount > 0 ? 'bg-[#2563EB]' : 'border-2 border-[#CBD5E1] bg-white'
+              }`}>
+                {(allSelected || selectedCount > 0) && (
+                  <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
+              </div>
+              <span className="text-[13px] font-semibold text-[#0F172A]">
+                {selectedCount > 0
+                  ? `${selectedCount} PDF${selectedCount > 1 ? 's' : ''} selected`
+                  : `${items.length} PDF${items.length > 1 ? 's' : ''} • ${totalPages} pages`}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setSortAsc(v => !v)}
+              className={`w-8 h-8 rounded-lg border flex items-center justify-center active:scale-90 transition ${
+                sortAsc ? 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]' : 'border-[#E2E8F0] bg-white text-[#64748B]'
+              }`}
+              aria-label="Sort"
+            >
+              <ArrowDownAZ size={15} strokeWidth={2} />
+            </button>
           </div>
         </div>
 
-        {/* ⭐ SELECTION HEADER */}
-        <div className="mt-3 mx-4 px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] rounded-lg flex items-center justify-between">
-          <button
-            onClick={toggleSelectAll}
-            className="flex items-center gap-2.5 active:opacity-70"
-          >
-            <div
-              className={`w-5 h-5 rounded flex items-center justify-center transition ${
-                allSelected || selectedCount > 0
-                  ? 'bg-[#2563EB]'
-                  : 'border-2 border-[#CBD5E1] bg-white'
-              }`}
-            >
-              {(allSelected || selectedCount > 0) && (
-                <svg viewBox="0 0 24 24" className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              )}
-            </div>
-            <span className="text-[13px] font-semibold text-[#0F172A]">
-              {selectedCount > 0
-                ? `${selectedCount} PDF${selectedCount > 1 ? 's' : ''} selected`
-                : `${items.length} PDF${items.length > 1 ? 's' : ''} • ${totalPages} pages`}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setSortAsc(v => !v)}
-            className={`w-8 h-8 rounded-lg border flex items-center justify-center active:scale-90 transition ${
-              sortAsc
-                ? 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]'
-                : 'border-[#E2E8F0] bg-white text-[#64748B]'
-            }`}
-            aria-label="Sort"
-          >
-            <ArrowDownAZ size={15} strokeWidth={2} />
-          </button>
-        </div>
-
-        {/*
-          ⭐ PDF LIST (universal MobileListView)
-          Reorder is enabled only when sort is NOT active — when the user
-          sorts by name, drag-to-reorder is disabled to prevent conflict.
-          Order badges show the merge sequence (1, 2, 3…).
-        */}
-        <div className="mx-4 mt-2">
+        {/* ═══ SECTION 2: SCROLLABLE FILE LIST ═══ */}
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0 mx-4 mt-2">
           <MobileListView
             items={displayItems}
             onReorder={sortAsc ? undefined : reorderPdfs}
@@ -319,23 +287,14 @@ export default function MobileView() {
             renderPrimaryText={(item) => item.name}
             renderSecondaryText={(item) => `${item.totalPages} pages · ${item.sizeMB}`}
             actions={(item) => [
-              {
-                icon: <RotateCw size={15} strokeWidth={1.8} />,
-                ariaLabel: 'Rotate',
-                onClick: () => handleRotateItem(item.id),
-              },
-              {
-                icon: <Trash2 size={15} strokeWidth={1.8} />,
-                ariaLabel: 'Remove',
-                onClick: () => removePdf(item.id),
-                variant: 'danger',
-              },
+              { icon: <RotateCw size={15} strokeWidth={1.8} />, ariaLabel: 'Rotate', onClick: () => handleRotateItem(item.id) },
+              { icon: <Trash2 size={15} strokeWidth={1.8} />, ariaLabel: 'Remove', onClick: () => removePdf(item.id), variant: 'danger' },
             ]}
           />
         </div>
 
-        {/* ⭐ ADD MORE PDFs — same size as list rows */}
-        <div className="mx-4 mt-2.5">
+        {/* ═══ SECTION 3: PINNED ADD MORE + SECURITY ═══ */}
+        <div className="flex-shrink-0 mx-4 mt-2 mb-2">
           <button
             onClick={openFilePicker}
             className="w-full py-3 rounded-lg border border-dashed border-[#BFDBFE] bg-[#F5F9FF] flex flex-col items-center justify-center gap-0.5 active:scale-[0.98] active:bg-[#EFF6FF] transition"
@@ -346,23 +305,19 @@ export default function MobileView() {
             </div>
             <p className="text-[10px] text-[#94A3B8]">PDF • Max 50 files</p>
           </button>
+
+          <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]">
+            <Lock size={11} />
+            Your files are 100% secure. We never store your data.
+          </div>
         </div>
 
-        {/* Security footer */}
-        <div className="mt-3 mb-1 px-4 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]">
-          <Lock size={11} />
-          Your files are 100% secure. We never store your data.
-        </div>
-
-        {/*
-          ⭐ STICKY BOTTOM — Merge button
-        */}
+        {/* ═══ SECTION 4: STICKY BOTTOM BAR ═══ */}
         <div
           ref={bottomBarRef}
-          className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
+          className="flex-shrink-0 bg-white border-t border-[#E2E8F0] px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)]"
           style={{ boxShadow: '0 -6px 20px -8px rgba(15,23,42,0.08)' }}
         >
-          {/* Merge button */}
           <button
             onClick={handleMerge}
             disabled={isProcessing || items.length < 2}
@@ -377,18 +332,11 @@ export default function MobileView() {
       </div>
 
       {/* Processing Overlay */}
-      <ProcessingOverlay
-        isVisible={isProcessing}
-        stage="merging"
-        progress={50}
-      />
+      <ProcessingOverlay isVisible={isProcessing} stage="merging" progress={50} />
     </>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ActionIcon — Row 1 icon button
-// Just an icon centered in a flex-1 slot. No labels, no borders.
 // ═══════════════════════════════════════════════════════════════
 function ActionIcon({
   onClick,
@@ -404,11 +352,9 @@ function ActionIcon({
   variant?: 'default' | 'primary' | 'danger';
 }) {
   const colorClass =
-    variant === 'primary'
-      ? 'text-[#6366F1]'
-      : variant === 'danger'
-      ? 'text-[#EF4444]'
-      : 'text-[#0F172A]';
+    variant === 'primary' ? 'text-[#6366F1]'
+    : variant === 'danger' ? 'text-[#EF4444]'
+    : 'text-[#0F172A]';
 
   return (
     <button
@@ -422,9 +368,6 @@ function ActionIcon({
   );
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ToolbarDivider — thin vertical line between Row 1 icons
-// ═══════════════════════════════════════════════════════════════
 function ToolbarDivider() {
   return <div className="w-px h-6 bg-[#E2E8F0] flex-shrink-0" />;
 }
