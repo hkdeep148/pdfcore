@@ -443,12 +443,15 @@ interface SectionRendererProps {
 function SectionRenderer({ section, tocItems }: SectionRendererProps) {
   switch (section.type) {
     case 'heading': {
+      // Prefer explicit id from data; fallback to matching TOC by title
       const tocItem = tocItems?.find(item =>
         section.content?.toLowerCase().includes(item.title.toLowerCase())
       );
+      const headingId = section.id || tocItem?.id;
+
       return (
         <h2
-          id={tocItem?.id}
+          id={headingId}
           className="font-['Space_Grotesk',sans-serif] text-[26px] md:text-[32px] font-extrabold text-[#07122E] tracking-tight mt-10 mb-4 scroll-mt-24"
         >
           {section.content}
@@ -546,7 +549,6 @@ function SectionRenderer({ section, tocItems }: SectionRendererProps) {
       return null;
   }
 }
-
 /* ============ FAQ ITEM ============ */
 
 interface FAQItemProps {
