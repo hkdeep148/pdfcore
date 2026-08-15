@@ -8,6 +8,7 @@ import MobileListView from '../../_components/MobileListView';
 import ProcessingOverlay from '../../_components/ProcessingOverlay';
 import { getToolByPath } from '../../_config/tools';
 import { useMergePdfContext } from '../_context/MergePdfContext';
+import AddMoreSection from '../../_components/AddMoreSection';
 
 // ═══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
@@ -291,7 +292,15 @@ export default function MobileView() {
               { icon: <Trash2 size={15} strokeWidth={1.8} />, ariaLabel: 'Remove', onClick: () => removePdf(item.id), variant: 'danger' },
             ]}
           />
-        </div>
+        <AddMoreSection
+    onAddMore={openFilePicker}
+    label="Add more PDFs"
+    hint="PDF • Max 50 files"
+    accentColor="#2563EB"
+    borderColor="#BFDBFE"
+    bgColor="#F5F9FF"
+  />
+</div>
 
         {/* ═══ SECTION 3: PINNED ADD MORE + SECURITY ═══ */}
         <div className="flex-shrink-0 mx-4 mt-2 mb-2">

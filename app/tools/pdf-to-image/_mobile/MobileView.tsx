@@ -8,6 +8,7 @@ import { getToolByPath } from '../../_config/tools';
 import { usePdfToImageContext } from '../_context/PdfToImageContext';
 import PageGrid from './PageGrid';
 import BottomToolbar from './BottomToolbar';
+import AddMoreSection from '../../_components/AddMoreSection';
 
 export default function MobileView() {
   const {
@@ -189,29 +190,16 @@ export default function MobileView() {
         </div>
       </div>
 
-      {/* ═══ SECTION 2: SCROLLABLE PAGE GRID ═══ */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0 mx-4 mt-3">
-        <PageGrid />
-      </div>
+{/* ═══ SECTION 2: SCROLLABLE PAGE GRID + ADD MORE + SECURITY ═══ */}
+<div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0 mx-4 mt-3">
+  <PageGrid />
 
-      {/* ═══ SECTION 3: PINNED ADD MORE + SECURITY ═══ */}
-      <div className="flex-shrink-0 mx-4 mt-2 mb-2">
-        <button
-          onClick={openFilePicker}
-          className="w-full py-3 rounded-lg border border-dashed border-[#BFDBFE] bg-[#F5F9FF] flex flex-col items-center justify-center gap-0.5 active:scale-[0.98] active:bg-[#EFF6FF] transition"
-        >
-          <div className="flex items-center gap-1.5 text-[#2563EB]">
-            <Plus size={16} strokeWidth={2.5} />
-            <span className="text-[13px] font-semibold">Add more PDFs</span>
-          </div>
-          <p className="text-[10px] text-[#94A3B8]">PDF • Max 100 MB</p>
-        </button>
-
-        <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]">
-          <Lock size={11} />
-          Your files are 100% secure. We never store your data.
-        </div>
-      </div>
+  <AddMoreSection
+    onAddMore={openFilePicker}
+    label="Add more PDFs"
+    hint="PDF • Max 100 MB"
+  />
+</div>
 
       {/* ═══ SECTION 4: STICKY BOTTOM BAR ═══ */}
       <BottomToolbar onAddPdfs={openFilePicker} barRef={bottomBarRef} />

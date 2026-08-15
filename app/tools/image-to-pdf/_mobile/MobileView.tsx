@@ -15,6 +15,8 @@ import { useImageToPdfContext } from '../_context/ImageToPdfContext';
 import OptionSheet, { OptionItem } from './OptionSheet';
 import type { ImageItem, PageSize, Orientation, Margins } from '../../_types';
 import { PAGE_BACKGROUND_HEX } from '../_utils/pdfGenerator';
+import AddMoreSection from '../../_components/AddMoreSection';
+
 
 // ═══════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -293,10 +295,7 @@ return (
     </div>
 
 {/* ═══ SCROLLABLE FILE LIST ═══ */}
-<div 
-  ref={scrollContainerRef}
-  className="flex-1 overflow-y-auto min-h-0 mx-4"
->
+<div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0 mx-4">
   <MobileListView
     items={displayImages}
     onReorder={sortAsc ? undefined : reorderImages}
@@ -314,22 +313,11 @@ return (
       { icon: <Trash2 size={15} strokeWidth={1.8} />, ariaLabel: 'Delete', onClick: () => removeImage(item.id), variant: 'danger' },
     ]}
   />
-</div>
-
-{/* ═══ PINNED "ADD MORE" BUTTON — stays above sticky bar ═══ */}
-<div className="flex-shrink-0 mx-4 mt-2 mb-2">
-  <button onClick={openFilePicker} className="w-full py-3 rounded-md border border-dashed border-[#BFDBFE] bg-[#F5F9FF] flex flex-col items-center justify-center gap-0.5 active:scale-[0.98] transition">
-    <div className="flex items-center gap-1.5 text-[#2563EB]">
-      <Plus size={16} strokeWidth={2.5} />
-      <span className="text-[13px] font-semibold">Add more images</span>
-    </div>
-    <p className="text-[10px] text-[#94A3B8]">JPG, PNG, WEBP • Max 50 images</p>
-  </button>
-
-  <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]">
-    <Lock size={11} />
-    Your files are 100% secure. We never store your data.
-  </div>
+ <AddMoreSection
+    onAddMore={openFilePicker}
+    label="Add more images"
+    hint="JPG, PNG, WEBP • Max 50 images"
+  />
 </div>
 
 {/* ═══ STICKY BOTTOM BAR ═══ */}

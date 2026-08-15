@@ -2,12 +2,13 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Check, ArrowRight, Image as ImageIcon, Lock } from 'lucide-react';
+import { Plus, Trash2, Check } from 'lucide-react';
 import MobileEmptyState from '../../_components/MobileEmptyState';
 import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessScreen';
 import MobileListView from '../../_components/MobileListView';
 import MobileLoadingScreen from '../../_components/MobileLoadingScreen';
 import MobileCompressingScreen from '../../_components/MobileCompressingScreen';
+import AddMoreSection from '../../_components/AddMoreSection';
 import ComparisonSlider from '../ComparisonSlider';
 import { getToolByPath } from '../../_config/tools';
 import { useToolFileReceiver } from '../../_hooks/useToolFileReceiver';
@@ -45,7 +46,6 @@ export default function MobileView() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const tool = getToolByPath('/tools/compress-image')!;
 
-  // Auto-show success screen when compression completes
   useEffect(() => {
     if (hasCompleted && !processing && completedCount === files.length && files.length > 0) {
       const timer = setTimeout(() => {
@@ -55,7 +55,6 @@ export default function MobileView() {
     }
   }, [hasCompleted, processing, completedCount, files.length]);
 
-  // Auto-scroll to bottom when files added
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
@@ -65,7 +64,6 @@ export default function MobileView() {
     }
   }, [files.length]);
 
-  // Keep selection in sync with files
   useEffect(() => {
     setSelectedIds(prev => {
       const next = new Set<string>();
@@ -76,39 +74,32 @@ export default function MobileView() {
 
   useToolFileReceiver((received: File[]) => handleFiles(received));
 
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const fileList = e.target.files;
-  if (!fileList || fileList.length === 0) {
-    e.target.value = '';
-    return;
-  }
-
-  // Filter out any files that aren't valid images (Samsung Gallery sometimes returns weird files)
-  const validFiles = Array.from(fileList).filter(file => {
-    // Check MIME type
-    if (!file.type.startsWith('image/')) {
-      return false;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) {
+      e.target.value = '';
+      return;
     }
-    // Check file size > 0
-    if (file.size === 0) {
-      return false;
+
+    const validFiles = Array.from(fileList).filter(file => {
+      if (!file.type.startsWith('image/')) return false;
+      if (file.size === 0) return false;
+      return true;
+    });
+
+    if (validFiles.length === 0) {
+      setError('No valid image files selected. Please try again from Files or Photos.');
+      e.target.value = '';
+      return;
     }
-    return true;
-  });
 
-  if (validFiles.length === 0) {
-    setError('No valid image files selected. Please try again from Files or Photos.');
+    if (validFiles.length < fileList.length) {
+      setError(`${fileList.length - validFiles.length} file(s) skipped (invalid format).`);
+    }
+
+    handleFiles(validFiles);
     e.target.value = '';
-    return;
-  }
-
-  if (validFiles.length < fileList.length) {
-    setError(`${fileList.length - validFiles.length} file(s) skipped (invalid format).`);
-  }
-
-  handleFiles(validFiles);
-  e.target.value = '';
-};
+  };
 
   const openFilePicker = () => fileInputRef.current?.click();
   const handleStartOver = () => { handleClearAll(); setShowSuccess(false); };
@@ -226,14 +217,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   if (files.length === 0) {
     return (
       <div className="flex-1 overflow-y-auto bg-white min-h-0">
-<input
-  ref={fileInputRef}
-  type="file"
-  className="hidden"
-  onChange={handleFileChange}
-  multiple
-  accept="application/octet-stream,image/*"
-/>
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          onChange={handleFileChange}
+          multiple
+          accept="application/octet-stream,image/*"
+        />
         <MobileEmptyState {...tool.mobileUpload} onUpload={openFilePicker} />
       </div>
     );
@@ -241,121 +232,112 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
   // ═════════ MAIN VIEW ═════════
   return (
-    <>
-      <div className="flex-1 flex flex-col bg-white min-h-0">
-<input
-  ref={fileInputRef}
-  type="file"
-  className="hidden"
-  onChange={handleFileChange}
-  multiple
-  accept="application/octet-stream,image/*"
-/>
+    <div className="flex-1 flex flex-col bg-white min-h-0">
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        onChange={handleFileChange}
+        multiple
+        accept="application/octet-stream,image/*"
+      />
 
-        {/* ═══ SECTION 1: FIXED TOP ═══ */}
-        <div className="flex-shrink-0">
-          {error && (
-            <div className="mx-4 mt-3 mb-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
-              <span className="text-[13px] text-red-600 font-medium">{error}</span>
-              <button onClick={() => setError(null)} className="text-red-400 text-xl leading-none">×</button>
-            </div>
-          )}
-
-          {/* TOP TOOLBAR */}
-          <div className="px-3 mt-3">
-            <div className="flex items-center rounded-md bg-white border border-[#E2E8F0] min-w-0 overflow-hidden">
-              <ActionIcon onClick={openFilePicker} ariaLabel="Add images" variant="primary" icon={<Plus size={20} strokeWidth={2.2} />} />
-              <ToolbarDivider />
-              <ActionIcon onClick={handleDeleteSelected} disabled={selectedCount === 0} ariaLabel="Remove" variant="danger" icon={<Trash2 size={18} strokeWidth={2} />} />
-            </div>
+      {/* ═══ SECTION 1: FIXED TOP ═══ */}
+      <div className="flex-shrink-0">
+        {error && (
+          <div className="mx-4 mt-3 mb-2 px-4 py-3 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
+            <span className="text-[13px] text-red-600 font-medium">{error}</span>
+            <button onClick={() => setError(null)} className="text-red-400 text-xl leading-none">×</button>
           </div>
+        )}
 
-          {/* SELECTION HEADER */}
-          <div className="mt-4 mx-4 px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] border-b-0 rounded-t-lg flex items-center justify-between">
-            <button onClick={toggleSelectAll} className="flex items-center gap-2.5 active:opacity-70">
-              <div className={`w-5 h-5 rounded flex items-center justify-center transition ${
-                allSelected ? 'bg-[#F59E0B]' : selectedCount > 0 ? 'bg-[#F59E0B]' : 'border-2 border-[#CBD5E1] bg-white'
-              }`}>
-                {allSelected && <Check size={13} className="text-white" strokeWidth={3} />}
-                {!allSelected && selectedCount > 0 && <div className="w-2.5 h-0.5 bg-white rounded" />}
-              </div>
-              <span className="text-[13px] font-semibold text-[#0F172A]">
-                {selectedCount > 0
-                  ? `${selectedCount} image${selectedCount > 1 ? 's' : ''} selected`
-                  : `${files.length} image${files.length > 1 ? 's' : ''}`}
-              </span>
-            </button>
-            {hasCompleted && (
-              <span className="text-[11px] font-semibold text-[#F59E0B] bg-[#FEF3C7] px-2 py-1 rounded-full">
-                {completedCount} compressed
-              </span>
-            )}
+        {/* TOP TOOLBAR */}
+        <div className="px-3 mt-3">
+          <div className="flex items-center rounded-md bg-white border border-[#E2E8F0] min-w-0 overflow-hidden">
+            <ActionIcon onClick={openFilePicker} ariaLabel="Add images" variant="primary" icon={<Plus size={20} strokeWidth={2.2} />} />
+            <ToolbarDivider />
+            <ActionIcon onClick={handleDeleteSelected} disabled={selectedCount === 0} ariaLabel="Remove" variant="danger" icon={<Trash2 size={18} strokeWidth={2} />} />
           </div>
         </div>
 
-        {/* ═══ SECTION 2: SCROLLABLE FILE LIST ═══ */}
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0 mx-4">
-          <MobileListView
-            items={files}
-            selectedIds={selectedIds}
-            onToggleSelect={toggleSelect}
-            accentColor="#F59E0B"
-            renderThumbnail={(file: any) => (
-              <img
-                src={file.originalUrl}
-                alt={file.original.name}
-                draggable={false}
-                className="max-w-full max-h-full object-cover w-full h-full"
-              />
-            )}
-            onThumbnailTap={(file: any) => {
-              if (file.compressedUrl && file.compressedSize) {
-                setComparingFile(file);
-              }
-            }}
-            renderPrimaryText={(file: any) => file.original.name}
-            renderSecondaryText={(file: any) => {
-              if (file.compressedSize) {
-                return `${formatBytes(file.original.size)} → ${formatBytes(file.compressedSize)} (-${file.reduction || 0}%)`;
-              }
-              return formatBytes(file.original.size);
-            }}
-            actions={(file: any) => [
-              {
-                icon: <Trash2 size={15} strokeWidth={1.8} />,
-                ariaLabel: 'Remove',
-                onClick: () => handleRemoveFile(file.id),
-                variant: 'danger',
-              },
-            ]}
-          />
-        </div>
-
-        {/* ═══ SECTION 3: PINNED ADD MORE + SECURITY ═══ */}
-        <div className="flex-shrink-0 mx-4 mt-2 mb-2">
-          <button
-            onClick={openFilePicker}
-            className="w-full py-3 rounded-md border border-dashed border-[#FCD34D] bg-[#FFFBEB] flex flex-col items-center justify-center gap-0.5 active:scale-[0.98] transition"
-          >
-            <div className="flex items-center gap-1.5 text-[#F59E0B]">
-              <Plus size={16} strokeWidth={2.5} />
-              <span className="text-[13px] font-semibold">Add more images</span>
+        {/* SELECTION HEADER */}
+        <div className="mt-4 mx-4 px-3 py-2.5 bg-[#F8FAFC] border border-[#F1F5F9] border-b-0 rounded-t-lg flex items-center justify-between">
+          <button onClick={toggleSelectAll} className="flex items-center gap-2.5 active:opacity-70">
+            <div className={`w-5 h-5 rounded flex items-center justify-center transition ${
+              allSelected ? 'bg-[#F59E0B]' : selectedCount > 0 ? 'bg-[#F59E0B]' : 'border-2 border-[#CBD5E1] bg-white'
+            }`}>
+              {allSelected && <Check size={13} className="text-white" strokeWidth={3} />}
+              {!allSelected && selectedCount > 0 && <div className="w-2.5 h-0.5 bg-white rounded" />}
             </div>
-            <p className="text-[10px] text-[#94A3B8]">JPG, PNG, WEBP • Multiple files supported</p>
+            <span className="text-[13px] font-semibold text-[#0F172A]">
+              {selectedCount > 0
+                ? `${selectedCount} image${selectedCount > 1 ? 's' : ''} selected`
+                : `${files.length} image${files.length > 1 ? 's' : ''}`}
+            </span>
           </button>
-
-          <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]">
-            <Lock size={11} />
-            Your files are 100% secure. We never store your data.
-          </div>
-        </div>
-
-        {/* ═══ SECTION 4: STICKY BOTTOM (Settings sheet + Action bar) ═══ */}
-        <div className="flex-shrink-0">
-          <MobileSettingsSheet />
-          <MobileActionBar barRef={bottomBarRef} />
+          {hasCompleted && (
+            <span className="text-[11px] font-semibold text-[#F59E0B] bg-[#FEF3C7] px-2 py-1 rounded-full">
+              {completedCount} compressed
+            </span>
+          )}
         </div>
       </div>
+
+      {/* ═══ SECTION 2: SCROLLABLE FILE LIST + ADD MORE + SECURITY ═══ */}
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0 mx-4">
+        <MobileListView
+          items={files}
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
+          accentColor="#F59E0B"
+          renderThumbnail={(file: any) => (
+            <img
+              src={file.originalUrl}
+              alt={file.original.name}
+              draggable={false}
+              className="max-w-full max-h-full object-cover w-full h-full"
+            />
+          )}
+          onThumbnailTap={(file: any) => {
+            if (file.compressedUrl && file.compressedSize) {
+              setComparingFile(file);
+            }
+          }}
+          renderPrimaryText={(file: any) => file.original.name}
+          renderSecondaryText={(file: any) => {
+            if (file.compressedSize) {
+              return `${formatBytes(file.original.size)} → ${formatBytes(file.compressedSize)} (-${file.reduction || 0}%)`;
+            }
+            return formatBytes(file.original.size);
+          }}
+          actions={(file: any) => [
+            {
+              icon: <Trash2 size={15} strokeWidth={1.8} />,
+              ariaLabel: 'Remove',
+              onClick: () => handleRemoveFile(file.id),
+              variant: 'danger',
+            },
+          ]}
+        />
+
+        {/* Add more + Security (scrolls with list) */}
+        <AddMoreSection
+          onAddMore={openFilePicker}
+          label="Add more images"
+          hint="JPG, PNG, WEBP • Multiple files supported"
+          accentColor="#F59E0B"
+          borderColor="#FCD34D"
+          bgColor="#FFFBEB"
+        />
+      </div>
+
+      {/* ═══ SECTION 3: COMPRESSION SETTINGS ═══ */}
+      <div className="flex-shrink-0 bg-white border-t border-[#E2E8F0] px-3 pt-2 pb-2">
+        <MobileSettingsSheet />
+      </div>
+
+      {/* ═══ SECTION 4: STICKY BOTTOM ACTION BAR ═══ */}
+      <MobileActionBar barRef={bottomBarRef} />
 
       {/* Comparison Modal */}
       {comparingFile && comparingFile.compressedUrl && comparingFile.compressedSize && (
@@ -369,7 +351,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           onClose={() => setComparingFile(null)}
         />
       )}
-    </>
+    </div>
   );
 }
 

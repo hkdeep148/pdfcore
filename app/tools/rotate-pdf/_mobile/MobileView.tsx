@@ -7,6 +7,7 @@ import MobileSuccessScreen from '../../_components/SuccessScreen/MobileSuccessSc
 import MobileListView from '../../_components/MobileListView';
 import { getToolByPath } from '../../_config/tools';
 import { useRotatePdfContext } from '../_context/RotatePdfContext';
+import AddMoreSection from '../../_components/AddMoreSection';
 
 export default function MobileView() {
   const {
@@ -265,26 +266,17 @@ export default function MobileView() {
             },
           ]}
         />
-      </div>
+      <AddMoreSection
+    onAddMore={openFilePicker}
+    label="Add more PDFs"
+    hint="PDF • Max 50 files"
+    accentColor="#2563EB"
+    borderColor="#BFDBFE"
+    bgColor="#F5F9FF"
+  />
+</div>
 
-      {/* ═══ SECTION 3: PINNED ADD MORE + SECURITY ═══ */}
-      <div className="flex-shrink-0 mx-4 mt-2 mb-2">
-        <button
-          onClick={openFilePicker}
-          className="w-full py-3 rounded-md border border-dashed border-[#DDD6FE] bg-[#FAF5FF] flex flex-col items-center justify-center gap-0.5 active:scale-[0.98] transition"
-        >
-          <div className="flex items-center gap-1.5 text-[#8B3DFF]">
-            <Plus size={16} strokeWidth={2.5} />
-            <span className="text-[13px] font-semibold">Add more PDFs</span>
-          </div>
-          <p className="text-[10px] text-[#94A3B8]">PDF • Max 50 files</p>
-        </button>
-
-        <div className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-[#94A3B8]">
-          <Lock size={11} />
-          Your files are 100% secure. We never store your data.
-        </div>
-      </div>
+  
 
       {/* ═══ SECTION 4: STICKY BOTTOM BAR ═══ */}
       <div
