@@ -93,11 +93,47 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  // ✅ UPDATED FAVICON CONFIGURATION
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/apple-icon.png',
+    icon: [
+      {
+        url: '/favicon.ico',
+        sizes: '32x32',
+        type: 'image/x-icon',
+      },
+      {
+        url: '/favicon-32x32.png',
+        sizes: '32x32',
+        type: 'image/png',
+      },
+      {
+        url: '/favicon-16x16.png',
+        sizes: '16x16',
+        type: 'image/png',
+      },
+      {
+        url: '/favicon-64x64.png',
+        sizes: '64x64',
+        type: 'image/png',
+      },
+    ],
+    apple: '/apple-touch-icon.png', // 180x180 for iPhone/iPad
+    other: [
+      {
+        rel: 'android-chrome-192x192',
+        url: '/android-chrome-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+      {
+        rel: 'android-chrome-512x512',
+        url: '/android-chrome-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+      },
+    ],
   },
+  manifest: '/site.webmanifest', // ✅ Web manifest for PWA support
   alternates: {
     canonical: 'https://pdfcore.online',
   },
@@ -108,7 +144,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#4F46E5',
+  themeColor: '#FF4757', // Your brand red color
 };
 
 const websiteSchema = {
@@ -133,7 +169,7 @@ const organizationSchema = {
   '@type': 'Organization',
   name: 'PDF Core',
   url: 'https://pdfcore.online',
-  logo: 'https://pdfcore.online/icon.png',
+  logo: 'https://pdfcore.online/android-chrome-192x192.png', // ✅ Updated logo reference
   description:
     'Free online PDF and image tools that respect your privacy. All processing happens in your browser.',
 };
