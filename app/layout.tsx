@@ -144,7 +144,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#FF4757', // Your brand red color
+  themeColor: '#1E63FF', //
 };
 
 const websiteSchema = {
@@ -169,7 +169,7 @@ const organizationSchema = {
   '@type': 'Organization',
   name: 'PDF Core',
   url: 'https://pdfcore.online',
-  logo: 'https://pdfcore.online/android-chrome-192x192.png', // ✅ Updated logo reference
+  logo: 'https://pdfcore.online/android-chrome-512x512.png',
   description:
     'Free online PDF and image tools that respect your privacy. All processing happens in your browser.',
 };

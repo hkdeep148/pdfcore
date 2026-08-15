@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import PrivacyClient from './PrivacyClient';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | PDF Core',
+  title: 'Privacy Policy',
   description: 'PDF Core privacy policy. Learn how we protect your data. Files processed in your browser, never uploaded to servers. 100% private PDF processing.',
   keywords: 'pdf core privacy, pdf privacy policy, secure pdf tools, private pdf processing',
   alternates: {
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: 'Privacy Policy | PDF Core',
+    title: 'Privacy Policy',
     description: 'PDF Core privacy policy. Files processed in your browser, never uploaded to servers.',
     url: 'https://pdfcore.online/privacy/',
     siteName: 'PDF Core',

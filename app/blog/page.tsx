@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import BlogClient from './BlogClient';
 
 export const metadata: Metadata = {
-  title: 'Blog | PDF Core - Free PDF Tools & Guides',
+  title: 'Blog - Free PDF Tools & Guides',
   description: 'Read guides, tutorials, and tips about PDF tools. Learn how to merge, compress, split, and manage PDFs like a pro — all for free.',
   keywords: 'pdf blog, pdf guides, pdf tutorials, pdf tips, free pdf tools, compress pdf, merge pdf',
   robots: {
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     canonical: 'https://pdfcore.online/blog/',
   },
   openGraph: {
-    title: 'Blog | PDF Core - Free PDF Tools & Guides',
+    title: 'Blog - Free PDF Tools & Guides',
     description: 'Read guides, tutorials, and tips about PDF tools. Learn how to merge, compress, split, and manage PDFs like a pro.',
     url: 'https://pdfcore.online/blog/',
     siteName: 'PDF Core',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Blog | PDF Core',
+    title: 'Blog - Free PDF Tools & Guides',
     description: 'Read guides, tutorials, and tips about PDF tools.',
   },
 };
