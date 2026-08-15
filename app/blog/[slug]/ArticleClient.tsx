@@ -32,7 +32,7 @@ import {
   type BlogCategory,
   type BlogPost,
 } from '../_config/posts';
-import { getArticleContent, type ArticleSection } from '../_config/articleContent';
+import { getArticleContent, type ArticleSection } from '../_content';
 
 const categoryIcons: Record<BlogCategory, React.ReactNode> = {
   guides: <BookOpen size={14} />,
@@ -72,17 +72,24 @@ export default function ArticleClient({ slug }: ArticleClientProps) {
 
   const colors = categoryColors[post.category];
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+const handleCopyLink = () => {
+  navigator.clipboard.writeText(currentUrl || window.location.href);
+  setCopied(true);
+  setTimeout(() => setCopied(false), 2000);
+};
 
-  const shareUrls = {
-    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`,
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`,
-    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`,
-  };
+// Track current URL for share links (client-side only to avoid hydration mismatch)
+const [currentUrl, setCurrentUrl] = useState('');
+
+useEffect(() => {
+  setCurrentUrl(window.location.href);
+}, []);
+
+const shareUrls = {
+  twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(currentUrl)}`,
+  facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`,
+  linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`,
+};
 
   return (
     <div className="min-h-screen bg-white font-['Inter',sans-serif]">

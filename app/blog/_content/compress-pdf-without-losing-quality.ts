@@ -1,234 +1,7 @@
-export interface ArticleSection {
-  type: 'paragraph' | 'heading' | 'subheading' | 'list' | 'code' | 'callout' | 'image' | 'quote' | 'divider' | 'steps';
-  content?: string;
-  items?: string[];
-  language?: string;
-  variant?: 'info' | 'success' | 'warning' | 'tip';
-  title?: string;
-  steps?: { title: string; description: string }[];
-  id?: string;
-}
+// app/blog/_content/compress-pdf-without-losing-quality.ts
+import type { ArticleContent } from '../_types';
 
-export interface ArticleContent {
-  slug: string;
-  intro: string;
-  tableOfContents: { id: string; title: string }[];
-  sections: ArticleSection[];
-  faqs?: { question: string; answer: string }[];
-}
-
-// ============ ARTICLE CONTENT ============
-
-export const articleContents: Record<string, ArticleContent> = {
-  'how-to-merge-pdf-files': {
-    slug: 'how-to-merge-pdf-files',
-    intro: 'Merging PDF files is one of the most common PDF tasks. Whether you\'re combining multiple invoices, joining chapters of a book, or consolidating reports, this guide will show you the easiest and fastest ways to merge PDFs in 2025.',
-    tableOfContents: [
-      { id: 'what-is-pdf-merging', title: 'What is PDF Merging?' },
-      { id: 'why-merge-pdfs', title: 'Why Merge PDFs?' },
-      { id: 'how-to-merge', title: 'How to Merge PDFs (Step-by-Step)' },
-      { id: 'best-practices', title: 'Best Practices' },
-      { id: 'common-issues', title: 'Common Issues & Solutions' },
-      { id: 'conclusion', title: 'Conclusion' },
-    ],
-    sections: [
-      {
-        type: 'heading',
-        content: 'What is PDF Merging?',
-      },
-      {
-        type: 'paragraph',
-        content: 'PDF merging is the process of combining two or more PDF files into a single document. Instead of having multiple separate PDFs, you get one unified file that\'s easier to share, print, and organize.',
-      },
-      {
-        type: 'paragraph',
-        content: 'For example, if you have three separate PDFs for chapters of a report, merging them creates one complete report document.',
-      },
-      {
-        type: 'callout',
-        variant: 'info',
-        title: 'Quick Fact',
-        content: 'Merging PDFs doesn\'t change the content of individual files—it simply combines them in the order you choose while preserving quality.',
-      },
-      {
-        type: 'heading',
-        content: 'Why Merge PDFs?',
-      },
-      {
-        type: 'paragraph',
-        content: 'There are many reasons why you might want to combine multiple PDF files:',
-      },
-      {
-        type: 'list',
-        items: [
-          '📧 Easier email sharing — one attachment instead of many',
-          '📂 Better organization — related documents stay together',
-          '🖨️ Simpler printing — print everything at once',
-          '📱 Convenient reading — no need to switch between files',
-          '💼 Professional presentation — organized proposals and reports',
-          '📚 Document consolidation — combine chapters, sections, or parts',
-        ],
-      },
-      {
-        type: 'heading',
-        content: 'How to Merge PDFs (Step-by-Step)',
-      },
-      {
-        type: 'paragraph',
-        content: 'Follow these simple steps to merge your PDF files using PDF Core—100% free with no signup required.',
-      },
-      {
-        type: 'steps',
-        steps: [
-          {
-            title: 'Open the Merge PDF Tool',
-            description: 'Go to our Merge PDF tool. The interface is clean and simple—no ads, no distractions.',
-          },
-          {
-            title: 'Upload Your PDF Files',
-            description: 'Click "Choose PDFs" or drag and drop your files into the upload area. You can select multiple files at once.',
-          },
-          {
-            title: 'Arrange the Order',
-            description: 'Drag and drop the PDFs to reorder them. The order in the list is the order they\'ll appear in your final PDF.',
-          },
-          {
-            title: 'Click Merge',
-            description: 'Once you\'re happy with the order, click the "Merge PDF" button. Your files are processed instantly in your browser.',
-          },
-          {
-            title: 'Download Your File',
-            description: 'The merged PDF downloads automatically. That\'s it! No watermarks, no limits, no signup.',
-          },
-        ],
-      },
-      {
-        type: 'callout',
-        variant: 'success',
-        title: '🔒 Privacy First',
-        content: 'All merging happens in your browser. Your PDF files are never uploaded to our servers—your data stays 100% private.',
-      },
-      {
-        type: 'heading',
-        content: 'Best Practices for Merging PDFs',
-      },
-      {
-        type: 'subheading',
-        content: '1. Name Your Files Clearly',
-      },
-      {
-        type: 'paragraph',
-        content: 'Before merging, rename your files with clear, sequential names like "Chapter1.pdf", "Chapter2.pdf", etc. This makes it easier to arrange them in the correct order.',
-      },
-      {
-        type: 'subheading',
-        content: '2. Check File Quality First',
-      },
-      {
-        type: 'paragraph',
-        content: 'Open each PDF individually to ensure they\'re not corrupted and the content is what you expect. This saves time by catching issues before merging.',
-      },
-      {
-        type: 'subheading',
-        content: '3. Consider File Size',
-      },
-      {
-        type: 'paragraph',
-        content: 'Large merged PDFs can be slow to open and share. If your final file exceeds 25MB, consider compressing it afterward using our Compress PDF tool.',
-      },
-      {
-        type: 'subheading',
-        content: '4. Preserve Bookmarks',
-      },
-      {
-        type: 'paragraph',
-        content: 'If your original PDFs have bookmarks or table of contents, they\'ll be preserved in the merged file, making navigation easier.',
-      },
-      {
-        type: 'callout',
-        variant: 'tip',
-        title: '💡 Pro Tip',
-        content: 'You can merge unlimited PDF files at once. There\'s no limit on the number of files or total pages you can combine.',
-      },
-      {
-        type: 'heading',
-        content: 'Common Issues & Solutions',
-      },
-      {
-        type: 'subheading',
-        content: 'Problem: Files won\'t upload',
-      },
-      {
-        type: 'paragraph',
-        content: 'Make sure your files are actual PDFs (not PDFs saved as .doc or .jpg). Try refreshing the page and uploading again.',
-      },
-      {
-        type: 'subheading',
-        content: 'Problem: The merged file is too large',
-      },
-      {
-        type: 'paragraph',
-        content: 'After merging, use our Compress PDF tool to reduce the file size by up to 80% without losing quality.',
-      },
-      {
-        type: 'subheading',
-        content: 'Problem: Password-protected PDFs won\'t merge',
-      },
-      {
-        type: 'paragraph',
-        content: 'You\'ll need to unlock password-protected PDFs first using our Unlock PDF tool, then merge them.',
-      },
-      {
-        type: 'subheading',
-        content: 'Problem: Pages are in wrong order',
-      },
-      {
-        type: 'paragraph',
-        content: 'Simply drag and drop the file tiles to rearrange them before clicking merge. The order shown is the final order.',
-      },
-      {
-        type: 'heading',
-        content: 'Conclusion',
-      },
-      {
-        type: 'paragraph',
-        content: 'Merging PDFs is a simple but powerful way to organize your documents. With PDF Core, you can combine unlimited PDF files in seconds—for free, without signup, and with complete privacy.',
-      },
-      {
-        type: 'paragraph',
-        content: 'Ready to give it a try? Our Merge PDF tool is waiting for you. No downloads, no accounts, just fast, secure PDF merging in your browser.',
-      },
-    ],
-    faqs: [
-      {
-        question: 'Is it free to merge PDFs?',
-        answer: 'Yes! PDF Core\'s Merge PDF tool is 100% free with no hidden costs, watermarks, or premium features. Merge as many PDFs as you want, as often as you want.',
-      },
-      {
-        question: 'Is there a limit on file size?',
-        answer: 'There\'s no strict file size limit. Since processing happens in your browser, the limit depends on your device\'s memory. Most devices can handle merging files up to 100MB+ without issues.',
-      },
-      {
-        question: 'Are my files safe when merging?',
-        answer: 'Absolutely. Your files never leave your device. All merging happens locally in your browser using JavaScript. We can\'t see, access, or store your PDFs.',
-      },
-      {
-        question: 'Can I merge password-protected PDFs?',
-        answer: 'You\'ll need to remove the password first using our Unlock PDF tool. Once unlocked, you can freely merge the files.',
-      },
-      {
-        question: 'Does merging affect the quality of my PDFs?',
-        answer: 'No. Merging preserves the original quality of each PDF. The text, images, and formatting remain exactly as they were in the source files.',
-      },
-      {
-        question: 'Can I reorder pages after merging?',
-        answer: 'Yes, but it\'s easier to arrange files in the correct order before merging. If you need to rearrange pages after, use our Organize PDF tool.',
-      },
-    ],
-  },
-
-'compress-pdf-without-losing-quality': {
-  slug: 'compress-pdf-without-losing-quality',
+const content: ArticleContent = {
   intro:
     'Your PDF is too large to email, too big for the portal, and every compressor you try either watermarks it or wrecks the quality. Sound familiar? This guide teaches you exactly how to compress large PDF files without losing quality — free, no Adobe, no watermark — with step-by-step methods for every device and use case.',
   tableOfContents: [
@@ -244,9 +17,6 @@ export const articleContents: Record<string, ArticleContent> = {
     { id: 'conclusion', title: 'Conclusion' },
   ],
   sections: [
-
-    // ─── SECTION 1: WHY PDF IS LARGE ───────────────────────────────────────
-
     {
       type: 'heading',
       id: 'why-pdf-is-large',
@@ -313,9 +83,6 @@ export const articleContents: Record<string, ArticleContent> = {
         'Thumbnails — some PDF creators embed page previews for every page, adding unnecessary weight',
       ],
     },
-
-    // ─── SECTION 2: LOSSLESS VS LOSSY ──────────────────────────────────────
-
     {
       type: 'heading',
       id: 'lossless-vs-lossy',
@@ -385,9 +152,6 @@ export const articleContents: Record<string, ArticleContent> = {
       content:
         '"Without losing quality" means choosing settings where quality loss is imperceptible at normal reading conditions — not necessarily zero data loss. A PDF that looks identical when read is, for practical purposes, identical.',
     },
-
-    // ─── SECTION 3: METHOD 1 — COMPRESS ONLINE ─────────────────────────────
-
     {
       type: 'heading',
       id: 'compress-online',
@@ -443,9 +207,6 @@ export const articleContents: Record<string, ArticleContent> = {
         'For extreme targets (under 200KB), consider converting color scans to grayscale before compression',
       ],
     },
-
-    // ─── SECTION 4: METHOD 2 — WITHOUT ADOBE ───────────────────────────────
-
     {
       type: 'heading',
       id: 'compress-without-adobe',
@@ -483,9 +244,6 @@ export const articleContents: Record<string, ArticleContent> = {
       content:
         'Mac\'s built-in Quartz filter is aggressive by default and can over-compress images. Always test the output before submitting anywhere. For better control, use a dedicated online compressor where you can set the quality level yourself.',
     },
-
-    // ─── SECTION 5: METHOD 3 — SCANNED PDFs ────────────────────────────────
-
     {
       type: 'heading',
       id: 'compress-scanned-pdf',
@@ -526,9 +284,6 @@ export const articleContents: Record<string, ArticleContent> = {
       content:
         'If your original scan was done at 200 DPI or lower, don\'t try to compress down to 96 DPI. You can only degrade what already exists. If the source is already borderline, compress lightly (150 DPI max) and accept that a larger file is the price of legibility.',
     },
-
-    // ─── SECTION 6: USE CASES ──────────────────────────────────────────────
-
     {
       type: 'heading',
       id: 'use-cases',
@@ -598,9 +353,6 @@ export const articleContents: Record<string, ArticleContent> = {
       content:
         'For web use (job applications, website uploads, cloud sharing), target under 5MB as a general rule. Most web systems handle this without issue. For cloud storage optimization of large archives, batch compression makes more sense than individual optimization.',
     },
-
-    // ─── SECTION 7: BY DEVICE ──────────────────────────────────────────────
-
     {
       type: 'heading',
       id: 'compress-by-device',
@@ -663,7 +415,8 @@ export const articleContents: Record<string, ArticleContent> = {
       steps: [
         {
           title: 'Open Safari',
-          description: 'Go to pdfcore.online/compress-pdf in Safari. The tool is fully mobile-optimized.',
+          description:
+            'Go to pdfcore.online/compress-pdf in Safari. The tool is fully mobile-optimized.',
         },
         {
           title: 'Upload Your PDF',
@@ -711,9 +464,6 @@ export const articleContents: Record<string, ArticleContent> = {
         },
       ],
     },
-
-    // ─── SECTION 8: ADVANCED TIPS ──────────────────────────────────────────
-
     {
       type: 'heading',
       id: 'advanced-tips',
@@ -773,9 +523,6 @@ export const articleContents: Record<string, ArticleContent> = {
         '72–96 DPI → Portal upload (strict limit) → Prioritizes compliance over quality',
       ],
     },
-
-    // ─── SECTION 9: COMMON MISTAKES ────────────────────────────────────────
-
     {
       type: 'heading',
       id: 'common-mistakes',
@@ -819,9 +566,6 @@ export const articleContents: Record<string, ArticleContent> = {
       content:
         'Each round of lossy compression degrades quality further — like photocopying a photocopy. Always compress from the original source file. If the first pass isn\'t sufficient, go back to the original and apply stronger settings in a single pass.',
     },
-
-    // ─── SECTION 10: CONCLUSION ────────────────────────────────────────────
-
     {
       type: 'heading',
       id: 'conclusion',
@@ -854,7 +598,6 @@ export const articleContents: Record<string, ArticleContent> = {
         'Try PDF Core\'s free PDF Compressor — no sign-up, no watermark, no file stored longer than necessary. Upload, choose your level, and download a smaller PDF in under 30 seconds.',
     },
   ],
-
   faqs: [
     {
       question: 'How do I reduce the size of a PDF without losing quality?',
@@ -907,9 +650,6 @@ export const articleContents: Record<string, ArticleContent> = {
         'Technically yes, but we strongly advise against it. Each round of lossy compression degrades quality further. Always compress from the original source file and choose the right compression level in a single pass for the best result.',
     },
   ],
-},
 };
 
-export function getArticleContent(slug: string): ArticleContent | undefined {
-  return articleContents[slug];
-}
+export default content;

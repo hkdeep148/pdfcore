@@ -2,9 +2,7 @@ export interface BlogPost {
   slug: string;
   title: string;
   excerpt: string;
-  /** SEO-optimized meta description (150-160 chars). Falls back to excerpt if not provided. */
   metaDescription?: string;
-  /** SEO-optimized page title. Falls back to `title` if not provided. */
   metaTitle?: string;
   category: BlogCategory;
   tags: string[];
@@ -13,6 +11,7 @@ export interface BlogPost {
   coverGradient: string;
   author: string;
   publishedAt: string;
+  updatedAt?: string;
   readTime: number;
   featured?: boolean;
   relatedTool?: string;
@@ -44,25 +43,30 @@ export const categoryColors: Record<BlogCategory, { color: string; bgColor: stri
 // ============ BLOG POSTS ============
 
 export const blogPosts: BlogPost[] = [
-  {
-    slug: 'how-to-merge-pdf-files',
-    title: 'How to Merge PDF Files: Complete Guide for 2025',
-    excerpt: 'Learn the easiest ways to combine multiple PDF files into one document. Free methods, tips for maintaining quality, and step-by-step instructions.',
-    category: 'guides',
-    tags: ['merge', 'pdf', 'guide', 'combine'],
-    coverImage: '/blog/merge-pdf.jpg',
-    coverEmoji: '📄',
-    coverGradient: 'from-[#1E63FF] to-[#6D35FF]',
-    author: 'PDF Core Team',
-    publishedAt: '2025-01-15',
-    readTime: 6,
-    featured: true,
-    relatedTool: '/tools/merge-pdf',
-  },
+{
+  slug: 'how-to-merge-pdf-files',
+  title: 'How to Merge PDF Files: Complete Guide for 2026',
+  excerpt: 'Learn the easiest ways to combine multiple PDF files into one document. Free methods, tips for maintaining quality, and step-by-step instructions.',
+  metaTitle: 'How to Merge PDF Files Online Free 2026 - PDF Core',
+  metaDescription: 'Learn how to merge PDF files online for free in seconds. No signup, no watermarks, no limits. Combine unlimited PDFs into one document securely in your browser.',
+  category: 'guides',
+  tags: ['merge', 'pdf', 'guide', 'combine'],
+  coverImage: '/blog/merge-pdf.jpg',
+  coverEmoji: '📄',
+  coverGradient: 'from-[#1E63FF] to-[#6D35FF]',
+  author: 'PDF Core Team',
+  publishedAt: '2026-01-15',
+  updatedAt: '2026-01-15',
+  readTime: 6,
+  featured: true,
+  relatedTool: '/tools/merge-pdf',
+},
 {
   slug: 'compress-pdf-without-losing-quality',
   title: 'How to Compress Large PDF Files Without Losing Quality',
   excerpt: 'Learn how to compress large PDF files without losing quality. Free, no Adobe, no watermark — step-by-step methods for email, WhatsApp, Mac, Windows & mobile.',
+  metaTitle: 'Compress PDF Without Losing Quality (Free, No Adobe) - PDF Core',
+  metaDescription: 'Compress large PDF files without losing quality. Free, no Adobe, no watermark. Reduce PDF size for email, WhatsApp, and government portals in seconds.',
   category: 'guides',
   tags: ['compress', 'pdf', 'quality', 'tutorial'],
   coverImage: '/blog/compress-pdf-quality.jpg',
@@ -70,6 +74,7 @@ export const blogPosts: BlogPost[] = [
   coverGradient: 'from-[#10B981] to-[#059669]',
   author: 'PDF Core Team',
   publishedAt: '2026-01-15',
+  updatedAt: '2026-01-15', 
   readTime: 12,
   featured: true,
   relatedTool: '/tools/compress-pdf',

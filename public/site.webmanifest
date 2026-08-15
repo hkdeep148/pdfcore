@@ -1,13 +1,16 @@
 {
-  "name": "PDF Core",
+  "name": "PDF Core - Free Online PDF Tools",
   "short_name": "PDF Core",
-  "description": "Free online PDF and image tools. Compress, merge, split, convert, sign PDFs. 100% private, no uploads.",
-  "start_url": "https://pdfcore.online/",
+  "description": "Free online PDF and image tools. Compress, merge, split, convert, sign PDFs. 100% private, no uploads, no signup required.",
+  "id": "/",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#FF4757",
+  "theme_color": "#1E63FF",
   "background_color": "#FFFFFF",
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/favicon-16x16.png",
@@ -24,6 +27,12 @@
     {
       "src": "/favicon-64x64.png",
       "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
     },
@@ -45,10 +54,11 @@
       "src": "/opengraph-image.png",
       "sizes": "1200x630",
       "type": "image/png",
-      "form_factor": "wide"
+      "form_factor": "wide",
+      "label": "PDF Core - Free Online PDF Tools"
     }
   ],
-  "categories": ["productivity", "utilities"],
+  "categories": ["productivity", "utilities", "business"],
   "shortcuts": [
     {
       "name": "Compress PDF",
@@ -68,6 +78,45 @@
       "short_name": "Merge",
       "description": "Merge multiple PDFs into one",
       "url": "/tools/merge-pdf/",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Split PDF",
+      "short_name": "Split",
+      "description": "Split PDF into multiple files",
+      "url": "/tools/split-pdf/",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "PDF to Image",
+      "short_name": "To Image",
+      "description": "Convert PDF pages to images",
+      "url": "/tools/pdf-to-image/",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Image to PDF",
+      "short_name": "To PDF",
+      "description": "Convert images to PDF",
+      "url": "/tools/image-to-pdf/",
       "icons": [
         {
           "src": "/android-chrome-192x192.png",

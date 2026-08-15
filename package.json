@@ -1,5 +1,5 @@
 {
-  "name": "image-tools",
+  "name": "pdfcore",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,8 +7,9 @@
     "build": "node scripts/generate-sitemap.js && next build",
     "start": "next start",
     "lint": "eslint",
-    "new-tool": "node scripts/create-tool.js",
-    "sitemap": "node scripts/generate-sitemap.js"
+    "type-check": "tsc --noEmit",
+    "sitemap": "node scripts/generate-sitemap.js",
+    "new-tool": "node scripts/create-tool.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -19,7 +20,6 @@
     "@jsquash/resize": "^2.1.1",
     "@jsquash/webp": "^1.5.0",
     "browser-image-compression": "^2.0.2",
-    "codebase-memory-mcp": "^0.10.0",
     "framer-motion": "^12.42.2",
     "jszip": "^3.10.1",
     "lucide-react": "^1.25.0",
@@ -35,6 +35,7 @@
     "@types/pdfjs-dist": "^2.10.377",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "codebase-memory-mcp": "^0.10.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
