@@ -90,16 +90,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const content = getArticleContent(slug);
 
   // JSON-LD: Article Schema
-  const articleSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: post.title,
-    description: post.metaDescription || post.excerpt,
-    image: post.coverImage
-      ? `https://pdfcore.online${post.coverImage}`
-      : undefined,
-    datePublished: post.publishedAt,
-    dateModified: post.updatedAt || post.publishedAt,
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: post.title,
+  description: post.metaDescription || post.excerpt,
+  image: post.coverImage
+    ? `https://pdfcore.online${post.coverImage}`
+    : undefined,
+  datePublished: new Date(post.publishedAt).toISOString(),
+  dateModified: new Date(post.updatedAt || post.publishedAt).toISOString(),
     author: {
       '@type': 'Organization',
       name: post.author,
