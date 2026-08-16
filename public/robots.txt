@@ -1,3 +1,4 @@
+# Allow all search engines
 User-agent: *
 Allow: /
 Disallow: /api/
@@ -6,7 +7,11 @@ Disallow: /out/
 Disallow: /404
 Disallow: /500
 Disallow: /tools/create-pdf/
-Disallow: /*?*
-Disallow: /*.json$
 
+# Block tracking parameters (optional)
+Disallow: /*?utm_
+Disallow: /*?ref=
+Disallow: /*?fbclid=
+
+# Sitemap
 Sitemap: https://spellpdf.com/sitemap.xml
