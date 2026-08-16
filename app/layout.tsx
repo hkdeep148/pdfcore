@@ -31,13 +31,13 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://spellpdf.com'),
   title: {
     default:
-      'SpellPDF — PDF Tasks Done Like Magic | Free, Private, No Signup',
-    template: '%s | SpellPDF — PDF Magic in Your Browser',
+      'SpellPDF — Free PDF Tools Online | No Signup, No Upload, 100% Private',
+    template: '%s | SpellPDF',
   },
   description:
-    'Cast a spell on your PDFs. Free online PDF and image tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. Unlock protected PDFs. Compress and convert images. No signup, no upload, no watermark. Your files never leave your device. Pure PDF magic. ✨',
+    '🪄 11 free PDF tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. No signup, no upload, no watermarks — cast a spell on your PDFs.',
   keywords: [
-    // 🪄 Brand & Magic Keywords
+    // Brand & Magic Keywords
     'SpellPDF', 'spell pdf', 'pdf magic', 'instant pdf tools', 'pdf spell',
     'magic pdf tools', 'pdf wizard', 'pdf tools instantly',
     
@@ -74,9 +74,9 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://spellpdf.com',
     siteName: 'SpellPDF',
-    title: 'SpellPDF — PDF Tasks Done Like Magic | Free & Private',
+    title: 'SpellPDF — PDF Tasks Done Like Magic ✨',
     description:
-      '🪄 11 instant PDF and image tools that work 100% in your browser. No file uploads, no signup, no watermarks. Compress, merge, convert, sign & more — pure PDF magic, completely free.',
+      '11 instant PDF tools that work in your browser. No uploads, no signup, no watermarks. Cast a spell on your PDFs — pure magic, 100% free & private.',
     images: [
       {
         url: '/opengraph-image.png',
@@ -90,8 +90,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'SpellPDF — PDF Tasks Done Like Magic ✨',
     description:
-      '🪄 11 browser-based PDF and image tools. No uploads, no signup, no watermarks. Cast a spell on your PDFs — 100% free & private.',
-    images: ['/twitter-image.png'],
+      '11 browser-based PDF and image tools. No uploads, no signup, no watermarks. Cast a spell on your PDFs — 100% free & private.',
   },
   robots: {
     index: true,
@@ -104,7 +103,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  // ✅ UPDATED FAVICON CONFIGURATION
   icons: {
     icon: [
       {
@@ -128,7 +126,7 @@ export const metadata: Metadata = {
         type: 'image/png',
       },
     ],
-    apple: '/apple-touch-icon.png', // 180x180 for iPhone/iPad
+    apple: '/apple-touch-icon.png',
     other: [
       {
         rel: 'android-chrome-192x192',
@@ -144,7 +142,7 @@ export const metadata: Metadata = {
       },
     ],
   },
-  manifest: '/site.webmanifest', // ✅ Web manifest for PWA support
+  manifest: '/site.webmanifest',
   alternates: {
     canonical: 'https://spellpdf.com',
   },
@@ -155,7 +153,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#6366F1', // 🪄 Indigo/Purple to match magic branding
+  themeColor: '#6366F1', // Indigo/Purple for magic branding
 };
 
 const websiteSchema = {

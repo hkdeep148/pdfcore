@@ -3,11 +3,11 @@ import HomeClient from './HomeClient';
 
 // ═══════════════════════════════════════════════════════════════
 // METADATA — SEO OPTIMIZED
+// (Title uses layout.tsx default — no duplication)
 // ═══════════════════════════════════════════════════════════════
 export const metadata: Metadata = {
-  title: 'SpellPDF — Free PDF Tools Online | No Signup, No Upload, 100% Private',
   description:
-    'Free online PDF and image tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. Unlock protected PDFs. No signup, no upload, no watermark. Your files stay private.',
+    'Free online PDF tools — compress, merge, split, convert, sign PDFs in your browser. No signup, no upload, no watermarks. Pure PDF magic, 100% private.',
   keywords: [
     'free pdf tools',
     'pdf tools online',

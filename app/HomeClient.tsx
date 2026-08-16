@@ -147,7 +147,7 @@ export default function HomeClient() {
           <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
         </span>
         <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-[0.12em]">
-          🪄 Instant PDF Magic
+          Instant PDF Magic
         </span>
       </div>
 
