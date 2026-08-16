@@ -31,24 +31,35 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://spellpdf.com'),
   title: {
     default:
-      'SpellPDF — Free PDF Tools Online | No Signup, No Upload, 100% Private',
-    template: '%s | SpellPDF — Free & Private PDF Tools',
+      'SpellPDF — PDF Tasks Done Like Magic | Free, Private, No Signup',
+    template: '%s | SpellPDF — PDF Magic in Your Browser',
   },
   description:
-    'Free online PDF and image tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. Unlock protected PDFs. Compress and convert images. No signup, no upload, no watermark. Your files never leave your device.',
+    'Cast a spell on your PDFs. Free online PDF and image tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. Unlock protected PDFs. Compress and convert images. No signup, no upload, no watermark. Your files never leave your device. Pure PDF magic. ✨',
   keywords: [
+    // 🪄 Brand & Magic Keywords
+    'SpellPDF', 'spell pdf', 'pdf magic', 'instant pdf tools', 'pdf spell',
+    'magic pdf tools', 'pdf wizard', 'pdf tools instantly',
+    
+    // Core PDF tool keywords
     'free pdf tools', 'pdf tools online', 'pdf editor free', 'compress pdf free',
     'merge pdf online', 'split pdf free', 'pdf to jpg converter', 'image to pdf converter',
     'sign pdf online free', 'unlock pdf free', 'rotate pdf online', 'add watermark to pdf',
     'compress image online', 'organize pdf pages',
+    
+    // Long-tail keywords
     'compress pdf without losing quality', 'merge pdf files online free no signup',
     'split pdf into separate files free', 'pdf to jpg converter free no watermark',
     'image to pdf no watermark no signup', 'sign pdf online free without registration',
     'unlock pdf password free online', 'rotate pdf pages permanently free',
     'compress image without losing quality',
+    
+    // Privacy-focused keywords
     'pdf tools no upload', 'pdf tools browser based', 'pdf tools that dont upload files',
     'offline pdf editor', 'local pdf compressor', 'private pdf tools',
     'client side pdf processing',
+    
+    // Competitor comparison keywords
     'ilovepdf alternative', 'smallpdf alternative free',
     'adobe acrobat alternative free', 'pdf24 alternative',
     'compress pdf without adobe', 'merge pdf without signup', 'sign pdf without printing',
@@ -63,23 +74,23 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://spellpdf.com',
     siteName: 'SpellPDF',
-    title: 'SpellPDF — Free PDF Tools | No Signup, No Upload, 100% Private',
+    title: 'SpellPDF — PDF Tasks Done Like Magic | Free & Private',
     description:
-      '11 PDF and image tools that work 100% in your browser. No file uploads, no signup, no watermarks. Compress, merge, convert, sign & more — completely free.',
+      '🪄 11 instant PDF and image tools that work 100% in your browser. No file uploads, no signup, no watermarks. Compress, merge, convert, sign & more — pure PDF magic, completely free.',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'SpellPDF — Free Private Browser-Based PDF Tools',
+        alt: 'SpellPDF — PDF Magic in Your Browser',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SpellPDF — Free PDF Tools, No Signup Required',
+    title: 'SpellPDF — PDF Tasks Done Like Magic ✨',
     description:
-      '11 browser-based PDF and image tools. No uploads, no signup, no watermarks. 100% free & private.',
+      '🪄 11 browser-based PDF and image tools. No uploads, no signup, no watermarks. Cast a spell on your PDFs — 100% free & private.',
     images: ['/twitter-image.png'],
   },
   robots: {
@@ -144,16 +155,17 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#1E63FF', //
+  themeColor: '#6366F1', // 🪄 Indigo/Purple to match magic branding
 };
 
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'SpellPDF',
+  alternateName: 'Spell PDF',
   url: 'https://spellpdf.com',
   description:
-    'Free online PDF tools that respect your privacy. All processing happens in your browser.',
+    'Cast a spell on your PDFs. Free online PDF tools that work like magic — instant, private, and 100% in your browser.',
   potentialAction: {
     '@type': 'SearchAction',
     target: {
@@ -171,7 +183,7 @@ const organizationSchema = {
   url: 'https://spellpdf.com',
   logo: 'https://spellpdf.com/android-chrome-512x512.png',
   description:
-    'Free online PDF and image tools that respect your privacy. All processing happens in your browser.',
+    'SpellPDF offers free, instant, and private PDF and image tools that run entirely in your browser. Merge, split, compress, convert, and sign PDFs like magic — no uploads required.',
 };
 
 export default function RootLayout({

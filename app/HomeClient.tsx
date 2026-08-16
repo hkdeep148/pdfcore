@@ -147,17 +147,17 @@ export default function HomeClient() {
           <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
         </span>
         <span className="text-[11px] font-bold text-indigo-700 uppercase tracking-[0.12em]">
-          Instant Smart Analysis
+          🪄 Instant PDF Magic
         </span>
       </div>
 
       {/* Headline */}
-      <h1 className="text-[38px] leading-[1.15] sm:text-[46px] md:text-[52px] lg:text-[58px] lg:leading-[1.1] font-extrabold tracking-tight text-slate-900 mb-6 md:mb-7">
-        Every PDF task,{' '}
-        <span className="relative inline-block whitespace-nowrap">
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-500 to-purple-600">
-            solved instantly.
-          </span>
+<h1 className="text-[38px] leading-[1.15] sm:text-[46px] md:text-[52px] lg:text-[58px] lg:leading-[1.1] font-extrabold tracking-tight text-slate-900 mb-6 md:mb-7">
+  PDF tasks,{' '}
+  <span className="relative inline-block whitespace-nowrap">
+    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-500 to-purple-600">
+      done like magic.
+    </span>
           <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 200 8" preserveAspectRatio="none">
             <path d="M0,6 Q100,-2 200,4" stroke="url(#gradient)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
             <defs>
@@ -171,10 +171,12 @@ export default function HomeClient() {
       </h1>
 
       {/* Subheadline */}
-      <p className="text-[16px] md:text-[18px] text-slate-600 mb-8 max-w-xl mx-auto lg:mx-0 font-medium leading-[1.65]">
-        Merge, split, convert, compress and more. Process files up to <span className="text-slate-900 font-semibold">any size</span>, running{' '}
-        <span className="text-slate-900 font-semibold">entirely in your browser</span>.
-      </p>
+<p className="text-[16px] md:text-[18px] text-slate-600 mb-8 max-w-xl mx-auto lg:mx-0 font-medium leading-[1.65]">
+  Merge, split, convert, and compress PDFs in a single click. Files up to{' '}
+  <span className="text-slate-900 font-semibold">any size</span>, processed{' '}
+  <span className="text-slate-900 font-semibold">entirely in your browser</span>.
+  No uploads. No waiting. Pure magic. ✨
+</p>
 
       {/* Trust Badges */}
       <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 md:gap-5 text-[13.5px] font-semibold text-slate-700">
@@ -217,14 +219,14 @@ export default function HomeClient() {
       {/* Top Badge */}
       <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 shadow-[0_2px_8px_-2px_rgba(245,158,11,0.15)] mb-5">
         <Sparkles size={12} className="text-amber-600" strokeWidth={2.5} />
-        <span className="text-[11px] font-bold text-amber-700 uppercase tracking-[0.12em]">
-          Did You Know?
-        </span>
+<span className="text-[11px] font-bold text-amber-700 uppercase tracking-[0.12em]">
+  ✨ Magic Suggestions
+</span>
       </div>
 
       {/* Compact Headline */}
 <h2 className="text-[20px] md:text-[22px] font-bold tracking-tight text-slate-900 mb-2">
-  Smart suggestions for your{' '}
+  Magic ready for your{' '}
   <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-500 to-purple-600">
     {analysis.type === 'pdf' ? 'PDF' : analysis.type === 'image' ? 'image' : 'files'}
   </span>
@@ -232,7 +234,7 @@ export default function HomeClient() {
 
 {/* Small Description */}
 <p className="text-[13px] text-slate-500 mb-5 font-medium leading-[1.5]">
-  Choose from these actions to get started
+  Pick a spell to transform your file instantly
 </p>
 
       {/* Smart Suggestions List */}
@@ -465,10 +467,10 @@ export default function HomeClient() {
 </div>
 
       {/* Bottom Message */}
-      <div className="mt-6 flex items-center justify-center lg:justify-start gap-2 text-[12.5px] text-slate-500 font-medium">
-        <Lock size={12} className="text-emerald-500" strokeWidth={2.5} />
-        <span>All in seconds. All free. All private.</span>
-      </div>
+<div className="mt-6 flex items-center justify-center lg:justify-start gap-2 text-[12.5px] text-slate-500 font-medium">
+  <Lock size={12} className="text-emerald-500" strokeWidth={2.5} />
+  <span>All in seconds. All free. All private. All magic. ✨</span>
+</div>
     </motion.div>
   )}
 </AnimatePresence>
@@ -561,9 +563,9 @@ export default function HomeClient() {
                         </div>
 
                         {/* Headline */}
-                        <h3 className="text-[20px] md:text-[22px] font-extrabold text-slate-900 mb-2 tracking-tight">
-                          {isDragging ? '✨ Drop it now!' : 'Drop your files here'}
-                        </h3>
+<h3 className="text-[20px] md:text-[22px] font-extrabold text-slate-900 mb-2 tracking-tight">
+  {isDragging ? '🪄 Cast the spell!' : 'Drop your files here'}
+</h3>
 
                         {/* Subheadline */}
                         <p className="text-[14px] text-slate-500 mb-1 max-w-xs">
@@ -571,10 +573,10 @@ export default function HomeClient() {
                         </p>
 
                         {/* Smart hint */}
-                        <p className="text-[12px] text-indigo-600 font-semibold mb-5 flex items-center gap-1.5">
-                          <Sparkles size={12} strokeWidth={2.5} />
-                          <span>We&apos;ll recommend the perfect tool</span>
-                        </p>
+<p className="text-[12px] text-indigo-600 font-semibold mb-5 flex items-center gap-1.5">
+  <Sparkles size={12} strokeWidth={2.5} />
+  <span>We&apos;ll cast the perfect spell for your file</span>
+</p>
 
                         {/* Browse Button */}
                         <button
@@ -691,12 +693,12 @@ export default function HomeClient() {
 
                       {/* Recommendations */}
                       <div className="p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                          <Sparkles size={14} className="text-indigo-600" strokeWidth={2.5} />
-                          <p className="text-[12px] font-bold text-indigo-600 uppercase tracking-wider">
-                            Recommended for you
-                          </p>
-                        </div>
+<div className="flex items-center gap-2 mb-4">
+  <Sparkles size={14} className="text-indigo-600" strokeWidth={2.5} />
+  <p className="text-[12px] font-bold text-indigo-600 uppercase tracking-wider">
+    🪄 Perfect Spell for You
+  </p>
+</div>
 
                         <button
                           onClick={() => goToTool(analysis.topRecommendation.href)}
@@ -714,10 +716,10 @@ export default function HomeClient() {
                             </div>
                             <div className="flex-1 text-left min-w-0">
                               <div className="flex items-center gap-1.5 mb-0.5">
-                                <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider bg-amber-50 px-1.5 py-0.5 rounded flex items-center gap-1">
-                                  <Star size={9} fill="currentColor" strokeWidth={0} />
-                                  Best Match
-                                </span>
+<span className="text-[10px] font-bold text-amber-600 uppercase tracking-wider bg-amber-50 px-1.5 py-0.5 rounded flex items-center gap-1">
+  <Star size={9} fill="currentColor" strokeWidth={0} />
+  Best Spell
+</span>
                               </div>
                               <h4 className="text-[15px] font-bold text-slate-900">
                                 {analysis.topRecommendation.label}
@@ -736,9 +738,9 @@ export default function HomeClient() {
 
                         {analysis.otherRecommendations.length > 0 && (
   <>
-    <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3 mt-5">
-      Or try these
-    </p>
+<p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3 mt-5">
+  Or cast another spell
+</p>
     <div className="grid grid-cols-2 gap-2">
       {analysis.otherRecommendations.map((tool: any) => (
         <button
@@ -785,9 +787,9 @@ export default function HomeClient() {
         <section id="tools" className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 md:pb-32">
           <div className="flex items-center justify-between mb-8 md:mb-10">
             <div>
-              <h2 className="text-[26px] md:text-[32px] font-extrabold tracking-tight text-slate-900">
-                Explore All Tools
-              </h2>
+<h2 className="text-[26px] md:text-[32px] font-extrabold tracking-tight text-slate-900">
+  Your Magic Toolkit
+</h2>
             </div>
             <Link
               href="/tools"
