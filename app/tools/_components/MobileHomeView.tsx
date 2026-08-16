@@ -35,7 +35,7 @@ export default function MobileHomeView() {
           <h1 className="text-[26px] sm:text-[30px] font-extrabold tracking-tight text-[#07122E] leading-[1.2] mb-2">
             Cast the perfect{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5B4EF5] to-[#8B5CF6]">
-              PDF spell. 🪄
+              PDF spell.
             </span>
           </h1>
           <p className="text-[13px] font-medium text-slate-500 leading-[1.5] mb-5">
