@@ -42,20 +42,20 @@ export const metadata: Metadata = {
     'how to extract pages from pdf',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online/tools/split-pdf',
+    canonical: 'https://spellpdf.com/tools/split-pdf',
   },
   openGraph: {
-    title: 'Split PDF Online — Free, No Signup, Unlimited | PDF Core',
+    title: 'Split PDF Online — Free, No Signup, Unlimited | SpellPDF',
     description:
       'Split large PDFs into smaller files. Extract pages, split by range or size. Free, no signup, 100% browser-based.',
-    url: 'https://pdfcore.online/tools/split-pdf',
+    url: 'https://spellpdf.com/tools/split-pdf',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Split PDF Free & Private — PDF Core',
+        alt: 'Split PDF Free & Private — SpellPDF',
       },
     ],
   },
@@ -72,8 +72,8 @@ export const metadata: Metadata = {
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Split PDF — PDF Core',
-  url: 'https://pdfcore.online/tools/split-pdf',
+  name: 'Split PDF — SpellPDF',
+  url: 'https://spellpdf.com/tools/split-pdf',
   description:
     'Free browser-based PDF splitter. Divide PDFs into multiple files, extract pages, or split by size. No signup, no watermark, no upload.',
   applicationCategory: 'UtilityApplication',
@@ -103,7 +103,7 @@ const howToSchema = {
   '@type': 'HowTo',
   name: 'How to Split a PDF into Multiple Files',
   description:
-    'Step-by-step guide to split a PDF into smaller files using PDF Core.',
+    'Step-by-step guide to split a PDF into smaller files using SpellPDF.',
   totalTime: 'PT1M',
   step: [
     {
@@ -136,7 +136,7 @@ const faqSchema = {
       name: 'How do I split a PDF for free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Upload your PDF to PDF Core, choose how to split it (by page range, specific pages, or file size), then click Split. Your split PDFs download instantly. Completely free with no signup, no watermarks, and no file size limits.',
+        text: 'Upload your PDF to SpellPDF, choose how to split it (by page range, specific pages, or file size), then click Split. Your split PDFs download instantly. Completely free with no signup, no watermarks, and no file size limits.',
       },
     },
     {
@@ -144,7 +144,7 @@ const faqSchema = {
       name: 'What are the different ways to split a PDF?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'PDF Core offers three split methods: (1) Split by range — extract specific page ranges like 1-5, 6-10. (2) Extract pages — pick individual pages like 1, 3, 7. (3) Split by size — automatically split PDFs into files under a target size like 5MB.',
+        text: 'SpellPDF offers three split methods: (1) Split by range — extract specific page ranges like 1-5, 6-10. (2) Extract pages — pick individual pages like 1, 3, 7. (3) Split by size — automatically split PDFs into files under a target size like 5MB.',
       },
     },
     {
@@ -160,7 +160,7 @@ const faqSchema = {
       name: 'Does splitting reduce PDF quality?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No. PDF Core preserves the exact original quality when splitting. Text stays sharp, images stay clear, and formatting is identical to the source PDF. Splitting only divides the file — it does not re-encode content.',
+        text: 'No. SpellPDF preserves the exact original quality when splitting. Text stays sharp, images stay clear, and formatting is identical to the source PDF. Splitting only divides the file — it does not re-encode content.',
       },
     },
     {
@@ -176,7 +176,7 @@ const faqSchema = {
       name: 'Is there a file size limit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No file size limits from us. Unlike some competitors that cap free users, PDF Core has no restrictions because everything runs in your browser. Split PDFs of any size your device can handle.',
+        text: 'No file size limits from us. Unlike some competitors that cap free users, SpellPDF has no restrictions because everything runs in your browser. Split PDFs of any size your device can handle.',
       },
     },
     {
@@ -200,7 +200,7 @@ const faqSchema = {
       name: 'Can I split PDFs on my phone?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works perfectly on iPhone, Android, iPad, and any modern mobile browser. Split PDFs directly on your phone without uploading to any server.',
+        text: 'Yes! SpellPDF works perfectly on iPhone, Android, iPad, and any modern mobile browser. Split PDFs directly on your phone without uploading to any server.',
       },
     },
     {

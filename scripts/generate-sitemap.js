@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const BASE_URL = 'https://pdfcore.online';
+const BASE_URL = 'https://spellpdf.com';
 
 // ============ TOOLS CONFIG ============
 // High-priority popular tools

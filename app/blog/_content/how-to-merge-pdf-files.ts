@@ -58,7 +58,7 @@ const content: ArticleContent = {
     },
     {
       type: 'paragraph',
-      content: 'Follow these simple steps to merge your PDF files using PDF Core—100% free with no signup required.',
+      content: 'Follow these simple steps to merge your PDF files using SpellPDF—100% free with no signup required.',
     },
     {
       type: 'steps',
@@ -178,7 +178,7 @@ const content: ArticleContent = {
     },
     {
       type: 'paragraph',
-      content: 'Merging PDFs is a simple but powerful way to organize your documents. With PDF Core, you can combine unlimited PDF files in seconds—for free, without signup, and with complete privacy.',
+      content: 'Merging PDFs is a simple but powerful way to organize your documents. With SpellPDF, you can combine unlimited PDF files in seconds—for free, without signup, and with complete privacy.',
     },
     {
       type: 'paragraph',
@@ -188,7 +188,7 @@ const content: ArticleContent = {
   faqs: [
     {
       question: 'Is it free to merge PDFs?',
-      answer: 'Yes! PDF Core\'s Merge PDF tool is 100% free with no hidden costs, watermarks, or premium features. Merge as many PDFs as you want, as often as you want.',
+      answer: 'Yes! SpellPDF\'s Merge PDF tool is 100% free with no hidden costs, watermarks, or premium features. Merge as many PDFs as you want, as often as you want.',
     },
     {
       question: 'Is there a limit on file size?',

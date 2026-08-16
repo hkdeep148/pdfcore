@@ -1,7 +1,7 @@
 {
-  "name": "PDF Core - Free Online PDF Tools",
-  "short_name": "PDF Core",
-  "description": "Free online PDF and image tools. Compress, merge, split, convert, sign PDFs. 100% private, no uploads, no signup required.",
+  "name": "SpellPDF - PDF Magic",
+  "short_name": "SpellPDF",
+  "description": "Cast a spell on your PDFs! Free online PDF tools.",
   "id": "/",
   "start_url": "/",
   "scope": "/",
@@ -55,7 +55,7 @@
       "sizes": "1200x630",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "PDF Core - Free Online PDF Tools"
+      "label": "SpellPDF - Free Online PDF Tools"
     }
   ],
   "categories": ["productivity", "utilities", "business"],

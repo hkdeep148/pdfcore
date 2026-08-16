@@ -41,20 +41,20 @@ export const metadata: Metadata = {
     'how to delete pages from pdf',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online/tools/organize-pdf',
+    canonical: 'https://spellpdf.com/tools/organize-pdf',
   },
   openGraph: {
-    title: 'Organize PDF Pages Online — Free Drag & Drop | PDF Core',
+    title: 'Organize PDF Pages Online — Free Drag & Drop | SpellPDF',
     description:
       'Reorder, delete, and rotate PDF pages with drag and drop. Free, private, 100% browser-based.',
-    url: 'https://pdfcore.online/tools/organize-pdf',
+    url: 'https://spellpdf.com/tools/organize-pdf',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Organize PDF Pages Free — PDF Core',
+        alt: 'Organize PDF Pages Free — SpellPDF',
       },
     ],
   },
@@ -71,8 +71,8 @@ export const metadata: Metadata = {
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Organize PDF — PDF Core',
-  url: 'https://pdfcore.online/tools/organize-pdf',
+  name: 'Organize PDF — SpellPDF',
+  url: 'https://spellpdf.com/tools/organize-pdf',
   description:
     'Free browser-based PDF page organizer. Reorder, delete, and rotate PDF pages with drag and drop. No signup, no watermark, no upload.',
   applicationCategory: 'UtilityApplication',
@@ -102,7 +102,7 @@ const howToSchema = {
   '@type': 'HowTo',
   name: 'How to Organize and Reorder PDF Pages',
   description:
-    'Step-by-step guide to reorder, delete, and rotate PDF pages using PDF Core.',
+    'Step-by-step guide to reorder, delete, and rotate PDF pages using SpellPDF.',
   totalTime: 'PT1M',
   step: [
     {
@@ -135,7 +135,7 @@ const faqSchema = {
       name: 'How do I organize PDF pages for free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Upload your PDF to PDF Core, then drag and drop page thumbnails to reorder them. You can also delete unwanted pages and rotate individual pages. Click Save to download your reorganized PDF. Completely free with no signup or watermarks.',
+        text: 'Upload your PDF to SpellPDF, then drag and drop page thumbnails to reorder them. You can also delete unwanted pages and rotate individual pages. Click Save to download your reorganized PDF. Completely free with no signup or watermarks.',
       },
     },
     {
@@ -175,7 +175,7 @@ const faqSchema = {
       name: 'Does organizing affect PDF quality?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No. PDF Core preserves the exact original quality when reorganizing pages. Text stays sharp, images stay clear, and formatting is identical. Only page order and orientation change.',
+        text: 'No. SpellPDF preserves the exact original quality when reorganizing pages. Text stays sharp, images stay clear, and formatting is identical. Only page order and orientation change.',
       },
     },
     {
@@ -191,7 +191,7 @@ const faqSchema = {
       name: 'Is there a page or file size limit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No limits from us. Unlike some competitors that cap free users, PDF Core has no restrictions because everything runs in your browser. Organize PDFs of any size with any number of pages your device can handle.',
+        text: 'No limits from us. Unlike some competitors that cap free users, SpellPDF has no restrictions because everything runs in your browser. Organize PDFs of any size with any number of pages your device can handle.',
       },
     },
     {
@@ -199,7 +199,7 @@ const faqSchema = {
       name: 'Can I organize PDF pages on my phone?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works on iPhone, Android, iPad, and any modern mobile browser. Touch and drag gestures make it easy to organize pages on your phone or tablet.',
+        text: 'Yes! SpellPDF works on iPhone, Android, iPad, and any modern mobile browser. Touch and drag gestures make it easy to organize pages on your phone or tablet.',
       },
     },
     {

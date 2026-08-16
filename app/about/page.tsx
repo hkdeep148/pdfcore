@@ -3,22 +3,22 @@ import AboutClient from './AboutClient';
 
 export const metadata: Metadata = {
   title: 'About Us - Our Mission for Free PDF Tools',
-  description: 'Learn about PDF Core - our mission to provide free, privacy-first PDF tools that work entirely in your browser. No signup, no ads, no watermarks.',
-  keywords: 'about pdf core, free pdf tools, privacy pdf tools, pdf core mission',
+  description: 'Learn about SpellPDF - our mission to provide free, privacy-first PDF tools that work entirely in your browser. No signup, no ads, no watermarks.',
+  keywords: 'about SpellPDF, free pdf tools, privacy pdf tools, SpellPDF mission',
   alternates: {
-    canonical: 'https://pdfcore.online/about/',
+    canonical: 'https://spellpdf.com/about/',
   },
   openGraph: {
-    title: 'About PDF Core - Our Mission for Free PDF Tools',
-    description: 'Learn about PDF Core - our mission to provide free, privacy-first PDF tools that work entirely in your browser.',
-    url: 'https://pdfcore.online/about/',
-    siteName: 'PDF Core',
+    title: 'About SpellPDF - Our Mission for Free PDF Tools',
+    description: 'Learn about SpellPDF - our mission to provide free, privacy-first PDF tools that work entirely in your browser.',
+    url: 'https://spellpdf.com/about/',
+    siteName: 'SpellPDF',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'About PDF Core - Our Mission for Free PDF Tools',
-    description: 'Learn about PDF Core - our mission to provide free, privacy-first PDF tools that work entirely in your browser.',
+    title: 'About SpellPDF - Our Mission for Free PDF Tools',
+    description: 'Learn about SpellPDF - our mission to provide free, privacy-first PDF tools that work entirely in your browser.',
   },
 };
 

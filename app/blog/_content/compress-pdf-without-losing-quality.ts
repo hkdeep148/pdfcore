@@ -166,9 +166,9 @@ const content: ArticleContent = {
       type: 'steps',
       steps: [
         {
-          title: 'Open PDF Core\'s Free Compressor',
+          title: 'Open SpellPDF\'s Free Compressor',
           description:
-            'Go to pdfcore.online/compress-pdf — no account needed. The tool works directly in your browser.',
+            'Go to spellpdf.com/compress-pdf — no account needed. The tool works directly in your browser.',
         },
         {
           title: 'Upload Your PDF',
@@ -366,9 +366,9 @@ const content: ArticleContent = {
       type: 'steps',
       steps: [
         {
-          title: 'Open PDF Core in Your Browser',
+          title: 'Open SpellPDF in Your Browser',
           description:
-            'Open Chrome or Edge and visit pdfcore.online/compress-pdf. No installation needed.',
+            'Open Chrome or Edge and visit spellpdf.com/compress-pdf. No installation needed.',
         },
         {
           title: 'Upload and Compress',
@@ -400,9 +400,9 @@ const content: ArticleContent = {
             'Go to File → Export as PDF → Quartz Filter → Reduce File Size → Save.',
         },
         {
-          title: 'Or Use PDF Core Online',
+          title: 'Or Use SpellPDF Online',
           description:
-            'For better quality control, use pdfcore.online/compress-pdf in Safari or Chrome to set exact compression levels.',
+            'For better quality control, use spellpdf.com/compress-pdf in Safari or Chrome to set exact compression levels.',
         },
       ],
     },
@@ -416,7 +416,7 @@ const content: ArticleContent = {
         {
           title: 'Open Safari',
           description:
-            'Go to pdfcore.online/compress-pdf in Safari. The tool is fully mobile-optimized.',
+            'Go to spellpdf.com/compress-pdf in Safari. The tool is fully mobile-optimized.',
         },
         {
           title: 'Upload Your PDF',
@@ -445,7 +445,7 @@ const content: ArticleContent = {
         {
           title: 'Open Chrome',
           description:
-            'Navigate to pdfcore.online/compress-pdf in Chrome on your Android device.',
+            'Navigate to spellpdf.com/compress-pdf in Chrome on your Android device.',
         },
         {
           title: 'Upload Your PDF',
@@ -504,7 +504,7 @@ const content: ArticleContent = {
     {
       type: 'list',
       items: [
-        'PDF Core batch mode — compress multiple PDF files at once using the batch upload feature',
+        'SpellPDF batch mode — compress multiple PDF files at once using the batch upload feature',
         'Ghostscript (command line) — free, open-source. Command: gs -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook -o output.pdf input.pdf',
         'Automator on Mac — build a batch compression workflow across an entire folder',
       ],
@@ -595,7 +595,7 @@ const content: ArticleContent = {
       variant: 'success',
       title: '🚀 Ready to Compress?',
       content:
-        'Try PDF Core\'s free PDF Compressor — no sign-up, no watermark, no file stored longer than necessary. Upload, choose your level, and download a smaller PDF in under 30 seconds.',
+        'Try SpellPDF\'s free PDF Compressor — no sign-up, no watermark, no file stored longer than necessary. Upload, choose your level, and download a smaller PDF in under 30 seconds.',
     },
   ],
   faqs: [
@@ -632,7 +632,7 @@ const content: ArticleContent = {
     {
       question: 'Can I compress a PDF on my phone for free?',
       answer:
-        'Yes. Visit pdfcore.online/compress-pdf in your mobile browser — Chrome on Android or Safari on iPhone. The upload, compression, and download work entirely through the browser with no app download required.',
+        'Yes. Visit spellpdf.com/compress-pdf in your mobile browser — Chrome on Android or Safari on iPhone. The upload, compression, and download work entirely through the browser with no app download required.',
     },
     {
       question: 'How do I compress a PDF for a government portal under 500KB?',

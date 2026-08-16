@@ -31,7 +31,7 @@ export default function Sidebar({
     <polyline points="14 2 14 8 20 8" />
   </svg>
 </div>
-  <span className="text-[15px] font-bold text-[#07122E]">PDF Core</span>
+  <span className="text-[15px] font-bold text-[#07122E]">SpellPDF</span>
 </Link>
 
         {/* Close button (mobile only) */}

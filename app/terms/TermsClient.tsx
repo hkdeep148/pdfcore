@@ -49,7 +49,7 @@ export default function TermsOfServicePage() {
             </h1>
 
             <p className="text-[15px] md:text-[17px] text-[#4B5874] font-medium max-w-2xl mx-auto leading-relaxed mb-6">
-              Please read these terms carefully before using PDF Core. By using our Service, you agree to these terms.
+              Please read these terms carefully before using SpellPDF. By using our Service, you agree to these terms.
             </p>
 
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#E7ECF5] text-[13px] text-[#4B5874]">
@@ -160,7 +160,7 @@ export default function TermsOfServicePage() {
             {/* 1. Acceptance */}
             <Section id="acceptance" icon={<UserCheck size={24} />} title="1. Acceptance of Terms">
               <p>
-                Welcome to <strong>PDF Core</strong> (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). These Terms of Service (&quot;Terms&quot;) govern your access to and use of our website, PDF tools, and related services (collectively, the &quot;Service&quot;).
+                Welcome to <strong>SpellPDF</strong> (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). These Terms of Service (&quot;Terms&quot;) govern your access to and use of our website, PDF tools, and related services (collectively, the &quot;Service&quot;).
               </p>
               <p>
                 By accessing or using our Service, you agree to be bound by these Terms and our{' '}
@@ -170,7 +170,7 @@ export default function TermsOfServicePage() {
               </p>
               <div className="bg-[#EFF6FF] border-l-4 border-[#1E63FF] p-4 rounded-r-lg mt-4">
                 <p className="text-[14px] text-[#1E40AF] font-medium m-0">
-                  <strong>Important:</strong> These Terms constitute a legally binding agreement between you and PDF Core. Please read them carefully.
+                  <strong>Important:</strong> These Terms constitute a legally binding agreement between you and SpellPDF. Please read them carefully.
                 </p>
               </div>
             </Section>
@@ -178,7 +178,7 @@ export default function TermsOfServicePage() {
             {/* 2. Description */}
             <Section id="description" icon={<FileText size={24} />} title="2. Service Description">
               <p>
-                PDF Core provides a suite of free, browser-based tools for working with PDF files and images, including:
+                SpellPDF provides a suite of free, browser-based tools for working with PDF files and images, including:
               </p>
 
               <div className="grid sm:grid-cols-2 gap-3 mt-4">
@@ -212,7 +212,7 @@ export default function TermsOfServicePage() {
             {/* 3. Eligibility */}
             <Section id="eligibility" icon={<UserCheck size={24} />} title="3. Eligibility">
               <p>
-                To use PDF Core, you must:
+                To use SpellPDF, you must:
               </p>
               <ul className="space-y-2 mt-4">
                 <li>Be at least <strong>13 years of age</strong> (or the minimum age in your jurisdiction)</li>
@@ -228,7 +228,7 @@ export default function TermsOfServicePage() {
             {/* 4. Acceptable Use */}
             <Section id="use" icon={<CheckCircle2 size={24} />} title="4. Acceptable Use">
               <p>
-                You may use PDF Core for any lawful purpose, including but not limited to:
+                You may use SpellPDF for any lawful purpose, including but not limited to:
               </p>
               <ul className="space-y-2 mt-4">
                 <li><strong>Personal Use:</strong> Managing personal documents, receipts, photos, etc.</li>
@@ -247,7 +247,7 @@ export default function TermsOfServicePage() {
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="w-6 h-6 text-[#DC2626] flex-shrink-0 mt-0.5" />
                   <p className="text-[14.5px] text-[#991B1B] font-semibold m-0">
-                    You agree NOT to use PDF Core for any of the following purposes:
+                    You agree NOT to use SpellPDF for any of the following purposes:
                   </p>
                 </div>
               </div>
@@ -301,7 +301,7 @@ export default function TermsOfServicePage() {
                 Our Rights
               </h3>
               <p>
-                The Service, including but not limited to its design, code, features, logos, and branding, is owned by PDF Core and protected by copyright, trademark, and other intellectual property laws.
+                The Service, including but not limited to its design, code, features, logos, and branding, is owned by SpellPDF and protected by copyright, trademark, and other intellectual property laws.
               </p>
               <p>
                 We grant you a limited, non-exclusive, non-transferable, revocable license to use the Service for its intended purposes, subject to these Terms.
@@ -311,14 +311,14 @@ export default function TermsOfServicePage() {
                 Open Source Components
               </h3>
               <p>
-                PDF Core uses various open-source libraries and components (like PDF.js, pdf-lib, Next.js, Framer Motion, and Lucide Icons), each governed by their respective licenses. We respect and comply with all applicable open-source licenses.
+                SpellPDF uses various open-source libraries and components (like PDF.js, pdf-lib, Next.js, Framer Motion, and Lucide Icons), each governed by their respective licenses. We respect and comply with all applicable open-source licenses.
               </p>
 
               <h3 className="text-[16px] font-extrabold text-[#07122E] mt-6 mb-3">
                 Trademark Notice
               </h3>
               <p>
-                &quot;PDF Core&quot; and our logo are trademarks. You may not use them without our prior written permission, except for factual reference (e.g., &quot;I use PDF Core&quot;).
+                &quot;SpellPDF&quot; and our logo are trademarks. You may not use them without our prior written permission, except for factual reference (e.g., &quot;I use SpellPDF&quot;).
               </p>
             </Section>
 
@@ -328,7 +328,7 @@ export default function TermsOfServicePage() {
                 <div className="flex items-start gap-3">
                   <Shield className="w-6 h-6 text-[#16A34A] flex-shrink-0 mt-0.5" />
                   <p className="text-[14.5px] text-[#166534] font-semibold m-0">
-                    <strong>You retain full ownership</strong> of any files you process using PDF Core. We claim no rights whatsoever to your content.
+                    <strong>You retain full ownership</strong> of any files you process using SpellPDF. We claim no rights whatsoever to your content.
                   </p>
                 </div>
               </div>
@@ -337,7 +337,7 @@ export default function TermsOfServicePage() {
                 No File Storage
               </h3>
               <p>
-                Because PDF Core processes files entirely in your browser:
+                Because SpellPDF processes files entirely in your browser:
               </p>
               <ul className="space-y-2">
                 <li>We never see, access, or store your files</li>
@@ -401,7 +401,7 @@ export default function TermsOfServicePage() {
             {/* 9. Liability */}
             <Section id="liability" icon={<Scale size={24} />} title="9. Limitation of Liability">
               <p>
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, PDF CORE SHALL NOT BE LIABLE FOR:
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, SpellPDF SHALL NOT BE LIABLE FOR:
               </p>
               <ul className="space-y-2 mt-4">
                 <li><strong>Indirect Damages:</strong> Any indirect, incidental, special, consequential, or punitive damages</li>
@@ -411,7 +411,7 @@ export default function TermsOfServicePage() {
                 <li><strong>Third-Party Actions:</strong> Actions or omissions of any third-party services or content</li>
               </ul>
               <p className="mt-4">
-                Since PDF Core is a <strong>free service</strong>, our total liability to you for any claim arising from or related to the Service shall not exceed <strong>the amount you paid us in the past 12 months (which is $0)</strong>.
+                Since SpellPDF is a <strong>free service</strong>, our total liability to you for any claim arising from or related to the Service shall not exceed <strong>the amount you paid us in the past 12 months (which is $0)</strong>.
               </p>
               <p>
                 Some jurisdictions do not allow the exclusion of certain warranties or limitation of liability, so some of the above may not apply to you.
@@ -421,7 +421,7 @@ export default function TermsOfServicePage() {
             {/* 10. Indemnification */}
             <Section id="indemnification" icon={<Gavel size={24} />} title="10. Indemnification">
               <p>
-                You agree to indemnify, defend, and hold harmless PDF Core, its officers, directors, employees, agents, and affiliates from any claims, damages, losses, liabilities, and expenses (including legal fees) arising from:
+                You agree to indemnify, defend, and hold harmless SpellPDF, its officers, directors, employees, agents, and affiliates from any claims, damages, losses, liabilities, and expenses (including legal fees) arising from:
               </p>
               <ul className="space-y-2 mt-4">
                 <li>Your use or misuse of the Service</li>
@@ -438,7 +438,7 @@ export default function TermsOfServicePage() {
                 Your Right to Stop Using
               </h3>
               <p>
-                You may stop using PDF Core at any time — simply close your browser tab. Since we don&apos;t require accounts, there&apos;s nothing to cancel or delete.
+                You may stop using SpellPDF at any time — simply close your browser tab. Since we don&apos;t require accounts, there&apos;s nothing to cancel or delete.
               </p>
 
               <h3 className="text-[16px] font-extrabold text-[#07122E] mt-6 mb-3">
@@ -454,14 +454,14 @@ export default function TermsOfServicePage() {
                 <li>Terminate the Service entirely at our discretion</li>
               </ul>
               <p className="mt-4">
-                Since PDF Core is a free service, we make no commitment to maintain it indefinitely, though we&apos;ll do our best to keep it running.
+                Since SpellPDF is a free service, we make no commitment to maintain it indefinitely, though we&apos;ll do our best to keep it running.
               </p>
             </Section>
 
             {/* 12. Third-Party */}
             <Section id="third-party" icon={<Globe size={24} />} title="12. Third-Party Services">
               <p>
-                PDF Core may link to or integrate with third-party services, websites, or resources. We are not responsible for:
+                SpellPDF may link to or integrate with third-party services, websites, or resources. We are not responsible for:
               </p>
               <ul className="space-y-2 mt-4">
                 <li>The content, accuracy, or opinions of third-party websites</li>
@@ -480,7 +480,7 @@ export default function TermsOfServicePage() {
                 Governing Law
               </h3>
               <p>
-                These Terms shall be governed by and construed in accordance with the laws applicable in the jurisdiction where PDF Core operates, without regard to conflict of law principles.
+                These Terms shall be governed by and construed in accordance with the laws applicable in the jurisdiction where SpellPDF operates, without regard to conflict of law principles.
               </p>
 
               <h3 className="text-[16px] font-extrabold text-[#07122E] mt-6 mb-3">
@@ -530,7 +530,7 @@ export default function TermsOfServicePage() {
                       Legal Inquiries
                     </p>
                     <p className="text-[13.5px] text-[#4B5874] m-0">
-                      Email: <a href="mailto:legal@pdfcore.com" className="text-[#1E63FF] hover:underline font-semibold">legal@pdfcore.com</a>
+                      Email: <a href="mailto:legal@spellpdf.com" className="text-[#1E63FF] hover:underline font-semibold">legal@spellpdf.com</a>
                     </p>
                     <p className="text-[13.5px] text-[#4B5874] m-0 mt-1">
                       We aim to respond to all inquiries within 5 business days.
@@ -558,7 +558,7 @@ export default function TermsOfServicePage() {
               <CheckCircle2 className="w-7 h-7 text-[#1E63FF]" />
             </div>
             <h3 className="text-[18px] md:text-[20px] font-extrabold text-[#07122E] mb-2">
-              By Using PDF Core
+              By Using SpellPDF
             </h3>
             <p className="text-[14px] text-[#4B5874] max-w-xl mx-auto">
               You acknowledge that you have read, understood, and agree to be bound by these Terms of Service and our{' '}

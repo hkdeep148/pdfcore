@@ -37,20 +37,20 @@ export const metadata: Metadata = {
     'how to rotate a single page in pdf',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online/tools/rotate-pdf',
+    canonical: 'https://spellpdf.com/tools/rotate-pdf',
   },
   openGraph: {
-    title: 'Rotate PDF Pages Online — Free, Permanent, No Signup | PDF Core',
+    title: 'Rotate PDF Pages Online — Free, Permanent, No Signup | SpellPDF',
     description:
       'Rotate PDF pages 90°, 180°, or 270°. Rotate single pages or all at once. Free, permanent, 100% browser-based.',
-    url: 'https://pdfcore.online/tools/rotate-pdf',
+    url: 'https://spellpdf.com/tools/rotate-pdf',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Rotate PDF Free & Private — PDF Core',
+        alt: 'Rotate PDF Free & Private — SpellPDF',
       },
     ],
   },
@@ -67,8 +67,8 @@ export const metadata: Metadata = {
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Rotate PDF — PDF Core',
-  url: 'https://pdfcore.online/tools/rotate-pdf',
+  name: 'Rotate PDF — SpellPDF',
+  url: 'https://spellpdf.com/tools/rotate-pdf',
   description:
     'Free browser-based PDF rotator. Rotate PDF pages permanently, 90° at a time. No signup, no watermark, no upload.',
   applicationCategory: 'UtilityApplication',
@@ -97,7 +97,7 @@ const howToSchema = {
   '@type': 'HowTo',
   name: 'How to Rotate PDF Pages Permanently',
   description:
-    'Step-by-step guide to rotate PDF pages 90°, 180°, or 270° using PDF Core.',
+    'Step-by-step guide to rotate PDF pages 90°, 180°, or 270° using SpellPDF.',
   totalTime: 'PT1M',
   step: [
     {
@@ -130,7 +130,7 @@ const faqSchema = {
       name: 'How do I rotate PDF pages for free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Upload your PDF to PDF Core, click the rotate button on individual pages or use Rotate All, then click Save. Your rotated PDF downloads instantly. Completely free with no signup, no watermarks, and no file size limits.',
+        text: 'Upload your PDF to SpellPDF, click the rotate button on individual pages or use Rotate All, then click Save. Your rotated PDF downloads instantly. Completely free with no signup, no watermarks, and no file size limits.',
       },
     },
     {
@@ -138,7 +138,7 @@ const faqSchema = {
       name: 'Is the rotation permanent?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! Unlike viewing rotation (which only changes how you see the PDF temporarily), PDF Core permanently rotates the pages in the file itself. When you open the saved PDF in any viewer, the pages will be in the new orientation.',
+        text: 'Yes! Unlike viewing rotation (which only changes how you see the PDF temporarily), SpellPDF permanently rotates the pages in the file itself. When you open the saved PDF in any viewer, the pages will be in the new orientation.',
       },
     },
     {
@@ -186,7 +186,7 @@ const faqSchema = {
       name: 'Is there a file size limit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No file size limits from us. Unlike some competitors that cap free users, PDF Core has no restrictions because everything runs in your browser. Rotate PDFs of any size your device can handle.',
+        text: 'No file size limits from us. Unlike some competitors that cap free users, SpellPDF has no restrictions because everything runs in your browser. Rotate PDFs of any size your device can handle.',
       },
     },
     {
@@ -194,7 +194,7 @@ const faqSchema = {
       name: 'Can I rotate PDFs on my phone?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works perfectly on iPhone, Android, iPad, and any modern mobile browser. Rotate PDFs directly on your phone with touch-friendly controls.',
+        text: 'Yes! SpellPDF works perfectly on iPhone, Android, iPad, and any modern mobile browser. Rotate PDFs directly on your phone with touch-friendly controls.',
       },
     },
     {
@@ -202,7 +202,7 @@ const faqSchema = {
       name: 'Can I preview the rotation before saving?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! You see a live preview of each page as you rotate it. Only when you click Save does PDF Core create the new rotated file. This lets you experiment freely before committing.',
+        text: 'Yes! You see a live preview of each page as you rotate it. Only when you click Save does SpellPDF create the new rotated file. This lets you experiment freely before committing.',
       },
     },
   ],

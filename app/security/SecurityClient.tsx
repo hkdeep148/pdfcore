@@ -61,7 +61,7 @@ export default function SecurityPage() {
 
             {/* Subtitle */}
             <p className="mt-5 md:mt-6 text-[15px] md:text-[19px] text-[#4B5874] font-medium max-w-2xl mx-auto leading-relaxed">
-              PDF Core is built with a <span className="text-[#07122E] font-semibold">privacy-first architecture</span>.
+              SpellPDF is built with a <span className="text-[#07122E] font-semibold">privacy-first architecture</span>.
               All file processing happens in your browser — nothing is uploaded, stored, or seen by us.
             </p>
 
@@ -163,7 +163,7 @@ export default function SecurityPage() {
               </div>
             </div>
 
-            {/* PDF Core Way */}
+            {/* SpellPDF Way */}
             <div className="bg-gradient-to-br from-[#F0FDF4] to-white border-2 border-[#BBF7D0] rounded-2xl p-6 md:p-7 relative overflow-hidden">
               <div className="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-[#16A34A] text-white text-[10px] font-bold uppercase tracking-wider">
                 Our Way
@@ -175,7 +175,7 @@ export default function SecurityPage() {
                 </div>
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-[#16A34A]">
-                    PDF Core
+                    SpellPDF
                   </div>
                   <div className="text-[16px] font-extrabold text-[#07122E]">Privacy-First Way</div>
                 </div>
@@ -436,7 +436,7 @@ export default function SecurityPage() {
             />
             <FAQItem
               question="What if I'm processing confidential documents?"
-              answer="PDF Core is safe for confidential documents like contracts, tax returns, medical records, legal papers, and business documents. Since files never leave your device, they remain as confidential as they were on your computer."
+              answer="SpellPDF is safe for confidential documents like contracts, tax returns, medical records, legal papers, and business documents. Since files never leave your device, they remain as confidential as they were on your computer."
             />
             <FAQItem
               question="Can hackers steal my files from your servers?"
@@ -515,7 +515,7 @@ export default function SecurityPage() {
                 Experience Truly Private PDF Tools
               </h2>
               <p className="text-[15px] md:text-[18px] text-white/90 mb-8 max-w-xl mx-auto">
-                Join thousands who trust PDF Core with their confidential documents.
+                Join thousands who trust SpellPDF with their confidential documents.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

@@ -183,12 +183,12 @@ export default function LandingNavbar() {
                     {currentTool.label}
                   </span>
                   <span className="text-[10px] font-normal text-[#8A93A3] leading-[1.3] truncate mt-[2px]">
-                    by PDFCore
+                    by spellpdf
                   </span>
                 </div>
               ) : (
                 <span className="hidden lg:inline text-[18px] font-bold text-[#07122E]">
-                  PDF Core
+                  SpellPDF
                 </span>
               )}
 
@@ -199,12 +199,12 @@ export default function LandingNavbar() {
                     {currentTool.label}
                   </span>
                   <span className="absolute top-full right-0 text-[8px] font-normal text-[#8A93A3] truncate leading-none -mt-2">
-                    by PDFCore
+                    by spellpdf
                   </span>
                 </div>
               ) : (
                 <span className="lg:hidden text-[18px] font-bold text-[#07122E] truncate">
-                  PDF Core
+                  SpellPDF
                 </span>
               )}
             </Link>

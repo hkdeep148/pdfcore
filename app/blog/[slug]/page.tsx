@@ -44,13 +44,13 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       },
     },
     alternates: {
-      canonical: `https://pdfcore.online/blog/${post.slug}/`,
+      canonical: `https://spellpdf.com/blog/${post.slug}/`,
     },
     openGraph: {
       title: post.metaTitle || post.title,
       description: post.metaDescription || post.excerpt,
-      url: `https://pdfcore.online/blog/${post.slug}/`,
-      siteName: 'PDF Core',
+      url: `https://spellpdf.com/blog/${post.slug}/`,
+      siteName: 'SpellPDF',
       type: 'article',
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt || post.publishedAt,
@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       images: post.coverImage
         ? [
             {
-              url: `https://pdfcore.online${post.coverImage}`,
+              url: `https://spellpdf.com${post.coverImage}`,
               width: 1200,
               height: 630,
               alt: post.title,
@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       title: post.metaTitle || post.title,
       description: post.metaDescription || post.excerpt,
       images: post.coverImage
-        ? [`https://pdfcore.online${post.coverImage}`]
+        ? [`https://spellpdf.com${post.coverImage}`]
         : undefined,
     },
   };
@@ -96,27 +96,27 @@ const articleSchema = {
   headline: post.title,
   description: post.metaDescription || post.excerpt,
   image: post.coverImage
-    ? `https://pdfcore.online${post.coverImage}`
+    ? `https://spellpdf.com${post.coverImage}`
     : undefined,
   datePublished: new Date(post.publishedAt).toISOString(),
   dateModified: new Date(post.updatedAt || post.publishedAt).toISOString(),
     author: {
       '@type': 'Organization',
       name: post.author,
-      url: 'https://pdfcore.online',
+      url: 'https://spellpdf.com',
     },
     publisher: {
       '@type': 'Organization',
-      name: 'PDF Core',
-      url: 'https://pdfcore.online',
+      name: 'SpellPDF',
+      url: 'https://spellpdf.com',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://pdfcore.online/android-chrome-512x512.png',
+        url: 'https://spellpdf.com/android-chrome-512x512.png',
       },
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://pdfcore.online/blog/${post.slug}/`,
+      '@id': `https://spellpdf.com/blog/${post.slug}/`,
     },
     keywords: post.tags.join(', '),
   };
@@ -147,19 +147,19 @@ const articleSchema = {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://pdfcore.online',
+        item: 'https://spellpdf.com',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Blog',
-        item: 'https://pdfcore.online/blog',
+        item: 'https://spellpdf.com/blog',
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: post.title,
-        item: `https://pdfcore.online/blog/${post.slug}/`,
+        item: `https://spellpdf.com/blog/${post.slug}/`,
       },
     ],
   };

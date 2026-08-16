@@ -28,11 +28,11 @@ const sourceSans3 = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://pdfcore.online'),
+  metadataBase: new URL('https://spellpdf.com'),
   title: {
     default:
-      'PDF Core — Free PDF Tools Online | No Signup, No Upload, 100% Private',
-    template: '%s | PDF Core — Free & Private PDF Tools',
+      'SpellPDF — Free PDF Tools Online | No Signup, No Upload, 100% Private',
+    template: '%s | SpellPDF — Free & Private PDF Tools',
   },
   description:
     'Free online PDF and image tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. Unlock protected PDFs. Compress and convert images. No signup, no upload, no watermark. Your files never leave your device.',
@@ -55,15 +55,15 @@ export const metadata: Metadata = {
     'unlock pdf without software', 'pdf tools without watermark',
     'pdf tools without registration', 'pdf editor without subscription',
   ],
-  authors: [{ name: 'PDF Core', url: 'https://pdfcore.online' }],
-  creator: 'PDF Core',
-  publisher: 'PDF Core',
+  authors: [{ name: 'SpellPDF', url: 'https://spellpdf.com' }],
+  creator: 'SpellPDF',
+  publisher: 'SpellPDF',
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://pdfcore.online',
-    siteName: 'PDF Core',
-    title: 'PDF Core — Free PDF Tools | No Signup, No Upload, 100% Private',
+    url: 'https://spellpdf.com',
+    siteName: 'SpellPDF',
+    title: 'SpellPDF — Free PDF Tools | No Signup, No Upload, 100% Private',
     description:
       '11 PDF and image tools that work 100% in your browser. No file uploads, no signup, no watermarks. Compress, merge, convert, sign & more — completely free.',
     images: [
@@ -71,13 +71,13 @@ export const metadata: Metadata = {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'PDF Core — Free Private Browser-Based PDF Tools',
+        alt: 'SpellPDF — Free Private Browser-Based PDF Tools',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'PDF Core — Free PDF Tools, No Signup Required',
+    title: 'SpellPDF — Free PDF Tools, No Signup Required',
     description:
       '11 browser-based PDF and image tools. No uploads, no signup, no watermarks. 100% free & private.',
     images: ['/twitter-image.png'],
@@ -135,7 +135,7 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest', // ✅ Web manifest for PWA support
   alternates: {
-    canonical: 'https://pdfcore.online',
+    canonical: 'https://spellpdf.com',
   },
   category: 'technology',
 };
@@ -150,15 +150,15 @@ export const viewport: Viewport = {
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'PDF Core',
-  url: 'https://pdfcore.online',
+  name: 'SpellPDF',
+  url: 'https://spellpdf.com',
   description:
     'Free online PDF tools that respect your privacy. All processing happens in your browser.',
   potentialAction: {
     '@type': 'SearchAction',
     target: {
       '@type': 'EntryPoint',
-      urlTemplate: 'https://pdfcore.online/tools?q={search_term_string}',
+      urlTemplate: 'https://spellpdf.com/tools?q={search_term_string}',
     },
     'query-input': 'required name=search_term_string',
   },
@@ -167,9 +167,9 @@ const websiteSchema = {
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'PDF Core',
-  url: 'https://pdfcore.online',
-  logo: 'https://pdfcore.online/android-chrome-512x512.png',
+  name: 'SpellPDF',
+  url: 'https://spellpdf.com',
+  logo: 'https://spellpdf.com/android-chrome-512x512.png',
   description:
     'Free online PDF and image tools that respect your privacy. All processing happens in your browser.',
 };

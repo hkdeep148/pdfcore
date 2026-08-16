@@ -43,20 +43,20 @@ export const metadata: Metadata = {
     'how to convert pdf to high resolution image',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online/tools/pdf-to-image',
+    canonical: 'https://spellpdf.com/tools/pdf-to-image',
   },
   openGraph: {
-    title: 'PDF to JPG Converter — Free, High Quality, No Watermark | PDF Core',
+    title: 'PDF to JPG Converter — Free, High Quality, No Watermark | SpellPDF',
     description:
       'Convert PDF pages to JPG or PNG images. High resolution, unlimited pages, 100% browser-based. Free forever.',
-    url: 'https://pdfcore.online/tools/pdf-to-image',
+    url: 'https://spellpdf.com/tools/pdf-to-image',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'PDF to JPG Converter Free — PDF Core',
+        alt: 'PDF to JPG Converter Free — SpellPDF',
       },
     ],
   },
@@ -73,8 +73,8 @@ export const metadata: Metadata = {
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'PDF to Image Converter — PDF Core',
-  url: 'https://pdfcore.online/tools/pdf-to-image',
+  name: 'PDF to Image Converter — SpellPDF',
+  url: 'https://spellpdf.com/tools/pdf-to-image',
   description:
     'Free browser-based PDF to image converter. Convert PDF pages to JPG or PNG. No signup, no watermark, no upload.',
   applicationCategory: 'UtilityApplication',
@@ -103,7 +103,7 @@ const howToSchema = {
   '@type': 'HowTo',
   name: 'How to Convert PDF to JPG or PNG for Free',
   description:
-    'Step-by-step guide to convert PDF pages into JPG or PNG image files using PDF Core.',
+    'Step-by-step guide to convert PDF pages into JPG or PNG image files using SpellPDF.',
   totalTime: 'PT1M',
   step: [
     {
@@ -136,7 +136,7 @@ const faqSchema = {
       name: 'How do I convert a PDF to JPG for free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Upload your PDF to PDF Core, choose JPG format and your preferred quality, then click Convert. You can download individual images or all pages at once as a ZIP file. Completely free with no watermarks and no signup required.',
+        text: 'Upload your PDF to SpellPDF, choose JPG format and your preferred quality, then click Convert. You can download individual images or all pages at once as a ZIP file. Completely free with no watermarks and no signup required.',
       },
     },
     {
@@ -152,7 +152,7 @@ const faqSchema = {
       name: 'What resolution options are available?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'PDF Core offers four resolution levels: Low (fast, small files), Medium (balanced), High (recommended for most uses), and Ultra (maximum quality, larger files). Higher resolution means sharper images but bigger file sizes.',
+        text: 'SpellPDF offers four resolution levels: Low (fast, small files), Medium (balanced), High (recommended for most uses), and Ultra (maximum quality, larger files). Higher resolution means sharper images but bigger file sizes.',
       },
     },
     {
@@ -165,7 +165,7 @@ const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'Does PDF Core add watermarks to converted images?',
+      name: 'Does SpellPDF add watermarks to converted images?',
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'Never. Your converted JPG or PNG images are 100% clean with no watermarks, no branding, and no logos. This is different from many "free" competitors that stamp their name on your files.',
@@ -176,7 +176,7 @@ const faqSchema = {
       name: 'How many pages can I convert at once?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'There is no page limit. Convert 5 pages or 500 pages — PDF Core handles them all. When you have multiple pages, they can be downloaded individually or bundled as a single ZIP file.',
+        text: 'There is no page limit. Convert 5 pages or 500 pages — SpellPDF handles them all. When you have multiple pages, they can be downloaded individually or bundled as a single ZIP file.',
       },
     },
     {
@@ -192,7 +192,7 @@ const faqSchema = {
       name: 'Can I convert PDF to image on my phone?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works on iPhone, Android, iPad, and any modern mobile browser. Convert PDFs to images directly on your phone without uploading to any server.',
+        text: 'Yes! SpellPDF works on iPhone, Android, iPad, and any modern mobile browser. Convert PDFs to images directly on your phone without uploading to any server.',
       },
     },
     {
@@ -200,7 +200,7 @@ const faqSchema = {
       name: 'What is the maximum PDF file size I can convert?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No file size limits from us. Unlike some competitors that cap free users, PDF Core has no restrictions because everything runs in your browser. Convert PDFs of any size your device can handle.',
+        text: 'No file size limits from us. Unlike some competitors that cap free users, SpellPDF has no restrictions because everything runs in your browser. Convert PDFs of any size your device can handle.',
       },
     },
     {
@@ -208,7 +208,7 @@ const faqSchema = {
       name: 'Can I extract images embedded in a PDF?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'PDF Core converts entire PDF pages to images (whole page as one image). To extract specific embedded images within a PDF, you would need a different type of tool. This converter renders each PDF page as a JPG or PNG.',
+        text: 'SpellPDF converts entire PDF pages to images (whole page as one image). To extract specific embedded images within a PDF, you would need a different type of tool. This converter renders each PDF page as a JPG or PNG.',
       },
     },
   ],

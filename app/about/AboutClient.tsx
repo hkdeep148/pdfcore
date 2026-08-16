@@ -127,7 +127,7 @@ export default function AboutPage() {
                 We noticed that most PDF tools online are either expensive, filled with ads, or lock essential features behind paywalls. We thought that&apos;s just not fair.
               </p>
               <p className="text-[15px] md:text-[16px] text-slate-600 leading-relaxed mb-6">
-                So we built <span className="font-semibold text-[#07122E]">PDF Core</span> — a complete PDF toolkit that gives everyone free access to professional-grade PDF tools. Whether you&apos;re a student, freelancer, or business owner, our tools are here to help.
+                So we built <span className="font-semibold text-[#07122E]">SpellPDF</span> — a complete PDF toolkit that gives everyone free access to professional-grade PDF tools. Whether you&apos;re a student, freelancer, or business owner, our tools are here to help.
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 rounded-xl bg-white border border-slate-100">
@@ -201,7 +201,7 @@ export default function AboutPage() {
           <div className="text-center mb-10 md:mb-14">
             <h2 className="text-[28px] md:text-[38px] font-extrabold text-[#07122E] tracking-tight">
               Why Choose{' '}
-              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">PDF Core</span>?
+              <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">SpellPDF</span>?
             </h2>
           </div>
           <div className="grid md:grid-cols-2 gap-4 md:gap-5">
@@ -247,7 +247,7 @@ export default function AboutPage() {
                 Ready to Try Our Free Tools?
               </h2>
               <p className="text-[15px] md:text-[18px] text-white/90 mb-8 max-w-xl mx-auto">
-                Join thousands of users who trust PDF Core for their daily PDF needs.
+                Join thousands of users who trust SpellPDF for their daily PDF needs.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link

@@ -98,7 +98,7 @@ export default function LandingFooter() {
                 </p>
                 <h3 className="text-[26px] font-semibold text-[#07122E] tracking-tight leading-[1.15]">
                   Why choose{' '}
-                  <span className="text-[#5B4EF5]">PDF Core</span>
+                  <span className="text-[#5B4EF5]">SpellPDF</span>
                   <span className="text-[#07122E]">?</span>
                 </h3>
                 <p className="text-[13.5px] text-slate-500 mt-3 leading-relaxed">
@@ -116,7 +116,7 @@ export default function LandingFooter() {
                   </div>
                   <div className="px-2 py-3.5 text-center">
                     <div className="text-[11px] font-bold text-[#5B4EF5] tracking-tight">
-                      PDF Core
+                      SpellPDF
                     </div>
                   </div>
                   <div className="px-2 py-3.5 text-center">
@@ -145,7 +145,7 @@ export default function LandingFooter() {
   href="/tools"
   className="group mt-6 flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-[#5B4EF5] to-[#8B5CF6] text-white text-[14px] font-semibold shadow-[0_4px_16px_-4px_rgba(91,78,245,0.4)] hover:shadow-[0_8px_24px_-4px_rgba(91,78,245,0.5)] hover:-translate-y-0.5 transition-all duration-200"
 >
-  Try PDF Core free
+  Try SpellPDF free
   <ArrowRight 
     size={15} 
     strokeWidth={2.5} 
@@ -185,7 +185,7 @@ export default function LandingFooter() {
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#3B82F6] to-[#6D35FF] flex items-center justify-center shadow-[0_4px_12px_-2px_rgba(109,53,255,0.3)]">
                   <FileText size={16} className="text-white" />
                 </div>
-                <span className="text-[16px] font-extrabold text-slate-900">PDF Core</span>
+                <span className="text-[16px] font-extrabold text-slate-900">SpellPDF</span>
               </Link>
               <p className="text-[13px] text-slate-500 leading-relaxed mb-5 max-w-xs">
                 Free, secure PDF tools that work right in your browser. Your files never leave your device.
@@ -250,7 +250,7 @@ export default function LandingFooter() {
           <div className="relative -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
             <div className="py-5 flex flex-col md:flex-row items-center justify-between gap-3">
               <p className="text-[12.5px] text-slate-600 font-medium">
-                © {new Date().getFullYear()} <span className="text-slate-900 font-semibold">PDF Core</span>. All rights reserved.
+                © {new Date().getFullYear()} <span className="text-slate-900 font-semibold">SpellPDF</span>. All rights reserved.
               </p>
               <div className="flex items-center gap-1.5 text-[12.5px] text-slate-600 font-medium">
                 <span>Made with</span>

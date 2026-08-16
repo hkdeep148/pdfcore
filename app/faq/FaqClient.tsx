@@ -46,24 +46,24 @@ const faqCategories: FAQCategory[] = [
     bgColor: '#DBEAFE',
     items: [
       {
-        q: 'What is PDF Core?',
-        a: 'PDF Core is a free, browser-based collection of PDF tools. You can merge, split, compress, convert, rotate, watermark, and organize PDF files — all without uploading anything to our servers. Everything runs directly in your web browser.',
+        q: 'What is SpellPDF?',
+        a: 'SpellPDF is a free, browser-based collection of PDF tools. You can merge, split, compress, convert, rotate, watermark, and organize PDF files — all without uploading anything to our servers. Everything runs directly in your web browser.',
       },
       {
-        q: 'Is PDF Core really free?',
+        q: 'Is SpellPDF really free?',
         a: 'Yes, 100% free forever. All our tools are completely free with no hidden costs, no premium tiers, no watermarks, no trial periods, and no credit card required. We believe powerful PDF tools should be accessible to everyone.',
       },
       {
         q: 'Do I need to create an account?',
-        a: 'No! PDF Core requires zero signup. Just visit the tool you need, upload your file, and get your result. No email, no password, no registration.',
+        a: 'No! SpellPDF requires zero signup. Just visit the tool you need, upload your file, and get your result. No email, no password, no registration.',
       },
       {
-        q: 'How is PDF Core different from other PDF tools?',
+        q: 'How is SpellPDF different from other PDF tools?',
         a: 'Three key differences: (1) It\'s completely free with no premium features, (2) Files are processed entirely in your browser — nothing is uploaded to our servers, and (3) No account or signup is required.',
       },
       {
-        q: 'How can PDF Core be free? What\'s the catch?',
-        a: 'There\'s no catch. We built PDF Core because we believe PDF tools shouldn\'t be locked behind paywalls. Since our tools run in your browser, we have very low server costs to maintain.',
+        q: 'How can SpellPDF be free? What\'s the catch?',
+        a: 'There\'s no catch. We built SpellPDF because we believe PDF tools shouldn\'t be locked behind paywalls. Since our tools run in your browser, we have very low server costs to maintain.',
       },
     ],
   },
@@ -83,8 +83,8 @@ const faqCategories: FAQCategory[] = [
         a: 'No. We don\'t store any files because we never receive them in the first place. Your files stay on your device throughout the entire process.',
       },
       {
-        q: 'Can I use PDF Core for confidential documents?',
-        a: 'Yes, PDF Core is perfect for confidential documents like contracts, medical records, tax returns, or legal papers. Since files are processed locally, they remain as confidential as they are on your computer.',
+        q: 'Can I use SpellPDF for confidential documents?',
+        a: 'Yes, SpellPDF is perfect for confidential documents like contracts, medical records, tax returns, or legal papers. Since files are processed locally, they remain as confidential as they are on your computer.',
       },
       {
         q: 'How can I verify that files aren\'t uploaded?',
@@ -96,7 +96,7 @@ const faqCategories: FAQCategory[] = [
       },
       {
         q: 'How do I manage my cookie preferences?',
-        a: 'When you first visit PDF Core, a cookie banner appears at the bottom of the page. You can: (1) Click "Accept All" to enable all cookies, (2) Click "Reject All" for only necessary cookies, or (3) Click "Customize" to pick which categories to enable. To change your preferences later, clear your browser\'s local storage for our site, and the banner will appear again.',
+        a: 'When you first visit SpellPDF, a cookie banner appears at the bottom of the page. You can: (1) Click "Accept All" to enable all cookies, (2) Click "Reject All" for only necessary cookies, or (3) Click "Customize" to pick which categories to enable. To change your preferences later, clear your browser\'s local storage for our site, and the banner will appear again.',
       },
       {
         q: 'Is my data shared with third parties?',
@@ -165,7 +165,7 @@ const faqCategories: FAQCategory[] = [
         a: 'Never! We don\'t add any watermarks, branding, or labels to your processed files. What you download is exactly what our tool produced.',
       },
       {
-        q: 'Can I use PDF Core offline?',
+        q: 'Can I use SpellPDF offline?',
         a: 'Once a tool page is loaded, most tools can continue working even without an internet connection. The initial page load requires internet, but processing happens locally.',
       },
     ],
@@ -179,11 +179,11 @@ const faqCategories: FAQCategory[] = [
     items: [
       {
         q: 'What browsers are supported?',
-        a: 'PDF Core works on all modern browsers: Chrome, Firefox, Safari, Edge, and Opera. We recommend using the latest version for the best experience.',
+        a: 'SpellPDF works on all modern browsers: Chrome, Firefox, Safari, Edge, and Opera. We recommend using the latest version for the best experience.',
       },
       {
         q: 'Does it work on mobile devices?',
-        a: 'Yes! PDF Core is fully responsive and works great on smartphones and tablets. Both iOS and Android are supported.',
+        a: 'Yes! SpellPDF is fully responsive and works great on smartphones and tablets. Both iOS and Android are supported.',
       },
       {
         q: 'Why is the tool loading slowly?',
@@ -194,12 +194,12 @@ const faqCategories: FAQCategory[] = [
         a: 'Try these steps: (1) Refresh the page, (2) Check your internet connection, (3) Try a different browser, (4) Clear your browser cache, (5) Make sure your file isn\'t corrupted. If issues continue, contact us.',
       },
       {
-        q: 'What technology powers PDF Core?',
+        q: 'What technology powers SpellPDF?',
         a: 'We use open-source JavaScript libraries: PDF.js (Mozilla) for rendering, pdf-lib for modifications, JSZip for archives, and Next.js for the website. Everything runs in your browser.',
       },
       {
-        q: 'Can I use PDF Core in my organization?',
-        a: 'Yes! PDF Core is free for personal, educational, and business use. No licenses needed. Just visit the site and start using the tools.',
+        q: 'Can I use SpellPDF in my organization?',
+        a: 'Yes! SpellPDF is free for personal, educational, and business use. No licenses needed. Just visit the site and start using the tools.',
       },
     ],
   },
@@ -220,15 +220,15 @@ const faqCategories: FAQCategory[] = [
       },
       {
         q: 'Do you offer a business or enterprise plan?',
-        a: 'Since everything is free, there\'s no business plan needed. Companies of all sizes can use PDF Core for free without any restrictions.',
+        a: 'Since everything is free, there\'s no business plan needed. Companies of all sizes can use SpellPDF for free without any restrictions.',
       },
       {
         q: 'Do you accept donations?',
-        a: 'While we don\'t currently accept donations, your support through sharing PDF Core with others is greatly appreciated!',
+        a: 'While we don\'t currently accept donations, your support through sharing SpellPDF with others is greatly appreciated!',
       },
       {
-        q: 'Will PDF Core become paid in the future?',
-        a: 'Our commitment is to keep PDF Core free. We built this service because we believe PDF tools should be accessible to everyone.',
+        q: 'Will SpellPDF become paid in the future?',
+        a: 'Our commitment is to keep SpellPDF free. We built this service because we believe PDF tools should be accessible to everyone.',
       },
     ],
   },
@@ -304,7 +304,7 @@ export default function FAQPage() {
             </h1>
 
             <p className="text-[15px] md:text-[17px] text-[#4B5874] font-medium max-w-2xl mx-auto leading-relaxed mb-8">
-              Everything you need to know about PDF Core. Can&apos;t find what you&apos;re looking for?{' '}
+              Everything you need to know about SpellPDF. Can&apos;t find what you&apos;re looking for?{' '}
               <a href="#contact" className="text-[#1E63FF] font-semibold hover:underline">
                 Get in touch
               </a>.
@@ -572,7 +572,7 @@ export default function FAQPage() {
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <a
-                  href="mailto:support@pdfcore.com"
+                  href="mailto:support@spellpdf.com"
                   className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white text-[#1E63FF] text-[15px] font-bold shadow-[0_10px_30px_-8px_rgba(0,0,0,0.3)] hover:scale-[1.02] transition-all"
                 >
                   <Mail size={18} />

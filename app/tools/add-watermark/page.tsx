@@ -45,20 +45,20 @@ export const metadata: Metadata = {
     'how to add confidential to pdf',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online/tools/add-watermark',
+    canonical: 'https://spellpdf.com/tools/add-watermark',
   },
   openGraph: {
-    title: 'Add Watermark to PDF Online — Free, No Signup | PDF Core',
+    title: 'Add Watermark to PDF Online — Free, No Signup | SpellPDF',
     description:
       'Add custom text watermarks to PDFs. Choose font, size, color, position, and opacity. Free, private, 100% browser-based.',
-    url: 'https://pdfcore.online/tools/add-watermark',
+    url: 'https://spellpdf.com/tools/add-watermark',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Add Watermark to PDF Free — PDF Core',
+        alt: 'Add Watermark to PDF Free — SpellPDF',
       },
     ],
   },
@@ -75,8 +75,8 @@ export const metadata: Metadata = {
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Add Watermark to PDF — PDF Core',
-  url: 'https://pdfcore.online/tools/add-watermark',
+  name: 'Add Watermark to PDF — SpellPDF',
+  url: 'https://spellpdf.com/tools/add-watermark',
   description:
     'Free browser-based PDF watermark tool. Add custom text watermarks to your PDFs with full control over appearance. No signup, no watermark from us, no upload.',
   applicationCategory: 'UtilityApplication',
@@ -97,7 +97,7 @@ const webApplicationSchema = {
     'Apply to all pages or specific pages',
     'No file size limit',
     'No signup required',
-    'No watermarks added by PDF Core',
+    'No watermarks added by SpellPDF',
     '100% browser-based processing',
   ],
 };
@@ -107,7 +107,7 @@ const howToSchema = {
   '@type': 'HowTo',
   name: 'How to Add a Watermark to PDF Documents',
   description:
-    'Step-by-step guide to add custom text watermarks to PDF files using PDF Core.',
+    'Step-by-step guide to add custom text watermarks to PDF files using SpellPDF.',
   totalTime: 'PT1M',
   step: [
     {
@@ -140,7 +140,7 @@ const faqSchema = {
       name: 'How do I add a watermark to a PDF for free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Upload your PDF to PDF Core, enter your watermark text, customize the appearance (font, color, position, opacity), then click Add Watermark. Your watermarked PDF downloads instantly. Completely free with no signup and no PDF Core watermark added.',
+        text: 'Upload your PDF to SpellPDF, enter your watermark text, customize the appearance (font, color, position, opacity), then click Add Watermark. Your watermarked PDF downloads instantly. Completely free with no signup and no SpellPDF watermark added.',
       },
     },
     {
@@ -185,10 +185,10 @@ const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'Does PDF Core add its own watermark?',
+      name: 'Does SpellPDF add its own watermark?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No, never. Only YOUR chosen watermark appears on the PDF. We do not add any PDF Core branding, logos, or promotional watermarks. Your document only shows what you specified.',
+        text: 'No, never. Only YOUR chosen watermark appears on the PDF. We do not add any SpellPDF branding, logos, or promotional watermarks. Your document only shows what you specified.',
       },
     },
     {
@@ -204,7 +204,7 @@ const faqSchema = {
       name: 'Is there a file size limit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No file size limits from us. Unlike some competitors that cap free users, PDF Core has no restrictions because everything runs in your browser. Watermark PDFs of any size your device can handle.',
+        text: 'No file size limits from us. Unlike some competitors that cap free users, SpellPDF has no restrictions because everything runs in your browser. Watermark PDFs of any size your device can handle.',
       },
     },
     {
@@ -212,7 +212,7 @@ const faqSchema = {
       name: 'Can I add watermarks on my phone?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works on iPhone, Android, iPad, and any modern mobile browser. Add watermarks to your PDFs directly on your phone with touch-friendly controls.',
+        text: 'Yes! SpellPDF works on iPhone, Android, iPad, and any modern mobile browser. Add watermarks to your PDFs directly on your phone with touch-friendly controls.',
       },
     },
     {

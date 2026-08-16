@@ -41,20 +41,20 @@ export const metadata: Metadata = {
     'how to unlock password protected pdf',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online/tools/unlock-pdf',
+    canonical: 'https://spellpdf.com/tools/unlock-pdf',
   },
   openGraph: {
-    title: 'Unlock PDF Online — Remove Password Free, No Signup | PDF Core',
+    title: 'Unlock PDF Online — Remove Password Free, No Signup | SpellPDF',
     description:
       'Remove password protection from your PDFs. Free, safe, 100% browser-based. Your files never leave your device.',
-    url: 'https://pdfcore.online/tools/unlock-pdf',
+    url: 'https://spellpdf.com/tools/unlock-pdf',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Unlock PDF Free & Private — PDF Core',
+        alt: 'Unlock PDF Free & Private — SpellPDF',
       },
     ],
   },
@@ -71,8 +71,8 @@ export const metadata: Metadata = {
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Unlock PDF — PDF Core',
-  url: 'https://pdfcore.online/tools/unlock-pdf',
+  name: 'Unlock PDF — SpellPDF',
+  url: 'https://spellpdf.com/tools/unlock-pdf',
   description:
     'Free browser-based PDF unlocker. Remove password protection from your own PDFs. No signup, no watermark, no upload.',
   applicationCategory: 'UtilityApplication',
@@ -101,7 +101,7 @@ const howToSchema = {
   '@type': 'HowTo',
   name: 'How to Unlock a Password-Protected PDF',
   description:
-    'Step-by-step guide to remove password protection from your PDF files using PDF Core.',
+    'Step-by-step guide to remove password protection from your PDF files using SpellPDF.',
   totalTime: 'PT1M',
   step: [
     {
@@ -134,7 +134,7 @@ const faqSchema = {
       name: 'How do I unlock a PDF for free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Upload your password-protected PDF to PDF Core, enter the password, then click Unlock. Your password-free PDF downloads instantly. Completely free with no signup, no watermarks, and no file size limits.',
+        text: 'Upload your password-protected PDF to SpellPDF, enter the password, then click Unlock. Your password-free PDF downloads instantly. Completely free with no signup, no watermarks, and no file size limits.',
       },
     },
     {
@@ -142,7 +142,7 @@ const faqSchema = {
       name: 'Do I need to know the password?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes. PDF Core requires you to enter the correct password to unlock a PDF. This tool is designed for removing password protection from YOUR OWN PDFs — files you have legitimate access to. It is not a password-cracking tool.',
+        text: 'Yes. SpellPDF requires you to enter the correct password to unlock a PDF. This tool is designed for removing password protection from YOUR OWN PDFs — files you have legitimate access to. It is not a password-cracking tool.',
       },
     },
     {
@@ -155,10 +155,10 @@ const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'Can PDF Core crack passwords I don\'t know?',
+      name: 'Can SpellPDF crack passwords I don\'t know?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No, and we would not want to. PDF Core is designed to help you remove passwords from YOUR OWN files. If you forgot the password to your own PDF, try password recovery software specifically designed for that purpose. Using this tool on files that are not yours may be illegal.',
+        text: 'No, and we would not want to. SpellPDF is designed to help you remove passwords from YOUR OWN files. If you forgot the password to your own PDF, try password recovery software specifically designed for that purpose. Using this tool on files that are not yours may be illegal.',
       },
     },
     {
@@ -190,7 +190,7 @@ const faqSchema = {
       name: 'Is there a file size limit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No file size limits from us. Unlike some competitors that cap free users, PDF Core has no restrictions because everything runs in your browser. Unlock PDFs of any size your device can handle.',
+        text: 'No file size limits from us. Unlike some competitors that cap free users, SpellPDF has no restrictions because everything runs in your browser. Unlock PDFs of any size your device can handle.',
       },
     },
     {
@@ -198,7 +198,7 @@ const faqSchema = {
       name: 'Can I unlock PDFs on my phone?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works perfectly on iPhone, Android, iPad, and any modern mobile browser. Unlock PDFs directly on your phone with your passwords staying private.',
+        text: 'Yes! SpellPDF works perfectly on iPhone, Android, iPad, and any modern mobile browser. Unlock PDFs directly on your phone with your passwords staying private.',
       },
     },
     {

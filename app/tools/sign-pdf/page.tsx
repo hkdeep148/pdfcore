@@ -45,20 +45,20 @@ export const metadata: Metadata = {
     'how to esign a pdf',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online/tools/sign-pdf',
+    canonical: 'https://spellpdf.com/tools/sign-pdf',
   },
   openGraph: {
-    title: 'Sign PDF Online — Free E-Signature, No Signup | PDF Core',
+    title: 'Sign PDF Online — Free E-Signature, No Signup | SpellPDF',
     description:
       'Add digital signatures to PDFs. Draw, type, or upload. Free, private, 100% browser-based.',
-    url: 'https://pdfcore.online/tools/sign-pdf',
+    url: 'https://spellpdf.com/tools/sign-pdf',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Sign PDF Free & Private — PDF Core',
+        alt: 'Sign PDF Free & Private — SpellPDF',
       },
     ],
   },
@@ -75,8 +75,8 @@ export const metadata: Metadata = {
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Sign PDF — PDF Core',
-  url: 'https://pdfcore.online/tools/sign-pdf',
+  name: 'Sign PDF — SpellPDF',
+  url: 'https://spellpdf.com/tools/sign-pdf',
   description:
     'Free browser-based PDF signature tool. Draw, type, or upload signatures and add them to PDF documents. No signup, no watermark, no upload.',
   applicationCategory: 'UtilityApplication',
@@ -106,7 +106,7 @@ const howToSchema = {
   '@type': 'HowTo',
   name: 'How to Sign a PDF Document Online',
   description:
-    'Step-by-step guide to add your signature to PDF documents using PDF Core.',
+    'Step-by-step guide to add your signature to PDF documents using SpellPDF.',
   totalTime: 'PT1M',
   step: [
     {
@@ -139,7 +139,7 @@ const faqSchema = {
       name: 'How do I sign a PDF for free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Upload your PDF to PDF Core, create your signature (draw, type, or upload), then click on the PDF where you want to place it. Download your signed PDF instantly. Completely free with no signup, no watermarks, and no file size limits.',
+        text: 'Upload your PDF to SpellPDF, create your signature (draw, type, or upload), then click on the PDF where you want to place it. Download your signed PDF instantly. Completely free with no signup, no watermarks, and no file size limits.',
       },
     },
     {
@@ -155,7 +155,7 @@ const faqSchema = {
       name: 'Is a digital signature legally valid?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Simple electronic signatures like the ones PDF Core creates are legally recognized in most countries (US ESIGN Act, EU eIDAS) for many document types. For high-security legal documents requiring digital certificates (like real estate transactions or court filings), consider dedicated e-signature services with authentication features.',
+        text: 'Simple electronic signatures like the ones SpellPDF creates are legally recognized in most countries (US ESIGN Act, EU eIDAS) for many document types. For high-security legal documents requiring digital certificates (like real estate transactions or court filings), consider dedicated e-signature services with authentication features.',
       },
     },
     {
@@ -203,7 +203,7 @@ const faqSchema = {
       name: 'Can I sign PDFs on my phone?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works on iPhone, Android, iPad, and any modern mobile browser. Signing with your finger on a touchscreen feels natural and produces great results.',
+        text: 'Yes! SpellPDF works on iPhone, Android, iPad, and any modern mobile browser. Signing with your finger on a touchscreen feels natural and produces great results.',
       },
     },
     {
@@ -211,7 +211,7 @@ const faqSchema = {
       name: 'How is this different from DocuSign?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'DocuSign is a full e-signature platform with authentication, audit trails, and multi-party workflows (great for legal contracts). PDF Core is a simple, private signing tool for when you just need to add a signature to your own PDF — free, instant, and browser-based with no signup.',
+        text: 'DocuSign is a full e-signature platform with authentication, audit trails, and multi-party workflows (great for legal contracts). SpellPDF is a simple, private signing tool for when you just need to add a signature to your own PDF — free, instant, and browser-based with no signup.',
       },
     },
   ],

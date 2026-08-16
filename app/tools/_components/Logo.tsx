@@ -65,7 +65,7 @@ export default function Logo({
       
       {showText && (
         <span className={`${s.text} font-bold ${textColor} tracking-tight`}>
-          PDF Core
+          SpellPDF
         </span>
       )}
     </div>

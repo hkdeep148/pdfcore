@@ -47,20 +47,20 @@ export const metadata: Metadata = {
     'how to compress photo without losing quality',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online/tools/compress-image',
+    canonical: 'https://spellpdf.com/tools/compress-image',
   },
   openGraph: {
-    title: 'Compress Images Online — Free, No Signup, No Watermark | PDF Core',
+    title: 'Compress Images Online — Free, No Signup, No Watermark | SpellPDF',
     description:
       'Reduce JPG, PNG, WEBP image sizes without quality loss. Free, unlimited, 100% browser-based. Your images stay private.',
-    url: 'https://pdfcore.online/tools/compress-image',
+    url: 'https://spellpdf.com/tools/compress-image',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Compress Images Free & Private — PDF Core',
+        alt: 'Compress Images Free & Private — SpellPDF',
       },
     ],
   },
@@ -77,8 +77,8 @@ export const metadata: Metadata = {
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Compress Images — PDF Core',
-  url: 'https://pdfcore.online/tools/compress-image',
+  name: 'Compress Images — SpellPDF',
+  url: 'https://spellpdf.com/tools/compress-image',
   description:
     'Free browser-based image compressor. Reduce JPG, PNG, WEBP file sizes without losing quality. No signup, no watermark, no upload.',
   applicationCategory: 'UtilityApplication',
@@ -108,7 +108,7 @@ const howToSchema = {
   '@type': 'HowTo',
   name: 'How to Compress Images Without Losing Quality',
   description:
-    'Step-by-step guide to compress JPG, PNG, and WEBP images using PDF Core.',
+    'Step-by-step guide to compress JPG, PNG, and WEBP images using SpellPDF.',
   totalTime: 'PT30S',
   step: [
     {
@@ -141,7 +141,7 @@ const faqSchema = {
       name: 'How do I compress images for free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Upload your JPG, PNG, or WEBP images to PDF Core, choose a compression level, then click Compress. Your smaller images download instantly. Completely free with no signup, no watermarks, and no file size limits.',
+        text: 'Upload your JPG, PNG, or WEBP images to SpellPDF, choose a compression level, then click Compress. Your smaller images download instantly. Completely free with no signup, no watermarks, and no file size limits.',
       },
     },
     {
@@ -149,7 +149,7 @@ const faqSchema = {
       name: 'Which image formats are supported?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'PDF Core supports JPG (JPEG), PNG, and WEBP formats. You can compress multiple formats in one session and even convert between formats during compression.',
+        text: 'SpellPDF supports JPG (JPEG), PNG, and WEBP formats. You can compress multiple formats in one session and even convert between formats during compression.',
       },
     },
     {
@@ -189,7 +189,7 @@ const faqSchema = {
       name: 'Is there a file size limit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No file size limits from us. Unlike some competitors that cap free users, PDF Core has no restrictions because everything runs in your browser. Compress images of any size your device can handle.',
+        text: 'No file size limits from us. Unlike some competitors that cap free users, SpellPDF has no restrictions because everything runs in your browser. Compress images of any size your device can handle.',
       },
     },
     {
@@ -197,7 +197,7 @@ const faqSchema = {
       name: 'Can I compare before and after?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core shows a side-by-side comparison of your original and compressed image, along with file size savings percentage. This helps you decide the best quality level before downloading.',
+        text: 'Yes! SpellPDF shows a side-by-side comparison of your original and compressed image, along with file size savings percentage. This helps you decide the best quality level before downloading.',
       },
     },
     {
@@ -205,7 +205,7 @@ const faqSchema = {
       name: 'Can I compress images on my phone?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works perfectly on iPhone, Android, iPad, and any modern mobile browser. Compress photos directly on your phone without uploading them anywhere.',
+        text: 'Yes! SpellPDF works perfectly on iPhone, Android, iPad, and any modern mobile browser. Compress photos directly on your phone without uploading them anywhere.',
       },
     },
     {
@@ -213,7 +213,7 @@ const faqSchema = {
       name: 'How is this different from TinyPNG or similar tools?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'The main difference: PDF Core processes images 100% in your browser, so your photos never leave your device. Many popular compressors upload your files to their servers for processing. We also have no daily limits, no file count limits, and no signup requirements.',
+        text: 'The main difference: SpellPDF processes images 100% in your browser, so your photos never leave your device. Many popular compressors upload your files to their servers for processing. We also have no daily limits, no file count limits, and no signup requirements.',
       },
     },
   ],

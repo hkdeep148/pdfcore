@@ -5,7 +5,7 @@ import HomeClient from './HomeClient';
 // METADATA — SEO OPTIMIZED
 // ═══════════════════════════════════════════════════════════════
 export const metadata: Metadata = {
-  title: 'PDF Core — Free PDF Tools Online | No Signup, No Upload, 100% Private',
+  title: 'SpellPDF — Free PDF Tools Online | No Signup, No Upload, 100% Private',
   description:
     'Free online PDF and image tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. Unlock protected PDFs. No signup, no upload, no watermark. Your files stay private.',
   keywords: [
@@ -42,27 +42,27 @@ export const metadata: Metadata = {
     'large pdf online free',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online',
+    canonical: 'https://spellpdf.com',
   },
   openGraph: {
-    title: 'PDF Core — Free PDF Tools | No Signup, No Upload, 100% Private',
+    title: 'SpellPDF — Free PDF Tools | No Signup, No Upload, 100% Private',
     description:
       '11 browser-based PDF and image tools. No file uploads, no signup, no watermarks. Compress, merge, convert, sign & more — completely free forever.',
-    url: 'https://pdfcore.online',
-    siteName: 'PDF Core',
+    url: 'https://spellpdf.com',
+    siteName: 'SpellPDF',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'PDF Core — Free Private Browser-Based PDF Tools',
+        alt: 'SpellPDF — Free Private Browser-Based PDF Tools',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'PDF Core — Free PDF Tools, No Signup Required',
+    title: 'SpellPDF — Free PDF Tools, No Signup Required',
     description:
       '11 browser-based PDF and image tools. No uploads, no signup, no watermarks. 100% free & private.',
     images: ['/twitter-image.png'],
@@ -74,12 +74,12 @@ export const metadata: Metadata = {
 // (WebSite + Organization are in app/layout.tsx — don't duplicate here)
 // ═══════════════════════════════════════════════════════════════
 
-// WebApplication — describes the overall PDF Core app
+// WebApplication — describes the overall SpellPDF app
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'PDF Core',
-  url: 'https://pdfcore.online',
+  name: 'SpellPDF',
+  url: 'https://spellpdf.com',
   description:
     'Free online PDF tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs without signup or watermark.',
   applicationCategory: 'UtilityApplication',
@@ -113,7 +113,7 @@ const webApplicationSchema = {
 const itemListSchema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  name: 'PDF Core Tools',
+  name: 'SpellPDF Tools',
   description: 'Complete list of free PDF and image tools',
   numberOfItems: 11,
   itemListElement: [
@@ -121,77 +121,77 @@ const itemListSchema = {
       '@type': 'ListItem',
       position: 1,
       name: 'Compress PDF',
-      url: 'https://pdfcore.online/tools/compress-pdf',
+      url: 'https://spellpdf.com/tools/compress-pdf',
       description: 'Reduce PDF file size without losing quality',
     },
     {
       '@type': 'ListItem',
       position: 2,
       name: 'Merge PDF',
-      url: 'https://pdfcore.online/tools/merge-pdf',
+      url: 'https://spellpdf.com/tools/merge-pdf',
       description: 'Combine multiple PDF files into one',
     },
     {
       '@type': 'ListItem',
       position: 3,
       name: 'Split PDF',
-      url: 'https://pdfcore.online/tools/split-pdf',
+      url: 'https://spellpdf.com/tools/split-pdf',
       description: 'Extract pages or split PDF into multiple files',
     },
     {
       '@type': 'ListItem',
       position: 4,
       name: 'Rotate PDF',
-      url: 'https://pdfcore.online/tools/rotate-pdf',
+      url: 'https://spellpdf.com/tools/rotate-pdf',
       description: 'Rotate PDF pages permanently',
     },
     {
       '@type': 'ListItem',
       position: 5,
       name: 'Organize PDF',
-      url: 'https://pdfcore.online/tools/organize-pdf',
+      url: 'https://spellpdf.com/tools/organize-pdf',
       description: 'Rearrange, delete, and reorder PDF pages',
     },
     {
       '@type': 'ListItem',
       position: 6,
       name: 'Unlock PDF',
-      url: 'https://pdfcore.online/tools/unlock-pdf',
+      url: 'https://spellpdf.com/tools/unlock-pdf',
       description: 'Remove password protection from PDFs',
     },
     {
       '@type': 'ListItem',
       position: 7,
       name: 'Sign PDF',
-      url: 'https://pdfcore.online/tools/sign-pdf',
+      url: 'https://spellpdf.com/tools/sign-pdf',
       description: 'Add digital signatures to PDF documents',
     },
     {
       '@type': 'ListItem',
       position: 8,
       name: 'Add Watermark',
-      url: 'https://pdfcore.online/tools/add-watermark',
+      url: 'https://spellpdf.com/tools/add-watermark',
       description: 'Add text watermark to PDF pages',
     },
     {
       '@type': 'ListItem',
       position: 9,
       name: 'PDF to Image',
-      url: 'https://pdfcore.online/tools/pdf-to-image',
+      url: 'https://spellpdf.com/tools/pdf-to-image',
       description: 'Convert PDF pages to JPG or PNG images',
     },
     {
       '@type': 'ListItem',
       position: 10,
       name: 'Image to PDF',
-      url: 'https://pdfcore.online/tools/image-to-pdf',
+      url: 'https://spellpdf.com/tools/image-to-pdf',
       description: 'Convert JPG, PNG, WEBP images to PDF',
     },
     {
       '@type': 'ListItem',
       position: 11,
       name: 'Compress Image',
-      url: 'https://pdfcore.online/tools/compress-image',
+      url: 'https://spellpdf.com/tools/compress-image',
       description: 'Reduce image file size without losing quality',
     },
   ],
@@ -204,7 +204,7 @@ const faqSchema = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'Are PDF Core tools really free?',
+      name: 'Are SpellPDF tools really free?',
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'Yes, 100% free forever. All our PDF and image tools are completely free with no hidden costs, no premium tiers, no trials, and no daily usage limits. Use them as often as you want for personal or commercial purposes.',
@@ -215,7 +215,7 @@ const faqSchema = {
       name: 'Do I need to create an account?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No account needed. Unlike iLovePDF, Smallpdf, and Adobe, PDF Core requires no signup, no email, and no verification. Just open the site and start using any tool immediately.',
+        text: 'No account needed. Unlike iLovePDF, Smallpdf, and Adobe, SpellPDF requires no signup, no email, and no verification. Just open the site and start using any tool immediately.',
       },
     },
     {
@@ -223,7 +223,7 @@ const faqSchema = {
       name: 'Are my files uploaded to your servers?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Never. All PDF Core tools run 100% in your browser using modern JavaScript and WebAssembly. Your files never leave your device — nothing is uploaded, stored, or transmitted to any server. This is the safest way to work with sensitive documents.',
+        text: 'Never. All SpellPDF tools run 100% in your browser using modern JavaScript and WebAssembly. Your files never leave your device — nothing is uploaded, stored, or transmitted to any server. This is the safest way to work with sensitive documents.',
       },
     },
     {
@@ -231,7 +231,7 @@ const faqSchema = {
       name: 'Is there a file size limit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No file size limits from us. Unlike some competitors that impose file size caps on free users, PDF Core has no restrictions because everything runs locally in your browser. Process PDFs of any size your device can handle.',
+        text: 'No file size limits from us. Unlike some competitors that impose file size caps on free users, SpellPDF has no restrictions because everything runs locally in your browser. Process PDFs of any size your device can handle.',
       },
     },
     {
@@ -239,12 +239,12 @@ const faqSchema = {
       name: 'Do you add watermarks to processed files?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Never. Your files stay clean — we never add watermarks, branding, or logos. This makes PDF Core different from many "free" competitors that force you to pay to remove watermarks.',
+        text: 'Never. Your files stay clean — we never add watermarks, branding, or logos. This makes SpellPDF different from many "free" competitors that force you to pay to remove watermarks.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Do PDF Core tools work on mobile?',
+      name: 'Do SpellPDF tools work on mobile?',
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'Yes! All tools work on iPhone, Android, iPad, and any modern mobile browser. The interface is touch-optimized for mobile use.',
@@ -255,15 +255,15 @@ const faqSchema = {
       name: 'Do the tools work offline?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'After the first page load, PDF Core tools can work even without an internet connection since all processing happens in your browser. Great for travelers, remote work, or privacy-conscious users.',
+        text: 'After the first page load, SpellPDF tools can work even without an internet connection since all processing happens in your browser. Great for travelers, remote work, or privacy-conscious users.',
       },
     },
     {
       '@type': 'Question',
-      name: 'How is PDF Core different from iLovePDF or Smallpdf?',
+      name: 'How is SpellPDF different from iLovePDF or Smallpdf?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'The main differences: PDF Core is 100% browser-based (no uploads), has no signup requirements, no file size limits imposed by us, no watermarks, no daily caps, and is completely free forever. iLovePDF and Smallpdf typically upload your files to servers, may require accounts for full features, and add watermarks to free files.',
+        text: 'The main differences: SpellPDF is 100% browser-based (no uploads), has no signup requirements, no file size limits imposed by us, no watermarks, no daily caps, and is completely free forever. iLovePDF and Smallpdf typically upload your files to servers, may require accounts for full features, and add watermarks to free files.',
       },
     },
   ],

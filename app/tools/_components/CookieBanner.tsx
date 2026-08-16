@@ -23,8 +23,8 @@ interface CookiePreferences {
   analytics: boolean;   // For usage analytics
 }
 
-const STORAGE_KEY = 'pdfcore_cookie_preferences';
-const CONSENT_KEY = 'pdfcore_cookie_consent';
+const STORAGE_KEY = 'spellpdf_cookie_preferences';
+const CONSENT_KEY = 'spellpdf_cookie_consent';
 
 // Helper to get preferences from localStorage
 function getStoredPreferences(): CookiePreferences | null {
@@ -436,6 +436,6 @@ export function useCookiePreferences(): CookiePreferences {
 // Function to show settings again (for footer link)
 export function openCookieSettings() {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem('pdfcore_cookie_consent');
+  localStorage.removeItem('spellpdf_cookie_consent');
   window.location.reload();
 }

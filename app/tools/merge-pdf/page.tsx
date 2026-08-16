@@ -35,20 +35,20 @@ export const metadata: Metadata = {
     'how to combine pdfs',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online/tools/merge-pdf',
+    canonical: 'https://spellpdf.com/tools/merge-pdf',
   },
   openGraph: {
-    title: 'Merge PDF Files Online — Free, No Signup, Unlimited | PDF Core',
+    title: 'Merge PDF Files Online — Free, No Signup, Unlimited | SpellPDF',
     description:
       'Combine multiple PDFs into one file instantly. Free, unlimited, no registration. Files stay private on your device.',
-    url: 'https://pdfcore.online/tools/merge-pdf',
+    url: 'https://spellpdf.com/tools/merge-pdf',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Merge PDF Files Free & Private — PDF Core',
+        alt: 'Merge PDF Files Free & Private — SpellPDF',
       },
     ],
   },
@@ -65,8 +65,8 @@ export const metadata: Metadata = {
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Merge PDF — PDF Core',
-  url: 'https://pdfcore.online/tools/merge-pdf',
+  name: 'Merge PDF — SpellPDF',
+  url: 'https://spellpdf.com/tools/merge-pdf',
   description:
     'Free browser-based PDF merger. Combine multiple PDF files into one instantly. No signup, no watermark, no upload.',
   applicationCategory: 'UtilityApplication',
@@ -94,7 +94,7 @@ const howToSchema = {
   '@type': 'HowTo',
   name: 'How to Merge PDF Files Online for Free',
   description:
-    'Step-by-step guide to combine multiple PDFs into one file using PDF Core.',
+    'Step-by-step guide to combine multiple PDFs into one file using SpellPDF.',
   totalTime: 'PT1M',
   step: [
     {
@@ -127,7 +127,7 @@ const faqSchema = {
       name: 'How do I merge PDF files for free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Simply upload your PDF files to PDF Core, drag them to reorder if needed, then click Merge PDF. Your combined file downloads instantly. It is 100% free with no signup, no watermarks, and no file size limits.',
+        text: 'Simply upload your PDF files to SpellPDF, drag them to reorder if needed, then click Merge PDF. Your combined file downloads instantly. It is 100% free with no signup, no watermarks, and no file size limits.',
       },
     },
     {
@@ -151,7 +151,7 @@ const faqSchema = {
       name: 'Does merging PDFs reduce quality?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No. PDF Core preserves the original quality of all pages when merging. Text stays sharp, images stay clear, and formatting is maintained exactly as in the source files.',
+        text: 'No. SpellPDF preserves the original quality of all pages when merging. Text stays sharp, images stay clear, and formatting is maintained exactly as in the source files.',
       },
     },
     {
@@ -167,7 +167,7 @@ const faqSchema = {
       name: 'Is there a file size limit for merging?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No file size limits. Unlike iLovePDF (100MB free) or Smallpdf (5MB free), PDF Core has no restrictions because everything runs in your browser. Merge 1GB+ files if your device supports it.',
+        text: 'No file size limits. Unlike iLovePDF (100MB free) or Smallpdf (5MB free), SpellPDF has no restrictions because everything runs in your browser. Merge 1GB+ files if your device supports it.',
       },
     },
     {
@@ -175,7 +175,7 @@ const faqSchema = {
       name: 'Can I merge PDFs on my phone?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works perfectly on iPhone, Android, iPad, and any modern mobile browser. The touch-optimized interface makes it easy to select, reorder, and merge PDFs on the go.',
+        text: 'Yes! SpellPDF works perfectly on iPhone, Android, iPad, and any modern mobile browser. The touch-optimized interface makes it easy to select, reorder, and merge PDFs on the go.',
       },
     },
     {
@@ -183,7 +183,7 @@ const faqSchema = {
       name: 'Do I need to install anything to merge PDFs?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No installation needed. PDF Core runs entirely in your browser — no downloads, no plugins, no apps. Just open the site and start merging immediately.',
+        text: 'No installation needed. SpellPDF runs entirely in your browser — no downloads, no plugins, no apps. Just open the site and start merging immediately.',
       },
     },
   ],

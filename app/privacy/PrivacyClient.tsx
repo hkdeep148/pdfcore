@@ -46,7 +46,7 @@ export default function PrivacyPolicyPage() {
             </h1>
 
             <p className="text-[15px] md:text-[17px] text-[#4B5874] font-medium max-w-2xl mx-auto leading-relaxed mb-6">
-              Your privacy is our top priority. This page explains how PDF Core handles your data — spoiler: we don&apos;t collect it.
+              Your privacy is our top priority. This page explains how SpellPDF handles your data — spoiler: we don&apos;t collect it.
             </p>
 
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-[#E7ECF5] text-[13px] text-[#4B5874]">
@@ -129,14 +129,14 @@ export default function PrivacyPolicyPage() {
             {/* 1. Introduction */}
             <Section id="introduction" icon={<Eye size={24} />} title="1. Introduction">
               <p>
-                Welcome to <strong>PDF Core</strong> (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). We are committed to protecting your privacy and being transparent about our practices.
+                Welcome to <strong>SpellPDF</strong> (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). We are committed to protecting your privacy and being transparent about our practices.
               </p>
               <p>
-                This Privacy Policy explains how PDF Core handles information when you use our website and PDF tools (the &quot;Service&quot;). By using our Service, you agree to the practices described in this policy.
+                This Privacy Policy explains how SpellPDF handles information when you use our website and PDF tools (the &quot;Service&quot;). By using our Service, you agree to the practices described in this policy.
               </p>
               <div className="bg-[#EFF6FF] border-l-4 border-[#1E63FF] p-4 rounded-r-lg mt-4">
                 <p className="text-[14px] text-[#1E40AF] font-medium m-0">
-                  <strong>Key Point:</strong> PDF Core is designed with privacy at its core. Your files are processed entirely within your web browser and are never uploaded to our servers.
+                  <strong>Key Point:</strong> SpellPDF is designed with privacy at its core. Your files are processed entirely within your web browser and are never uploaded to our servers.
                 </p>
               </div>
             </Section>
@@ -144,7 +144,7 @@ export default function PrivacyPolicyPage() {
             {/* 2. Information We Collect */}
             <Section id="information" icon={<FileText size={24} />} title="2. Information We Collect">
               <p>
-                We&apos;ve designed PDF Core to collect as little information as possible. Here&apos;s what we do and don&apos;t collect:
+                We&apos;ve designed SpellPDF to collect as little information as possible. Here&apos;s what we do and don&apos;t collect:
               </p>
 
               <h3 className="text-[16px] font-extrabold text-[#07122E] mt-6 mb-3">
@@ -213,7 +213,7 @@ export default function PrivacyPolicyPage() {
             {/* 4. Cookies & Tracking */}
             <Section id="cookies" icon={<Cookie size={24} />} title="4. Cookies & Tracking">
   <p>
-    PDF Core uses cookies and local storage to enhance your experience. You have full control over which cookies you accept through our cookie preferences panel.
+    SpellPDF uses cookies and local storage to enhance your experience. You have full control over which cookies you accept through our cookie preferences panel.
   </p>
 
   <h3 className="text-[16px] font-extrabold text-[#07122E] mt-6 mb-3">
@@ -241,7 +241,7 @@ export default function PrivacyPolicyPage() {
     Managing Your Cookie Preferences
   </h3>
   <p>
-    When you first visit PDF Core, you&apos;ll see a cookie consent banner where you can:
+    When you first visit SpellPDF, you&apos;ll see a cookie consent banner where you can:
   </p>
   <ul className="space-y-2">
     <li><strong>Accept All:</strong> Enable all cookies including functional and analytics</li>
@@ -280,7 +280,7 @@ export default function PrivacyPolicyPage() {
             {/* 5. Third-Party Services */}
             <Section id="third-party" icon={<Globe size={24} />} title="5. Third-Party Services">
               <p>
-                PDF Core uses several open-source libraries and services to provide our tools:
+                SpellPDF uses several open-source libraries and services to provide our tools:
               </p>
 
               <div className="grid sm:grid-cols-2 gap-3 mt-4">
@@ -329,7 +329,7 @@ export default function PrivacyPolicyPage() {
             {/* 7. Children's Privacy */}
             <Section id="children" icon={<AlertCircle size={24} />} title="7. Children's Privacy">
               <p>
-                PDF Core is suitable for users of all ages. Since we don&apos;t collect any personal information, we don&apos;t need to worry about age verification or parental consent requirements under laws like COPPA (Children&apos;s Online Privacy Protection Act) or GDPR-K.
+                SpellPDF is suitable for users of all ages. Since we don&apos;t collect any personal information, we don&apos;t need to worry about age verification or parental consent requirements under laws like COPPA (Children&apos;s Online Privacy Protection Act) or GDPR-K.
               </p>
               <p>
                 That said, we recommend that children under 13 use our Service with parental supervision, as with any online service.
@@ -339,7 +339,7 @@ export default function PrivacyPolicyPage() {
             {/* 8. International Users */}
             <Section id="international" icon={<Globe size={24} />} title="8. International Users">
               <p>
-                PDF Core is accessible worldwide. Since we don&apos;t collect personal data:
+                SpellPDF is accessible worldwide. Since we don&apos;t collect personal data:
               </p>
               <ul className="space-y-2 mt-4">
                 <li>We comply with <strong>GDPR</strong> (Europe) by design — no data collection means no data processing concerns.</li>
@@ -395,7 +395,7 @@ export default function PrivacyPolicyPage() {
                       Get in Touch
                     </p>
                     <p className="text-[13.5px] text-[#4B5874] m-0">
-                      Email: <a href="mailto:privacy@pdfcore.com" className="text-[#1E63FF] hover:underline font-semibold">privacy@pdfcore.com</a>
+                      Email: <a href="mailto:privacy@spellpdf.com" className="text-[#1E63FF] hover:underline font-semibold">privacy@spellpdf.com</a>
                     </p>
                     <p className="text-[13.5px] text-[#4B5874] m-0 mt-1">
                       We typically respond within 48 hours.

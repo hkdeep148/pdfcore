@@ -16,13 +16,13 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://pdfcore.online/blog/',
+    canonical: 'https://spellpdf.com/blog/',
   },
   openGraph: {
     title: 'Blog - Free PDF Tools & Guides',
     description: 'Read guides, tutorials, and tips about PDF tools. Learn how to merge, compress, split, and manage PDFs like a pro.',
-    url: 'https://pdfcore.online/blog/',
-    siteName: 'PDF Core',
+    url: 'https://spellpdf.com/blog/',
+    siteName: 'SpellPDF',
     type: 'website',
   },
   twitter: {

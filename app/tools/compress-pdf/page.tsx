@@ -30,20 +30,20 @@ export const metadata: Metadata = {
     'how to compress pdf without losing quality',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online/tools/compress-pdf',
+    canonical: 'https://spellpdf.com/tools/compress-pdf',
   },
   openGraph: {
-    title: 'Compress PDF Without Losing Quality — Free & Private | PDF Core',
+    title: 'Compress PDF Without Losing Quality — Free & Private | SpellPDF',
     description:
       'Reduce PDF file size instantly without quality loss. No signup, no watermark, 100% browser-based. Free forever.',
-    url: 'https://pdfcore.online/tools/compress-pdf',
+    url: 'https://spellpdf.com/tools/compress-pdf',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Compress PDF Free & Private — PDF Core',
+        alt: 'Compress PDF Free & Private — SpellPDF',
       },
     ],
   },
@@ -61,8 +61,8 @@ export const metadata: Metadata = {
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Compress PDF — PDF Core',
-  url: 'https://pdfcore.online/tools/compress-pdf',
+  name: 'Compress PDF — SpellPDF',
+  url: 'https://spellpdf.com/tools/compress-pdf',
   description:
     'Free browser-based PDF compressor. Reduce PDF file size without losing quality. No signup, no watermark, no upload.',
   applicationCategory: 'UtilityApplication',
@@ -90,7 +90,7 @@ const howToSchema = {
   '@type': 'HowTo',
   name: 'How to Compress a PDF Without Losing Quality',
   description:
-    'Step-by-step guide to reduce PDF file size while preserving quality using PDF Core.',
+    'Step-by-step guide to reduce PDF file size while preserving quality using SpellPDF.',
   totalTime: 'PT1M',
   step: [
     {
@@ -131,7 +131,7 @@ const faqSchema = {
       name: 'Is there a file size limit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No. Unlike other tools that limit you to 20MB or 100MB, PDF Core has no file size restrictions because everything runs in your browser. You can compress PDFs as large as your device can handle.',
+        text: 'No. Unlike other tools that limit you to 20MB or 100MB, SpellPDF has no file size restrictions because everything runs in your browser. You can compress PDFs as large as your device can handle.',
       },
     },
     {
@@ -144,7 +144,7 @@ const faqSchema = {
     },
     {
       '@type': 'Question',
-      name: 'Is PDF Core free to use?',
+      name: 'Is SpellPDF free to use?',
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'Yes, completely free with no hidden costs. No signup required, no email needed, no watermarks added, and no limits on how many PDFs you can compress. Free forever.',
@@ -171,7 +171,7 @@ const faqSchema = {
       name: 'Does compressing PDF work on mobile?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works on iPhone, Android, iPad, and any modern mobile browser. The interface is fully optimized for touch, and compression happens directly on your phone without uploading.',
+        text: 'Yes! SpellPDF works on iPhone, Android, iPad, and any modern mobile browser. The interface is fully optimized for touch, and compression happens directly on your phone without uploading.',
       },
     },
     {
@@ -179,7 +179,7 @@ const faqSchema = {
       name: 'How is this different from iLovePDF or Smallpdf?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'The main difference: PDF Core processes files 100% in your browser, so your PDFs never leave your device. iLovePDF and Smallpdf upload your files to their servers. We also have no file size limits, no signup requirements, and no daily usage caps.',
+        text: 'The main difference: SpellPDF processes files 100% in your browser, so your PDFs never leave your device. iLovePDF and Smallpdf upload your files to their servers. We also have no file size limits, no signup requirements, and no daily usage caps.',
       },
     },
   ],

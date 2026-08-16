@@ -41,7 +41,7 @@ export default function ToolShellDesktop({
       settings). The universal LandingNavbar rendered by
       tools/layout.tsx is now the single navbar on desktop tool pages,
       matching mobile behavior. Tool identity is shown by the
-      LandingNavbar itself (tool icon + tool name + "by PDFCore").
+      LandingNavbar itself (tool icon + tool name + "by spellpdf").
     */
     <div className="hidden lg:flex flex-col h-full overflow-hidden bg-[#F8FAFC]">
       {/* ============ MAIN LAYOUT WITH FLOATING SIDEBAR ============ */}
@@ -54,7 +54,7 @@ export default function ToolShellDesktop({
   {/*
     REMOVED: in-page tool title header (icon + name + subtitle).
     The universal LandingNavbar now shows the tool icon, tool name,
-    and "by PDFCore" subtitle — so this header was duplicating the
+    and "by spellpdf" subtitle — so this header was duplicating the
     same information. Removing it reclaims ~80px of vertical space
     for the actual tool content below.
 

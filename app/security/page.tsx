@@ -3,16 +3,16 @@ import SecurityClient from './SecurityClient';
 
 export const metadata: Metadata = {
   title: 'Security - How We Protect Your Files',
-  description: 'Learn how PDF Core keeps your files 100% secure. All processing happens in your browser. Zero server uploads. Enterprise-grade encryption and privacy.',
+  description: 'Learn how SpellPDF keeps your files 100% secure. All processing happens in your browser. Zero server uploads. Enterprise-grade encryption and privacy.',
   keywords: 'pdf security, secure pdf tools, private pdf processing, browser-based pdf security',
   alternates: {
-    canonical: 'https://pdfcore.online/security/',
+    canonical: 'https://spellpdf.com/security/',
   },
   openGraph: {
     title: 'Security - How We Protect Your Files',
     description: 'All processing happens in your browser. Zero server uploads. Enterprise-grade privacy.',
-    url: 'https://pdfcore.online/security/',
-    siteName: 'PDF Core',
+    url: 'https://spellpdf.com/security/',
+    siteName: 'SpellPDF',
     type: 'website',
   },
   twitter: {

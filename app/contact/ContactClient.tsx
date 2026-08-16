@@ -147,7 +147,7 @@ export default function ContactPage() {
       // You can replace this with an actual API endpoint or form service
       const subject = `[${contactReasons.find(r => r.value === selectedReason)?.label}] ${formData.subject}`;
       const body = `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`;
-      const mailtoLink = `mailto:support@pdfcore.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const mailtoLink = `mailto:support@spellpdf.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
       // Open email client
       window.location.href = mailtoLink;
@@ -223,11 +223,11 @@ export default function ContactPage() {
             <InfoCard
               icon={<Mail size={22} />}
               title="Email Us"
-              description="support@pdfcore.com"
+              description="support@spellpdf.com"
               subtitle="We respond within 24 hours"
               color="#1E63FF"
               bgColor="#DBEAFE"
-              href="mailto:support@pdfcore.com"
+              href="mailto:support@spellpdf.com"
             />
             <InfoCard
               icon={<Clock size={22} />}
@@ -329,7 +329,7 @@ export default function ContactPage() {
                         Something went wrong
                       </p>
                       <p className="text-[12.5px] text-red-700">
-                        Please try again or email us directly at support@pdfcore.com
+                        Please try again or email us directly at support@spellpdf.com
                       </p>
                     </div>
                   </motion.div>

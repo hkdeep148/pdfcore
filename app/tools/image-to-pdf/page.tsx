@@ -46,20 +46,20 @@ export const metadata: Metadata = {
     'how to convert image to pdf free',
   ],
   alternates: {
-    canonical: 'https://pdfcore.online/tools/image-to-pdf',
+    canonical: 'https://spellpdf.com/tools/image-to-pdf',
   },
   openGraph: {
-    title: 'Image to PDF Converter — Free, No Watermark, No Signup | PDF Core',
+    title: 'Image to PDF Converter — Free, No Watermark, No Signup | SpellPDF',
     description:
       'Convert JPG, PNG, WEBP images to PDF instantly. Unlimited files, no watermark, 100% browser-based. Free forever.',
-    url: 'https://pdfcore.online/tools/image-to-pdf',
+    url: 'https://spellpdf.com/tools/image-to-pdf',
     type: 'website',
     images: [
       {
         url: '/opengraph-image.png',
         width: 1200,
         height: 630,
-        alt: 'Image to PDF Converter Free — PDF Core',
+        alt: 'Image to PDF Converter Free — SpellPDF',
       },
     ],
   },
@@ -76,8 +76,8 @@ export const metadata: Metadata = {
 const webApplicationSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  name: 'Image to PDF Converter — PDF Core',
-  url: 'https://pdfcore.online/tools/image-to-pdf',
+  name: 'Image to PDF Converter — SpellPDF',
+  url: 'https://spellpdf.com/tools/image-to-pdf',
   description:
     'Free browser-based image to PDF converter. Convert JPG, PNG, WEBP to PDF. No signup, no watermark, no upload.',
   applicationCategory: 'UtilityApplication',
@@ -107,7 +107,7 @@ const howToSchema = {
   '@type': 'HowTo',
   name: 'How to Convert Images to PDF for Free',
   description:
-    'Step-by-step guide to convert JPG, PNG, or WEBP images into a single PDF file using PDF Core.',
+    'Step-by-step guide to convert JPG, PNG, or WEBP images into a single PDF file using SpellPDF.',
   totalTime: 'PT1M',
   step: [
     {
@@ -140,7 +140,7 @@ const faqSchema = {
       name: 'How do I convert an image to PDF for free?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Upload your images (JPG, PNG, or WEBP) to PDF Core, choose your page size and orientation, then click Create PDF. Your file downloads instantly with no watermark, no signup, and no file size limits.',
+        text: 'Upload your images (JPG, PNG, or WEBP) to SpellPDF, choose your page size and orientation, then click Create PDF. Your file downloads instantly with no watermark, no signup, and no file size limits.',
       },
     },
     {
@@ -148,7 +148,7 @@ const faqSchema = {
       name: 'Which image formats are supported?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'PDF Core supports JPG, JPEG, PNG, and WEBP formats. You can mix different formats in a single PDF — for example, combining JPG photos with PNG screenshots.',
+        text: 'SpellPDF supports JPG, JPEG, PNG, and WEBP formats. You can mix different formats in a single PDF — for example, combining JPG photos with PNG screenshots.',
       },
     },
     {
@@ -156,12 +156,12 @@ const faqSchema = {
       name: 'Can I convert multiple images to a single PDF?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! Upload as many images as you want and PDF Core will combine them into one PDF. You can drag and drop to reorder them, and each image becomes a separate page in the final PDF.',
+        text: 'Yes! Upload as many images as you want and SpellPDF will combine them into one PDF. You can drag and drop to reorder them, and each image becomes a separate page in the final PDF.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Does PDF Core add watermarks to converted PDFs?',
+      name: 'Does SpellPDF add watermarks to converted PDFs?',
       acceptedAnswer: {
         '@type': 'Answer',
         text: 'Never. Your converted PDFs are 100% clean with no watermarks, no branding, and no logos. This is different from many "free" competitors that add watermarks unless you pay.',
@@ -188,7 +188,7 @@ const faqSchema = {
       name: 'Can I convert HEIC (iPhone photos) to PDF?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Currently PDF Core supports JPG, PNG, and WEBP. For HEIC files, first convert them to JPG (iPhone can do this in Photos app) and then upload to PDF Core.',
+        text: 'Currently SpellPDF supports JPG, PNG, and WEBP. For HEIC files, first convert them to JPG (iPhone can do this in Photos app) and then upload to SpellPDF.',
       },
     },
     {
@@ -204,7 +204,7 @@ const faqSchema = {
       name: 'Is there a file size or quantity limit?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'No limits. Convert 5 images or 500 images — PDF Core has no restrictions because processing happens in your browser. The only limit is your device memory.',
+        text: 'No limits. Convert 5 images or 500 images — SpellPDF has no restrictions because processing happens in your browser. The only limit is your device memory.',
       },
     },
     {
@@ -212,7 +212,7 @@ const faqSchema = {
       name: 'Can I convert images to PDF on my phone?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Yes! PDF Core works perfectly on iPhone, Android, iPad, and any modern mobile browser. Take photos and convert them to PDF directly on your phone without uploading anywhere.',
+        text: 'Yes! SpellPDF works perfectly on iPhone, Android, iPad, and any modern mobile browser. Take photos and convert them to PDF directly on your phone without uploading anywhere.',
       },
     },
   ],

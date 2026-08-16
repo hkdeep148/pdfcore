@@ -9,4 +9,4 @@ Disallow: /tools/create-pdf/
 Disallow: /*?*
 Disallow: /*.json$
 
-Sitemap: https://pdfcore.online/sitemap.xml
+Sitemap: https://spellpdf.com/sitemap.xml
