@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     template: '%s | SpellPDF',
   },
   description:
-    '🪄 11 free PDF tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. No signup, no upload, no watermarks — cast a spell on your PDFs.',
+    '11 free PDF tools that work 100% in your browser. Compress, merge, split, convert, sign PDFs. No signup, no upload, no watermarks — cast a spell on your PDFs.',
   keywords: [
     // Brand & Magic Keywords
     'SpellPDF', 'spell pdf', 'pdf magic', 'instant pdf tools', 'pdf spell',
